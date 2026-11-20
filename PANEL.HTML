@@ -2,1243 +2,437 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASTRIX CLOUD | Hosting Panel</title>
-
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-:root {
-    --bg: #080711;
-    --panel: #100d1c;
-    --card: #171326;
-    --border: #29233d;
-    --purple: #8b5cf6;
-    --text: #ffffff;
-    --muted: #9993aa;
-    --green: #22c55e;
-    --red: #ef4444;
-}
-
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
-}
-
-button, input, select, textarea {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
-    border: none;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* LOGIN */
-
-#loginPage {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.login-card {
-    width: 100%;
-    max-width: 400px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    padding: 35px;
-    border-radius: 16px;
-}
-
-.logo {
-    font-size: 28px;
-    font-weight: bold;
-    color: #a78bfa;
-    margin-bottom: 10px;
-}
-
-.login-card h2 {
-    margin: 20px 0 8px;
-}
-
-.subtitle {
-    color: var(--muted);
-    font-size: 14px;
-    margin-bottom: 25px;
-}
-
-.field {
-    margin-bottom: 17px;
-}
-
-.field label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 13px;
-    color: #ccc6d8;
-}
-
-.field input,
-.field select,
-.field textarea {
-    width: 100%;
-    background: #0b0914;
-    border: 1px solid var(--border);
-    color: white;
-    padding: 13px;
-    border-radius: 8px;
-    outline: none;
-}
-
-.field input:focus,
-.field textarea:focus,
-.field select:focus {
-    border-color: var(--purple);
-}
-
-.primary {
-    background: var(--purple);
-    color: white;
-    padding: 13px 18px;
-    border-radius: 8px;
-    width: 100%;
-    font-weight: bold;
-}
-
-.primary:hover {
-    background: #7c3aed;
-}
-
-.login-note {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.7;
-    margin-top: 18px;
-}
-
-/* DASHBOARD */
-
-#dashboard {
-    display: none;
-    min-height: 100vh;
-}
-
-.layout {
-    display: flex;
-    min-height: 100vh;
-}
-
-/* SIDEBAR */
-
-.sidebar {
-    width: 255px;
-    min-width: 255px;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.sidebar-header {
-    padding: 25px 20px;
-    border-bottom: 1px solid var(--border);
-}
-
-.sidebar-logo {
-    color: #a78bfa;
-    font-size: 22px;
-    font-weight: bold;
-}
-
-.sidebar-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px 12px;
-    min-height: 0;
-}
-
-.sidebar-scroll::-webkit-scrollbar {
-    width: 5px;
-}
-
-.sidebar-scroll::-webkit-scrollbar-thumb {
-    background: #40365b;
-    border-radius: 10px;
-}
-
-.menu-label {
-    color: #746d85;
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 1.5px;
-    padding: 15px 12px 8px;
-}
-
-.nav-btn {
-    display: flex;
-    width: 100%;
-    text-align: left;
-    padding: 12px;
-    margin-bottom: 5px;
-    background: transparent;
-    color: #aaa4b9;
-    border-radius: 8px;
-    font-size: 14px;
-    gap: 12px;
-    align-items: center;
-}
-
-.nav-btn:hover,
-.nav-btn.active {
-    background: #251b3d;
-    color: white;
-}
-
-.nav-btn.active {
-    border-left: 3px solid var(--purple);
-}
-
-.sidebar-footer {
-    border-top: 1px solid var(--border);
-    padding: 15px;
-    background: var(--panel);
-}
-
-.profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-}
-
-.avatar {
-    width: 37px;
-    height: 37px;
-    background: #51349b;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    font-weight: bold;
-}
-
-.profile small {
-    display: block;
-    color: var(--muted);
-    margin-top: 4px;
-}
-
-/* MAIN */
-
-.main {
-    flex: 1;
-    min-width: 0;
-}
-
-.topbar {
-    height: 70px;
-    background: #0d0a17;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-}
-
-.topbar h3 {
-    font-size: 16px;
-}
-
-.content {
-    padding: 28px;
-    max-width: 1400px;
-    margin: auto;
-}
-
-.page-title {
-    font-size: 25px;
-    margin-bottom: 8px;
-}
-
-.page-description {
-    color: var(--muted);
-    font-size: 14px;
-    margin-bottom: 25px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-    gap: 18px;
-}
-
-.card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    padding: 22px;
-    border-radius: 12px;
-    margin-bottom: 18px;
-}
-
-.stat-label {
-    color: var(--muted);
-    font-size: 13px;
-}
-
-.stat-value {
-    font-size: 28px;
-    font-weight: bold;
-    margin-top: 15px;
-}
-
-.card h3 {
-    margin-bottom: 16px;
-}
-
-.table-wrap {
-    width: 100%;
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 500px;
-}
-
-th, td {
-    padding: 15px 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-}
-
-th {
-    color: var(--muted);
-    font-weight: normal;
-}
-
-td {
-    color: #e8e3f1;
-}
-
-.status {
-    color: var(--green);
-    background: #12331f;
-    padding: 5px 9px;
-    border-radius: 20px;
-    font-size: 11px;
-}
-
-.btn-small {
-    padding: 8px 12px;
-    border-radius: 6px;
-    background: #30204e;
-    color: white;
-    font-size: 12px;
-    margin: 2px;
-}
-
-.btn-small:hover {
-    background: var(--purple);
-}
-
-.btn-danger {
-    background: #491c28;
-}
-
-.btn-danger:hover {
-    background: #b91c1c;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-}
-
-.form-grid .full {
-    grid-column: 1 / -1;
-}
-
-.form-grid input,
-.form-grid select,
-.form-grid textarea {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: #0b0914;
-    color: white;
-    margin-top: 8px;
-}
-
-.form-grid label {
-    color: #c5bfd2;
-    font-size: 13px;
-}
-
-.range-value {
-    color: #a78bfa;
-    margin-left: 8px;
-}
-
-.ticket {
-    border: 1px solid var(--border);
-    background: #100d1c;
-    padding: 17px;
-    border-radius: 9px;
-    margin-bottom: 12px;
-}
-
-.ticket p {
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.6;
-    margin-top: 8px;
-}
-
-.empty {
-    color: var(--muted);
-    padding: 25px 5px;
-    text-align: center;
-}
-
-#toast {
-    position: fixed;
-    bottom: 22px;
-    right: 22px;
-    background: #251b3d;
-    border: 1px solid var(--purple);
-    padding: 14px 20px;
-    border-radius: 9px;
-    display: none;
-    z-index: 99;
-    max-width: 90%;
-}
-
-/* MOBILE */
-
-.menu-toggle {
-    background: transparent;
-    color: white;
-    font-size: 22px;
-    display: none;
-}
-
-@media(max-width: 750px) {
-    .sidebar {
-        position: fixed;
-        left: -270px;
-        top: 0;
-        z-index: 20;
-        transition: left .25s;
-        height: 100dvh;
-    }
-
-    .sidebar.open {
-        left: 0;
-    }
-
-    .menu-toggle {
-        display: block;
-    }
-
-    .topbar {
-        padding: 0 15px;
-        gap: 12px;
-    }
-
-    .content {
-        padding: 18px 14px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-grid .full {
-        grid-column: auto;
-    }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080711">
+  <title>ASTRIX CLOUD | Control Panel</title>
+
+  <!-- Separate CSS file -->
+  <link rel="stylesheet" href="PANEL.CSS">
 </head>
 
 <body>
 
-<!-- LOGIN PAGE -->
-
-<section id="loginPage">
+  <!-- LOGIN PAGE -->
+  <section id="loginPage" class="login-page">
     <div class="login-card">
-        <div class="logo">✦ ASTRIX CLOUD</div>
-        <h2>Welcome Back</h2>
-        <p class="subtitle">Sign in to your hosting panel</p>
+      <div class="logo">ASTRIX <span>CLOUD</span></div>
+      <p class="subtitle">Next Generation Cloud Hosting</p>
 
-        <form id="loginForm">
-            <div class="field">
-                <label>Email Address</label>
-                <input id="loginEmail" type="email" placeholder="Enter email" required>
-            </div>
+      <form id="loginForm">
+        <label for="loginEmail">Email Address</label>
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="Enter your email"
+          required
+        >
 
-            <div class="field">
-                <label>Password</label>
-                <input id="loginPassword" type="password" placeholder="Enter password" required>
-            </div>
+        <label for="loginPassword">Password</label>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Enter your password"
+          required
+        >
 
-            <button class="primary" type="submit">Sign In</button>
-        </form>
+        <button type="submit" class="primary-btn">
+          Login to Panel
+        </button>
+      </form>
 
-        <p class="login-note">
-            Demo owner: owner@astrixcloud.test<br>
-            Demo password: astrix123<br><br>
-            Friend Admin: admin@gmail.com<br>
-            Friend password: Rahul@4321<br><br>
-            This is a frontend demonstration, not secure production authentication.
-        </p>
+      <p id="loginMessage" class="message"></p>
+      <p class="login-footer">Powered by ASTRIX CLOUD</p>
     </div>
-</section>
+  </section>
 
-<!-- DASHBOARD -->
 
-<section id="dashboard">
-<div class="layout">
+  <!-- MAIN DASHBOARD -->
+  <div id="dashboard" class="dashboard hidden">
 
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
 
-        <div class="sidebar-header">
-            <div class="sidebar-logo">✦ ASTRIX CLOUD</div>
+      <div class="brand">
+        <h2>ASTRIX <span>CLOUD</span></h2>
+        <small>CONTROL PANEL</small>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar" id="userAvatar">A</div>
+        <div>
+          <strong id="sidebarUserName">User</strong>
+          <small id="sidebarUserRole">User</small>
+        </div>
+      </div>
+
+      <nav class="navigation">
+
+        <p class="nav-heading">MAIN MENU</p>
+
+        <button class="nav-link active" data-page="overview">
+          <span>⌂</span> Overview
+        </button>
+
+        <button class="nav-link" data-page="servers">
+          <span>▣</span> My Servers
+        </button>
+
+        <button class="nav-link" data-page="tickets">
+          <span>✉</span> Support Tickets
+        </button>
+
+        <button class="nav-link" data-page="account">
+          <span>⚙</span> Account Settings
+        </button>
+
+        <div id="adminNavigation" class="hidden">
+          <p class="nav-heading">ADMINISTRATION</p>
+
+          <button class="nav-link" data-page="create-server">
+            <span>＋</span> Create Server
+          </button>
+
+          <button class="nav-link" data-page="manage-users">
+            <span>♙</span> Manage Users
+          </button>
+
+          <button class="nav-link" data-page="all-servers">
+            <span>▤</span> All Servers
+          </button>
+
+          <button class="nav-link" data-page="manage-tickets">
+            <span>☷</span> Manage Tickets
+          </button>
         </div>
 
-        <div class="sidebar-scroll">
+      </nav>
 
-            <div class="menu-label">MAIN MENU</div>
+      <button id="logoutBtn" class="logout-btn">
+        ↪ Logout
+      </button>
 
-            <button class="nav-btn active" data-page="overview">▦ Overview</button>
-            <button class="nav-btn" data-page="servers">▣ My Servers</button>
-            <button class="nav-btn" data-page="tickets">◈ Support Tickets</button>
-
-            <div id="adminMenu">
-                <div class="menu-label">ADMINISTRATION</div>
-                <button class="nav-btn" data-page="create">＋ Create Server</button>
-                <button class="nav-btn" data-page="users">♙ Manage Users</button>
-                <button class="nav-btn" data-page="allservers">▤ All Servers</button>
-                <button class="nav-btn" data-page="adminTickets">✉ Manage Tickets</button>
-            </div>
-
-            <div class="menu-label">ACCOUNT</div>
-            <button class="nav-btn" data-page="account">⚙ Account Settings</button>
-
-        </div>
-
-        <div class="sidebar-footer">
-            <div class="profile">
-                <div class="avatar" id="avatar">A</div>
-                <div>
-                    <strong id="profileEmail">Account</strong>
-                    <small id="profileRole">User</small>
-                </div>
-            </div>
-            <button class="nav-btn" id="logoutButton">⇥ Logout</button>
-        </div>
     </aside>
 
-    <main class="main">
 
-        <header class="topbar">
-            <div style="display:flex;align-items:center;gap:15px">
-                <button class="menu-toggle" id="menuToggle">☰</button>
-                <h3 id="topTitle">Overview</h3>
-            </div>
-            <span style="color:#a78bfa;font-size:13px" id="topRole">USER</span>
-        </header>
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
 
-        <div class="content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <button id="menuToggle" class="menu-toggle">☰</button>
 
-            <!-- OVERVIEW -->
-
-            <section class="page" id="page-overview">
-                <h1 class="page-title">Dashboard Overview</h1>
-                <p class="page-description">Welcome to your ASTRIX CLOUD control panel.</p>
-
-                <div class="grid">
-                    <div class="card">
-                        <div class="stat-label">My Servers</div>
-                        <div class="stat-value" id="myServerCount">0</div>
-                    </div>
-                    <div class="card">
-                        <div class="stat-label">Support Tickets</div>
-                        <div class="stat-value" id="myTicketCount">0</div>
-                    </div>
-                    <div class="card">
-                        <div class="stat-label">Account Role</div>
-                        <div class="stat-value" style="font-size:20px" id="roleStat">User</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Welcome to ASTRIX CLOUD</h3>
-                    <p style="color:#aaa;line-height:1.8">
-                        Manage your servers, check your account and contact support
-                        from your dashboard.
-                    </p>
-                </div>
-            </section>
-
-            <!-- USER SERVERS -->
-
-            <section class="page hidden" id="page-servers">
-                <h1 class="page-title">My Servers</h1>
-                <p class="page-description">View servers assigned to your account.</p>
-
-                <div class="card">
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Server Name</th>
-                                    <th>Software</th>
-                                    <th>Memory</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="myServersTable"></tbody>
-                        </table>
-                    </div>
-                    <div id="noMyServers" class="empty">No servers assigned to your account yet.</div>
-                </div>
-            </section>
-
-            <!-- CREATE SERVER ADMIN ONLY -->
-
-            <section class="page hidden" id="page-create">
-                <h1 class="page-title">Create Server</h1>
-                <p class="page-description">Create a new demo server for a user.</p>
-
-                <div class="card">
-                    <form id="createServerForm" class="form-grid">
-
-                        <div>
-                            <label>Server Name</label>
-                            <input id="serverName" placeholder="My Minecraft Server" required>
-                        </div>
-
-                        <div>
-                            <label>Assign to User Email</label>
-                            <input id="serverOwner" type="email" placeholder="user@email.com" required>
-                        </div>
-
-                        <div>
-                            <label>Software</label>
-                            <select id="serverSoftware">
-                                <option>Vanilla Minecraft</option>
-                                <option>Paper</option>
-                                <option>Purpur</option>
-                                <option>Spigot</option>
-                                <option>Fabric</option>
-                                <option>Forge</option>
-                                <option>Velocity</option>
-                                <option>Node.js</option>
-                                <option>Python</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label>Version</label>
-                            <select id="serverVersion">
-                                <option>Latest</option>
-                                <option>1.21.11</option>
-                                <option>1.21.10</option>
-                                <option>1.21.8</option>
-                                <option>1.21.4</option>
-                                <option>1.20.6</option>
-                                <option>1.20.4</option>
-                                <option>1.19.4</option>
-                            </select>
-                        </div>
-
-                        <div class="full">
-                            <label>RAM: <span class="range-value" id="ramValue">2 GB</span></label>
-                            <input type="range" id="ram" min="1" max="32" value="2">
-                        </div>
-
-                        <div class="full">
-                            <label>Disk: <span class="range-value" id="diskValue">10 GB</span></label>
-                            <input type="range" id="disk" min="1" max="100" value="10">
-                        </div>
-
-                        <div class="full">
-                            <label>CPU: <span class="range-value" id="cpuValue">100%</span></label>
-                            <input type="range" id="cpu" min="50" max="400" step="50" value="100">
-                        </div>
-
-                        <div class="full">
-                            <button class="primary" type="submit">Create Demo Server</button>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            <!-- USERS -->
-
-            <section class="page hidden" id="page-users">
-                <h1 class="page-title">Manage Users</h1>
-                <p class="page-description">View registered demo accounts.</p>
-
-                <div class="card">
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ALL SERVERS -->
-
-            <section class="page hidden" id="page-allservers">
-                <h1 class="page-title">All Servers</h1>
-                <p class="page-description">Administrator server overview.</p>
-
-                <div class="card">
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Owner</th>
-                                    <th>Software</th>
-                                    <th>RAM</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="allServersTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SUPPORT TICKETS -->
-
-            <section class="page hidden" id="page-tickets">
-                <h1 class="page-title">Support Tickets</h1>
-                <p class="page-description">Create a support request and check its status.</p>
-
-                <div class="card">
-                    <h3>Create New Ticket</h3>
-
-                    <form id="ticketForm">
-                        <div class="field">
-                            <label>Ticket Subject</label>
-                            <input id="ticketSubject" placeholder="Describe your issue" required>
-                        </div>
-
-                        <div class="field">
-                            <label>Department</label>
-                            <select id="ticketDepartment">
-                                <option>General Support</option>
-                                <option>Technical Support</option>
-                                <option>Billing Support</option>
-                                <option>Server Support</option>
-                            </select>
-                        </div>
-
-                        <div class="field">
-                            <label>Message</label>
-                            <textarea id="ticketMessage" rows="5"
-                                placeholder="Write your problem here..." required
-                                style="width:100%;background:#0b0914;color:white;border:1px solid #29233d;padding:13px;border-radius:8px"></textarea>
-                        </div>
-
-                        <button class="primary" type="submit">Submit Ticket</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h3>My Tickets</h3>
-                    <div id="myTickets"></div>
-                </div>
-            </section>
-
-            <!-- ADMIN TICKETS -->
-
-            <section class="page hidden" id="page-adminTickets">
-                <h1 class="page-title">Manage Support Tickets</h1>
-                <p class="page-description">Review user support requests.</p>
-                <div id="adminTicketsList"></div>
-            </section>
-
-            <!-- ACCOUNT -->
-
-            <section class="page hidden" id="page-account">
-                <h1 class="page-title">Account Settings</h1>
-                <p class="page-description">Your demo account information.</p>
-
-                <div class="card">
-                    <h3>Account Information</h3>
-                    <p style="color:#aaa;line-height:2">
-                        Email: <strong id="accountEmail"></strong><br>
-                        Role: <strong id="accountRole"></strong><br>
-                        Platform: ASTRIX CLOUD
-                    </p>
-                </div>
-            </section>
-
+        <div>
+          <h3 id="pageTitle">Overview</h3>
+          <p>Welcome to ASTRIX CLOUD</p>
         </div>
-    </main>
-</div>
-</section>
 
-<div id="toast"></div>
+        <div class="topbar-user">
+          <span class="status-dot"></span>
+          <span id="topbarUserName">User</span>
+        </div>
+      </header>
 
-<script>
-"use strict";
 
-/*
- DEMO LOGIN DETAILS
+      <!-- PAGE CONTAINER -->
+      <div class="page-container">
 
- Owner:
- owner@astrixcloud.test
- astrix123
 
- Friend Admin:
- admin@gmail.com
- Rahul@4321
+        <!-- OVERVIEW -->
+        <section id="page-overview" class="page active">
 
- FRONTEND DEMO ONLY.
- This is not secure production authentication.
-*/
-
-const OWNER_EMAIL = "owner@astrixcloud.test";
-const OWNER_PASSWORD = "astrix123";
-
-const FRIEND_EMAIL = "admin@gmail.com";
-const FRIEND_PASSWORD = "Rahul@4321";
-
-const STORAGE_KEY = "astrix_cloud_full_demo_v1";
-
-let state = {
-    users: [
-        {email: OWNER_EMAIL, role: "Owner"},
-        {email: FRIEND_EMAIL, role: "Admin"}
-    ],
-    servers: [],
-    tickets: []
-};
-
-let currentUser = null;
-
-function loadState() {
-    try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (parsed && Array.isArray(parsed.users) &&
-                Array.isArray(parsed.servers) &&
-                Array.isArray(parsed.tickets)) {
-                state = parsed;
-            }
-        }
-    } catch (error) {
-        console.error("Could not load saved demo data:", error);
-    }
-
-    if (!state.users.some(u => u.email.toLowerCase() === OWNER_EMAIL)) {
-        state.users.push({email: OWNER_EMAIL, role: "Owner"});
-    }
-
-    if (!state.users.some(u => u.email.toLowerCase() === FRIEND_EMAIL)) {
-        state.users.push({email: FRIEND_EMAIL, role: "Admin"});
-    }
-
-    saveState();
-}
-
-function saveState() {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-        console.error("Could not save demo data:", error);
-        toast("Browser storage is unavailable.");
-    }
-}
-
-function toast(message) {
-    const el = document.getElementById("toast");
-    el.textContent = message;
-    el.style.display = "block";
-    clearTimeout(window.toastTimer);
-    window.toastTimer = setTimeout(() => {
-        el.style.display = "none";
-    }, 3000);
-}
-
-function isAdmin() {
-    return currentUser &&
-        (currentUser.role === "Admin" || currentUser.role === "Owner");
-}
-
-function escapeHTML(value) {
-    return String(value).replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[char]);
-}
-
-/* LOGIN */
-
-document.getElementById("loginForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
-    const password = document.getElementById("loginPassword").value;
-
-    if (email === OWNER_EMAIL && password === OWNER_PASSWORD) {
-        login(OWNER_EMAIL, "Owner");
-        return;
-    }
-
-    if (email === FRIEND_EMAIL && password === FRIEND_PASSWORD) {
-        login(FRIEND_EMAIL, "Admin");
-        return;
-    }
-
-    toast("Incorrect email or password.");
-});
-
-function login(email, role) {
-    currentUser = {email, role};
-
-    document.getElementById("loginPage").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-
-    document.getElementById("profileEmail").textContent = email;
-    document.getElementById("profileRole").textContent = role;
-    document.getElementById("avatar").textContent = email.charAt(0).toUpperCase();
-    document.getElementById("topRole").textContent = role.toUpperCase();
-
-    document.getElementById("accountEmail").textContent = email;
-    document.getElementById("accountRole").textContent = role;
-
-    document.getElementById("adminMenu").classList.toggle("hidden", !isAdmin());
-
-    showPage("overview");
-    renderAll();
-}
-
-/* LOGOUT */
-
-document.getElementById("logoutButton").addEventListener("click", function() {
-    currentUser = null;
-    document.getElementById("dashboard").style.display = "none";
-    document.getElementById("loginPage").style.display = "flex";
-    document.getElementById("loginPassword").value = "";
-    document.getElementById("loginEmail").value = "";
-    document.getElementById("sidebar").classList.remove("open");
-});
-
-/* NAVIGATION */
-
-const titles = {
-    overview: "Overview",
-    servers: "My Servers",
-    tickets: "Support Tickets",
-    create: "Create Server",
-    users: "Manage Users",
-    allservers: "All Servers",
-    adminTickets: "Manage Tickets",
-    account: "Account Settings"
-};
-
-document.querySelectorAll(".nav-btn[data-page]").forEach(button => {
-    button.addEventListener("click", function() {
-        const page = this.dataset.page;
-
-        if ((page === "create" || page === "users" ||
-            page === "allservers" || page === "adminTickets") && !isAdmin()) {
-            toast("Admin access required.");
-            return;
-        }
-
-        showPage(page);
-        document.getElementById("sidebar").classList.remove("open");
-    });
-});
-
-function showPage(page) {
-    document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
-
-    const target = document.getElementById("page-" + page);
-    if (!target) return;
-
-    target.classList.remove("hidden");
-
-    document.querySelectorAll(".nav-btn[data-page]").forEach(button => {
-        button.classList.toggle("active", button.dataset.page === page);
-    });
-
-    document.getElementById("topTitle").textContent = titles[page] || page;
-}
-
-/* MOBILE SIDEBAR */
-
-document.getElementById("menuToggle").addEventListener("click", function() {
-    document.getElementById("sidebar").classList.toggle("open");
-});
-
-/* RANGE SLIDERS */
-
-["ram", "disk", "cpu"].forEach(id => {
-    const input = document.getElementById(id);
-    input.addEventListener("input", function() {
-        document.getElementById(id + "Value").textContent =
-            this.value + (id === "cpu" ? "%" : " GB");
-    });
-});
-
-/* CREATE SERVER */
-
-document.getElementById("createServerForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    if (!isAdmin()) {
-        toast("Admin access required.");
-        return;
-    }
-
-    const owner = document.getElementById("serverOwner").value.trim().toLowerCase();
-
-    if (!state.users.some(u => u.email.toLowerCase() === owner)) {
-        toast("No registered demo account with that email.");
-        return;
-    }
-
-    state.servers.push({
-        id: Date.now().toString(),
-        name: document.getElementById("serverName").value.trim(),
-        owner,
-        software: document.getElementById("serverSoftware").value,
-        version: document.getElementById("serverVersion").value,
-        ram: document.getElementById("ram").value,
-        disk: document.getElementById("disk").value,
-        cpu: document.getElementById("cpu").value,
-        status: "Offline"
-    });
-
-    saveState();
-    this.reset();
-
-    document.getElementById("ramValue").textContent = "2 GB";
-    document.getElementById("diskValue").textContent = "10 GB";
-    document.getElementById("cpuValue").textContent = "100%";
-
-    document.getElementById("ram").value = 2;
-    document.getElementById("disk").value = 10;
-    document.getElementById("cpu").value = 100;
-
-    renderAll();
-    toast("Demo server created successfully!");
-});
-
-/* SUPPORT TICKETS */
-
-document.getElementById("ticketForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    if (!currentUser) return;
-
-    state.tickets.push({
-        id: "T-" + Date.now(),
-        email: currentUser.email,
-        subject: document.getElementById("ticketSubject").value.trim(),
-        department: document.getElementById("ticketDepartment").value,
-        message: document.getElementById("ticketMessage").value.trim(),
-        status: "Open",
-        created: new Date().toLocaleString()
-    });
-
-    saveState();
-    this.reset();
-    renderAll();
-    toast("Your support ticket has been submitted!");
-});
-
-function updateTicket(id, status) {
-    if (!isAdmin()) return;
-
-    const ticket = state.tickets.find(t => t.id === id);
-    if (!ticket) return;
-
-    ticket.status = status;
-    saveState();
-    renderAll();
-    toast("Ticket status updated.");
-}
-
-/* DELETE SERVER */
-
-function deleteServer(id) {
-    if (!isAdmin()) return;
-    if (!confirm("Delete this demo server?")) return;
-
-    state.servers = state.servers.filter(s => s.id !== id);
-    saveState();
-    renderAll();
-    toast("Server deleted.");
-}
-
-/* RENDER DASHBOARD */
-
-function renderAll() {
-    if (!currentUser) return;
-
-    const email = currentUser.email.toLowerCase();
-
-    const myServers = state.servers.filter(s =>
-        s.owner.toLowerCase() === email
-    );
-
-    const myTickets = state.tickets.filter(t =>
-        t.email.toLowerCase() === email
-    );
-
-    document.getElementById("myServerCount").textContent = myServers.length;
-    document.getElementById("myTicketCount").textContent = myTickets.length;
-    document.getElementById("roleStat").textContent = currentUser.role;
-
-    /* MY SERVERS */
-
-    document.getElementById("myServersTable").innerHTML = myServers.map(s => `
-        <tr>
-            <td>${escapeHTML(s.name)}</td>
-            <td>${escapeHTML(s.software)}</td>
-            <td>${escapeHTML(s.ram)} GB</td>
-            <td><span class="status">${escapeHTML(s.status)}</span></td>
-        </tr>
-    `).join("");
-
-    document.getElementById("noMyServers").style.display =
-        myServers.length ? "none" : "block";
-
-    /* USERS */
-
-    if (isAdmin()) {
-        document.getElementById("usersTable").innerHTML =
-            state.users.map(u => `
-                <tr>
-                    <td>${escapeHTML(u.email)}</td>
-                    <td>${escapeHTML(u.role)}</td>
-                    <td>${u.role === "Owner" ? "Protected" : "Account"}</td>
-                </tr>
-            `).join("");
-
-        /* ALL SERVERS */
-
-        document.getElementById("allServersTable").innerHTML =
-            state.servers.map(s => `
-                <tr>
-                    <td>${escapeHTML(s.name)}</td>
-                    <td>${escapeHTML(s.owner)}</td>
-                    <td>${escapeHTML(s.software)}</td>
-                    <td>${escapeHTML(s.ram)} GB</td>
-                    <td>
-                        <button class="btn-small btn-danger"
-                            data-delete-server="${escapeHTML(s.id)}">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            `).join("") || `
-                <tr><td colspan="5">No servers created yet.</td></tr>
-            `;
-
-        document.getElementById("allServersTable").querySelectorAll("[data-delete-server]")
-            .forEach(button => {
-                button.addEventListener("click", () =>
-                    deleteServer(button.dataset.deleteServer)
-                );
-            });
-    }
-
-    /* MY TICKETS */
-
-    document.getElementById("myTickets").innerHTML =
-        myTickets.map(t => `
-            <div class="ticket">
-                <strong>${escapeHTML(t.subject)}</strong>
-                <span class="status">${escapeHTML(t.status)}</span>
-                <p>Ticket: ${escapeHTML(t.id)}</p>
-                <p>Department: ${escapeHTML(t.department)}</p>
-                <p>${escapeHTML(t.message)}</p>
-                <p>${escapeHTML(t.created)}</p>
+          <div class="welcome-banner">
+            <div>
+              <h1>Welcome to ASTRIX CLOUD</h1>
+              <p>Your cloud hosting journey starts here.</p>
             </div>
-        `).join("") || `<div class="empty">You have no support tickets.</div>`;
+            <div class="banner-icon">☁</div>
+          </div>
 
-    /* ADMIN TICKETS */
+          <div class="stats-grid">
 
-    if (isAdmin()) {
-        document.getElementById("adminTicketsList").innerHTML =
-            state.tickets.map(t => `
-                <div class="ticket">
-                    <strong>${escapeHTML(t.subject)}</strong>
-                    <span class="status">${escapeHTML(t.status)}</span>
-                    <p>From: ${escapeHTML(t.email)}</p>
-                    <p>Ticket: ${escapeHTML(t.id)}</p>
-                    <p>Department: ${escapeHTML(t.department)}</p>
-                    <p>${escapeHTML(t.message)}</p>
-                    <p>${escapeHTML(t.created)}</p>
-                    <button class="btn-small"
-                        data-ticket-id="${escapeHTML(t.id)}"
-                        data-ticket-status="In Progress">
-                        In Progress
-                    </button>
-                    <button class="btn-small"
-                        data-ticket-id="${escapeHTML(t.id)}"
-                        data-ticket-status="Closed">
-                        Close Ticket
-                    </button>
-                </div>
-            `).join("") || `<div class="empty">No support tickets received.</div>`;
+            <div class="stat-card">
+              <div class="stat-icon purple">▣</div>
+              <p>Total Servers</p>
+              <h2 id="totalServers">0</h2>
+            </div>
 
-        document.getElementById("adminTicketsList")
-            .querySelectorAll("[data-ticket-id]").forEach(button => {
-                button.addEventListener("click", () =>
-                    updateTicket(button.dataset.ticketId, button.dataset.ticketStatus)
-                );
-            });
-    }
-}
+            <div class="stat-card">
+              <div class="stat-icon green">●</div>
+              <p>Online Servers</p>
+              <h2 id="onlineServers">0</h2>
+            </div>
 
-/* START */
+            <div class="stat-card">
+              <div class="stat-icon orange">◷</div>
+              <p>Offline Servers</p>
+              <h2 id="offlineServers">0</h2>
+            </div>
 
-loadState();
+            <div class="stat-card">
+              <div class="stat-icon blue">✉</div>
+              <p>Support Tickets</p>
+              <h2 id="totalTickets">0</h2>
+            </div>
 
-</script>
+          </div>
+
+          <div class="content-card">
+            <div class="section-header">
+              <h2>Recent Servers</h2>
+              <button class="secondary-btn" data-page="servers">
+                View All
+              </button>
+            </div>
+
+            <div id="recentServers">
+              <p class="empty-state">No servers available yet.</p>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- MY SERVERS -->
+        <section id="page-servers" class="page">
+
+          <div class="section-header">
+            <div>
+              <h1>My Servers</h1>
+              <p>View and manage your cloud servers.</p>
+            </div>
+          </div>
+
+          <div id="myServersList" class="server-grid">
+            <p class="empty-state">No servers found.</p>
+          </div>
+
+        </section>
+
+
+        <!-- SUPPORT TICKETS -->
+        <section id="page-tickets" class="page">
+
+          <div class="section-header">
+            <div>
+              <h1>Support Tickets</h1>
+              <p>Get help from the ASTRIX CLOUD team.</p>
+            </div>
+          </div>
+
+          <div class="content-card">
+
+            <h2>Create New Ticket</h2>
+
+            <form id="ticketForm">
+
+              <label for="ticketSubject">Subject</label>
+              <input
+                type="text"
+                id="ticketSubject"
+                placeholder="Enter ticket subject"
+                required
+              >
+
+              <label for="ticketCategory">Category</label>
+              <select id="ticketCategory" required>
+                <option value="">Select category</option>
+                <option value="Technical">Technical Support</option>
+                <option value="Billing">Billing</option>
+                <option value="Account">Account</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <label for="ticketDescription">Description</label>
+              <textarea
+                id="ticketDescription"
+                rows="5"
+                placeholder="Describe your problem..."
+                required
+              ></textarea>
+
+              <button type="submit" class="primary-btn">
+                Submit Ticket
+              </button>
+
+            </form>
+
+          </div>
+
+          <div class="content-card">
+            <h2>My Tickets</h2>
+            <div id="myTicketsList">
+              <p class="empty-state">No tickets submitted.</p>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ACCOUNT SETTINGS -->
+        <section id="page-account" class="page">
+
+          <div class="section-header">
+            <div>
+              <h1>Account Settings</h1>
+              <p>View your account information.</p>
+            </div>
+          </div>
+
+          <div class="content-card">
+
+            <div class="account-avatar" id="accountAvatar">A</div>
+
+            <h2 id="accountName">User</h2>
+            <p id="accountEmail">user@example.com</p>
+
+            <div class="account-details">
+              <div>
+                <span>Account Role</span>
+                <strong id="accountRole">User</strong>
+              </div>
+
+              <div>
+                <span>Account Status</span>
+                <strong class="success-text">Active</strong>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ADMIN: CREATE SERVER -->
+        <section id="page-create-server" class="page">
+
+          <div class="section-header">
+            <div>
+              <h1>Create Server</h1>
+              <p>Create a demo server and assign it to a user.</p>
+            </div>
+          </div>
+
+          <div class="content-card">
+
+            <form id="createServerForm">
+
+              <label for="serverName">Server Name</label>
+              <input
+                type="text"
+                id="serverName"
+                placeholder="My Minecraft Server"
+                required
+              >
+
+              <label for="serverOwner">Owner Email</label>
+              <input
+                type="email"
+                id="serverOwner"
+                placeholder="user@example.com"
+                required
+              >
+
+              <label for="serverSoftware">Server Software</label>
+              <select id="serverSoftware" required>
+                <option value="">Choose software</option>
+                <option value="Minecraft Java">Minecraft Java</option>
+                <option value="Minecraft Bedrock">Minecraft Bedrock</option>
+                <option value="Node.js">Node.js</option>
+                <option value="Python">Python</option>
+                <option value="Discord Bot">Discord Bot</option>
+              </select>
+
+              <label for="serverMemory">Memory (RAM)</label>
+              <select id="serverMemory" required>
+                <option value="512 MB">512 MB</option>
+                <option value="1 GB">1 GB</option>
+                <option value="2 GB">2 GB</option>
+                <option value="4 GB">4 GB</option>
+              </select>
+
+              <button type="submit" class="primary-btn">
+                Create Demo Server
+              </button>
+
+            </form>
+
+            <p id="createServerMessage" class="message"></p>
+
+          </div>
+
+        </section>
+
+
+        <!-- ADMIN: MANAGE USERS -->
+        <section id="page-manage-users" class="page">
+
+          <div class="section-header">
+            <div>
+              <h1>Manage Users</h1>
+              <p>View registered demo accounts.</p>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div id="usersList">
+              <p class="empty-state">No users found.</p>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ADMIN: ALL SERVERS -->
+        <section id="page-all-servers" class="page">
+
+          <div class="section-header">
+            <div>
+              <h1>All Servers</h1>
+              <p>Manage all demo servers.</p>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div id="allServersList">
+              <p class="empty-state">No servers found.</p>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ADMIN: MANAGE TICKETS -->
+        <section id="page-manage-tickets" class="page">
+
+          <div class="section-header">
+            <div>
+              <h1>Manage Tickets</h1>
+              <p>Review and update demo support tickets.</p>
+            </div>
+          </div>
+
+          <div class="content-card">
+            <div id="adminTicketsList">
+              <p class="empty-state">No tickets found.</p>
+            </div>
+          </div>
+
+        </section>
+
+
+      </div>
+
+      <footer class="footer">
+        © 2026 ASTRIX CLOUD. All rights reserved.
+      </footer>
+
+    </main>
+
+  </div>
+
+  <!-- Separate JavaScript file -->
+  <script src="PANEL.JS"></script>
+
 </body>
 </html>
