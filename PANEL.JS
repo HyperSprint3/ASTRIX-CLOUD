@@ -5,7 +5,6 @@ function adminLogin() {
 
   if (username === "admin" && password === "astrix123") {
     document.getElementById("loginScreen").style.display = "none";
-    message.textContent = "";
   } else {
     message.textContent = "Invalid username or password!";
   }
