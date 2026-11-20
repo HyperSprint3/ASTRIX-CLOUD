@@ -1,1 +1,168 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+body {
+  background: #080711;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background: #100d1c;
+  border-right: 1px solid #30204d;
+  padding: 30px 20px;
+}
+
+.sidebar h2 {
+  color: #ffffff;
+  font-size: 22px;
+  margin-bottom: 45px;
+}
+
+.sidebar h2 span {
+  color: #a855f7;
+}
+
+.menu-title {
+  color: #777;
+  font-size: 11px;
+  margin-bottom: 15px;
+}
+
+.sidebar a {
+  display: block;
+  color: #aaa;
+  text-decoration: none;
+  padding: 14px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  color: white;
+  background: #35145c;
+  box-shadow: 0 0 15px #8b2be244;
+}
+
+.main {
+  flex: 1;
+  padding: 40px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  border-bottom: 1px solid #30204d;
+  padding-bottom: 25px;
+}
+
+header h1 {
+  color: #bd70ff;
+  font-size: 32px;
+  margin: 8px 0;
+}
+
+header p {
+  color: #999;
+}
+
+.subtitle {
+  font-size: 13px;
+}
+
+.status {
+  color: #39e98c;
+  background: #123323;
+  padding: 12px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.welcome {
+  margin: 35px 0;
+}
+
+.welcome h2,
+.server h2 {
+  margin-bottom: 10px;
+}
+
+.welcome p,
+.server p {
+  color: #999;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.card,
+.server {
+  background: #120e20;
+  border: 1px solid #382052;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 0 20px #8b2be210;
+}
+
+.card p {
+  color: #999;
+  font-size: 12px;
+}
+
+.card h2 {
+  color: #bd70ff;
+  font-size: 28px;
+  margin-top: 15px;
+}
+
+.server {
+  margin-top: 30px;
+}
+
+button {
+  margin-top: 20px;
+  padding: 13px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: #7130b5;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+footer {
+  margin-top: 60px;
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .main {
+    padding: 20px;
+  }
+}
