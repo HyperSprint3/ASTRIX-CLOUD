@@ -1,1 +1,198 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASTRIX CLOUD | Hosting Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#080810;color:#eee;font-family:Arial,sans-serif}
+:root{--purple:#a855f7;--border:#292438}
+header{height:70px;border-bottom:1px solid var(--border);
+display:flex;align-items:center;justify-content:space-between;
+padding:0 28px;background:#0d0b16}
+.logo{font-size:23px;font-weight:900;color:#c084fc}
+.logo span{color:white}
+.status{color:#4ade80;font-size:13px}
+.layout{display:flex;min-height:calc(100vh - 70px)}
+aside{width:235px;background:#0d0b16;padding:25px 15px;
+border-right:1px solid var(--border)}
+aside h4{color:#777;font-size:11px;margin:15px 10px}
+nav button{display:block;width:100%;padding:13px;
+margin:5px 0;text-align:left;background:transparent;
+border:0;color:#aaa;border-radius:8px;cursor:pointer}
+nav button:hover,nav button.active{background:#241638;color:#d8b4fe}
+main{flex:1;padding:32px;min-width:0}
+h1{font-size:29px;margin-bottom:10px}
+.subtitle{color:#888;margin-bottom:28px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:16px;margin-bottom:28px}
+.card{background:#12101d;border:1px solid var(--border);
+border-radius:12px;padding:22px}
+.card small{color:#999}
+.card h2{font-size:27px;margin:15px 0 5px;color:#d8b4fe}
+.section{background:#12101d;border:1px solid var(--border);
+padding:22px;border-radius:12px;margin-bottom:20px}
+.section h3{margin-bottom:20px}
+.server{display:flex;align-items:center;justify-content:space-between;
+gap:15px;flex-wrap:wrap;padding:15px 0;border-bottom:1px solid var(--border)}
+.server:last-child{border:0}
+.server p{color:#888;font-size:13px;margin-top:7px}
+.online{color:#4ade80;font-size:12px}
+.btn{background:#9333ea;border:0;padding:10px 15px;
+border-radius:7px;color:white;cursor:pointer;margin:3px}
+.btn:hover{background:#7e22ce}
+.btn.secondary{background:#292438}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.console{background:#050508;color:#a78bfa;padding:18px;
+border-radius:8px;font-family:monospace;min-height:100px;
+line-height:1.8;overflow-wrap:anywhere}
+input{background:#080810;border:1px solid #39304b;
+padding:12px;color:white;border-radius:7px;width:100%;margin:10px 0}
+.page{display:none}
+.page.active{display:block}
+footer{color:#666;text-align:center;padding:25px;font-size:12px}
+@media(max-width:650px){
+.layout{display:block}aside{width:100%;border-right:0}
+nav{display:flex;overflow-x:auto}
+nav button{min-width:max-content}
+main{padding:18px}
+header{padding:0 15px}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">ASTRIX <span>CLOUD</span></div>
+<div class="status">● SYSTEM ONLINE</div>
+</header>
+
+<div class="layout">
+<aside>
+<h4>MAIN MENU</h4>
+<nav>
+<button class="active" onclick="showPage('dashboard',this)">◈ Dashboard</button>
+<button onclick="showPage('servers',this)">▣ My Servers</button>
+<button onclick="showPage('plans',this)">◇ Hosting Plans</button>
+<button onclick="showPage('console',this)">⌘ Console</button>
+<button onclick="showPage('account',this)">◎ Account</button>
+</nav>
+<h4>ADMINISTRATION</h4>
+<nav>
+<button onclick="showPage('admin',this)">⚙ Admin Panel</button>
+</nav>
+</aside>
+
+<main>
+<div id="dashboard" class="page active">
+<h1>Welcome to ASTRIX CLOUD</h1>
+<p class="subtitle">Beyond Limits. Beyond Servers.</p>
+
+<div class="cards">
+<div class="card"><small>Total Servers</small><h2 id="total">0</h2><small>Your servers</small></div>
+<div class="card"><small>Running Servers</small><h2 id="running">0</h2><small>Currently online</small></div>
+<div class="card"><small>Account Status</small><h2>DEMO</h2><small>Preview account</small></div>
+</div>
+
+<div class="section">
+<h3>Welcome, Explorer!</h3>
+<p style="color:#aaa;line-height:1.8">
+Your Minecraft hosting journey starts here.
+Manage your servers, explore hosting plans
+and discover the ASTRIX CLOUD experience.
+</p>
+<br>
+<button class="btn" onclick="showPage('plans')">Explore Hosting Plans →</button>
+</div>
+</div>
+
+<div id="servers" class="page">
+<h1>My Servers</h1>
+<p class="subtitle">Manage your Minecraft servers</p>
+<div class="section">
+<h3>Server Overview</h3>
+<div class="server">
+<div><b>Demo Minecraft Server</b><p>Paper • 1 GB RAM • Demo only</p></div>
+<span class="online">● DEMO</span>
+</div>
+<p style="color:#888;font-size:13px;margin-top:18px">
+This is a sample server. No real Minecraft server is connected.
+</p>
+</div>
+</div>
+
+<div id="plans" class="page">
+<h1>Hosting Plans</h1>
+<p class="subtitle">Choose your Minecraft experience</p>
+<div class="cards">
+<div class="card"><small>STARTER</small><h2>₹99</h2><p>1 GB RAM</p><p>5 GB Storage</p><button class="btn" onclick="order('Starter')">Select Plan</button></div>
+<div class="card"><small>PRO</small><h2>₹199</h2><p>4 GB RAM</p><p>15 GB Storage</p><button class="btn" onclick="order('Pro')">Select Plan</button></div>
+<div class="card"><small>ULTIMATE</small><h2>₹399</h2><p>8 GB RAM</p><p>30 GB Storage</p><button class="btn" onclick="order('Ultimate')">Select Plan</button></div>
+</div>
+<p style="color:#888;font-size:13px">Illustrative prices only. Ordering and payment are not connected yet.</p>
+</div>
+
+<div id="console" class="page">
+<h1>Server Console</h1>
+<p class="subtitle">Demo console interface</p>
+<div class="section">
+<div class="console" id="logs">[ASTRIX] Welcome to the demo console.<br>[SYSTEM] No server connection.</div>
+<br>
+<input id="command" placeholder="Enter a demo command..." />
+<button class="btn" onclick="sendCommand()">Send Command</button>
+</div>
+</div>
+
+<div id="account" class="page">
+<h1>My Account</h1>
+<p class="subtitle">Account information preview</p>
+<div class="section">
+<h3>Customer Profile</h3>
+<p style="color:#aaa">Account: Demo User</p><br>
+<p style="color:#aaa">Role: Customer Preview</p><br>
+<p style="color:#aaa">Authentication: Not connected</p>
+</div>
+</div>
+
+<div id="admin" class="page">
+<h1>Admin Panel</h1>
+<p class="subtitle">ASTRIX CLOUD administration preview</p>
+<div class="cards">
+<div class="card"><small>Customers</small><h2>0</h2></div>
+<div class="card"><small>Orders</small><h2>0</h2></div>
+<div class="card"><small>Revenue</small><h2>₹0</h2></div>
+</div>
+<div class="section">
+<h3>Administrator Access</h3>
+<p style="color:#aaa">This is a visual preview, not a secured admin system.</p>
+</div>
+</div>
+
+</main>
+</div>
+<footer>© 2026 ASTRIX CLOUD • Beyond Limits. Beyond Servers.</footer>
+
+<script>
+function showPage(id,btn){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+if(btn)btn.classList.add('active');
+}
+
+function order(plan){
+alert('You selected the '+plan+' plan! Ordering is not connected yet.');
+}
+
+function sendCommand(){
+const input=document.getElementById('command');
+const logs=document.getElementById('logs');
+if(!input.value.trim())return;
+logs.innerHTML += '<br>[DEMO] '+input.value.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+input.value='';
+}
+</script>
+</body>
+</html>
+
