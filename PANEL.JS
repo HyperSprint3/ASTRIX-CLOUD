@@ -1,5 +1,14 @@
-console.log("ASTRIX CLOUD Panel Loaded!");
+function adminLogin() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const message = document.getElementById("loginMessage");
 
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Beyond Limits. Beyond Servers.");
-});
+  if (username === "admin" && password === "astrix123") {
+    document.getElementById("loginScreen").style.display = "none";
+    message.textContent = "";
+  } else {
+    message.textContent = "Invalid username or password!";
+  }
+}
+
+console.log("ASTRIX CLOUD Loaded!");
