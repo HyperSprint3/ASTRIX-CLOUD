@@ -69,9 +69,11 @@ export async function onRequestPost({ request, env }) {
       success: true,
       message: "Owner account created. You can now log in."
     });
-  } catch (error) {
+    } catch (error) {
+    console.error("Owner setup error:", error);
+
     return Response.json({
-      error: "Owner setup failed."
+      error: error.message || "Unknown setup error."
     }, { status: 500 });
   }
 }
