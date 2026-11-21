@@ -1,684 +1,583 @@
 
-/* =========================================
-   ASTRIX CLOUD - PANEL.JS
-   Frontend Demo Control Panel
-========================================= */
-
 document.addEventListener("DOMContentLoaded", () => {
+    // ==========================================
+    // ASTRIX CLOUD - MAIN PANEL
+    // Database authentication and support tickets
+    // ==========================================
 
-  // =====================================
-  // ACCOUNTS
-  // =====================================
+    let currentUser = null;
+    let tickets = [];
+    let servers = JSON.parse(localStorage.getItem("astrix_servers") || "[]");
 
-  const accounts = [
-    {
-      name: "ASTRIX Owner",
-      email: "owner@astrixcloud.test",
-      password: "astrix123",
-      role: "Owner"
-    },
-    {
-      name: "Rahul Admin",
-      email: "admin@gmail.com",
-      password: "Rahul@4321",
-      role: "Admin"
-    },
-    {
-      name: "Demo User",
-      email: "user@gmail.com",
-      password: "user123",
-      role: "User"
-    }
-  ];
+    const $ = (id) => document.getElementById(id);
 
-  // =====================================
-  // STORAGE
-  // =====================================
+    // ---------- HELPERS ----------
 
-  function loadData(key, fallback) {
-    try {
-      const saved = localStorage.getItem(key);
-      return saved ? JSON.parse(saved) : fallback;
-    } catch (error) {
-      console.error("Storage error:", error);
-      return fallback;
-    }
-  }
-
-  function saveData(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-
-  let servers = loadData("astrix_servers", []);
-  let tickets = loadData("astrix_tickets", []);
-
-  let currentUser = null;
-
-  // =====================================
-  // ELEMENTS
-  // =====================================
-
-  const loginPage = document.getElementById("loginPage");
-  const dashboard = document.getElementById("dashboard");
-  const loginForm = document.getElementById("loginForm");
-  const loginMessage = document.getElementById("loginMessage");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const sidebar = document.getElementById("sidebar");
-  const menuToggle = document.getElementById("menuToggle");
-  const adminNavigation = document.getElementById("adminNavigation");
-
-  // =====================================
-  // HELPERS
-  // =====================================
-
-  function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    })[char]);
-  }
-
-  function isAdmin() {
-    return currentUser &&
-      ["Owner", "Admin"].includes(currentUser.role);
-  }
-
-  function showMessage(element, message, isError = false) {
-    if (!element) return;
-
-    element.textContent = message;
-    element.classList.toggle("error", isError);
-  }
-
-  function saveServers() {
-    saveData("astrix_servers", servers);
-  }
-
-  function saveTickets() {
-    saveData("astrix_tickets", tickets);
-  }
-
-  function getUserServers() {
-    if (isAdmin()) return servers;
-
-    return servers.filter(server =>
-      server.owner.toLowerCase() === currentUser.email.toLowerCase()
-    );
-  }
-
-  function getUserTickets() {
-    if (isAdmin()) return tickets;
-
-    return tickets.filter(ticket =>
-      ticket.email.toLowerCase() === currentUser.email.toLowerCase()
-    );
-  }
-
-  // =====================================
-  // LOGIN
-  // =====================================
-
-  loginForm.addEventListener("submit", event => {
-    event.preventDefault();
-
-    const email = document.getElementById("loginEmail")
-      .value.trim().toLowerCase();
-
-    const password = document.getElementById("loginPassword").value;
-
-    const account = accounts.find(user =>
-      user.email.toLowerCase() === email &&
-      user.password === password
-    );
-
-    if (!account) {
-      showMessage(
-        loginMessage,
-        "Invalid email or password.",
-        true
-      );
-      return;
+    function escapeHTML(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[char]));
     }
 
-    currentUser = {
-      name: account.name,
-      email: account.email,
-      role: account.role
-    };
+    function formatDate(value) {
+        if (!value) return "Just now";
+        const date = new Date(value.replace(" ", "T") + (value.includes("Z") ? "" : "Z"));
+        return isNaN(date.getTime()) ? value : date.toLocaleString();
+    }
 
-    loginPage.classList.add("hidden");
-    dashboard.classList.remove("hidden");
+    async function api(url, options = {}) {
+        const response = await fetch(url, {
+            credentials: "same-origin",
+            ...options,
+            headers: {
+                ...(options.body ? { "Content-Type": "application/json" } : {}),
+                ...(options.headers || {})
+            }
+        });
 
-    loginForm.reset();
-
-    updateUserInformation();
-    setupNavigation();
-    renderDashboard();
-    showPage("overview");
-  });
-
-  // =====================================
-  // USER INFORMATION
-  // =====================================
-
-  function updateUserInformation() {
-    if (!currentUser) return;
-
-    const firstLetter = currentUser.name.charAt(0).toUpperCase();
-
-    document.getElementById("sidebarUserName").textContent =
-      currentUser.name;
-
-    document.getElementById("sidebarUserRole").textContent =
-      currentUser.role;
-
-    document.getElementById("userAvatar").textContent =
-      firstLetter;
-
-    document.getElementById("topbarUserName").textContent =
-      currentUser.name;
-
-    document.getElementById("accountAvatar").textContent =
-      firstLetter;
-
-    document.getElementById("accountName").textContent =
-      currentUser.name;
-
-    document.getElementById("accountEmail").textContent =
-      currentUser.email;
-
-    document.getElementById("accountRole").textContent =
-      currentUser.role;
-
-    adminNavigation.classList.toggle("hidden", !isAdmin());
-  }
-
-  // =====================================
-  // LOGOUT
-  // =====================================
-
-  logoutBtn.addEventListener("click", () => {
-    currentUser = null;
-
-    dashboard.classList.add("hidden");
-    loginPage.classList.remove("hidden");
-
-    sidebar.classList.remove("open");
-
-    loginForm.reset();
-    showMessage(loginMessage, "");
-  });
-
-  // =====================================
-  // NAVIGATION
-  // =====================================
-
-  function setupNavigation() {
-
-    document.querySelectorAll("[data-page]").forEach(button => {
-
-      button.addEventListener("click", () => {
-
-        const page = button.dataset.page;
-
-        if (
-          ["create-server", "manage-users", "all-servers", "manage-tickets"].includes(page)
-          && !isAdmin()
-        ) {
-          return;
+        let data = {};
+        try {
+            data = await response.json();
+        } catch {
+            throw new Error("The server returned an invalid response.");
         }
 
-        showPage(page);
-        sidebar.classList.remove("open");
-      });
+        if (!response.ok) {
+            throw new Error(data.error || data.message || "Request failed.");
+        }
 
+        return data;
+    }
+
+    function showMessage(element, message, success = false) {
+        if (!element) return;
+        element.textContent = message;
+        element.style.color = success ? "#22c55e" : "#ef4444";
+    }
+
+    function isStaff() {
+        return ["owner", "admin", "staff"].includes(
+            String(currentUser?.role || "").toLowerCase()
+        );
+    }
+
+    function normalizeUser(user) {
+        if (!user) return null;
+        return {
+            ...user,
+            name: user.username || user.name || "User",
+            role: String(user.role || "member").toLowerCase()
+        };
+    }
+
+    // ---------- LOGIN / LOGOUT ----------
+
+    function showLogin() {
+        if ($("loginPage")) $("loginPage").style.display = "flex";
+        if ($("dashboard")) $("dashboard").style.display = "none";
+    }
+
+    function showDashboard() {
+        if ($("loginPage")) $("loginPage").style.display = "none";
+        if ($("dashboard")) $("dashboard").style.display = "block";
+
+        updateUserDetails();
+        updatePermissions();
+        updateDashboard();
+        navigateTo("overview");
+    }
+
+    function updateUserDetails() {
+        if (!currentUser) return;
+
+        const name = currentUser.username || currentUser.name || "User";
+        const email = currentUser.email || "";
+        const role = currentUser.role || "member";
+        const avatar = name.charAt(0).toUpperCase();
+
+        if ($("sidebarUserName")) $("sidebarUserName").textContent = name;
+        if ($("sidebarUserRole")) $("sidebarUserRole").textContent = role;
+        if ($("userAvatar")) $("userAvatar").textContent = avatar;
+        if ($("topbarUserName")) $("topbarUserName").textContent = name;
+        if ($("accountAvatar")) $("accountAvatar").textContent = avatar;
+        if ($("accountName")) $("accountName").textContent = name;
+        if ($("accountEmail")) $("accountEmail").textContent = email;
+        if ($("accountRole")) $("accountRole").textContent = role;
+    }
+
+    function updatePermissions() {
+        const staff = isStaff();
+
+        if ($("adminNavigation")) {
+            $("adminNavigation").style.display = staff ? "" : "none";
+        }
+
+        document.querySelectorAll("[data-page]").forEach((link) => {
+            const page = link.dataset.page;
+            const restricted = [
+                "create-server",
+                "manage-users",
+                "all-servers",
+                "manage-tickets"
+            ];
+
+            if (restricted.includes(page)) {
+                link.style.display = staff ? "" : "none";
+            }
+        });
+    }
+
+    $("loginForm")?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const email = $("loginEmail")?.value.trim();
+        const password = $("loginPassword")?.value;
+        const message = $("loginMessage");
+
+        showMessage(message, "Logging in...", true);
+
+        try {
+            const result = await api("/api/login", {
+                method: "POST",
+                body: JSON.stringify({ email, password })
+            });
+
+            currentUser = normalizeUser(result.user || result);
+            if (!currentUser?.id) {
+                throw new Error("Login response did not contain a user.");
+            }
+
+            if ($("loginPassword")) $("loginPassword").value = "";
+            showDashboard();
+            await loadTickets();
+        } catch (error) {
+            showMessage(message, error.message);
+        }
     });
 
-  }
+    $("logoutBtn")?.addEventListener("click", async () => {
+        try {
+            await api("/api/logout", { method: "POST" });
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
 
-  function showPage(pageName) {
-
-    document.querySelectorAll(".page").forEach(page => {
-      page.classList.remove("active");
+        currentUser = null;
+        tickets = [];
+        showLogin();
     });
 
-    const selectedPage = document.getElementById(
-      "page-" + pageName
-    );
+    async function restoreSession() {
+        try {
+            const result = await api("/api/me");
+            currentUser = normalizeUser(result.user || result);
 
-    if (!selectedPage) return;
+            if (!currentUser?.id) throw new Error("No active session.");
 
-    selectedPage.classList.add("active");
+            showDashboard();
+            await loadTickets();
+        } catch {
+            currentUser = null;
+            showLogin();
+        }
+    }
 
-    document.querySelectorAll(".nav-link").forEach(link => {
-      link.classList.toggle(
-        "active",
-        link.dataset.page === pageName
-      );
+    // ---------- NAVIGATION ----------
+
+    function navigateTo(page) {
+        if (!page) return;
+
+        const restricted = [
+            "create-server",
+            "manage-users",
+            "all-servers",
+            "manage-tickets"
+        ];
+
+        if (restricted.includes(page) && !isStaff()) {
+            page = "overview";
+        }
+
+        document.querySelectorAll(".page-content").forEach((section) => {
+            section.style.display = "none";
+        });
+
+        const target = $("page-" + page);
+        if (target) target.style.display = "block";
+
+        document.querySelectorAll("[data-page]").forEach((link) => {
+            link.classList.toggle("active", link.dataset.page === page);
+        });
+
+        const activeLink = document.querySelector(`[data-page="${page}"]`);
+        if ($("pageTitle") && activeLink) {
+            $("pageTitle").textContent = activeLink.textContent.trim();
+        }
+
+        if (page.includes("ticket")) loadTickets();
+        if (page === "overview") updateDashboard();
+
+        if ($("sidebar")) $("sidebar").classList.remove("active");
+    }
+
+    document.querySelectorAll("[data-page]").forEach((link) => {
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            navigateTo(link.dataset.page);
+        });
     });
 
-    const titles = {
-      overview: "Overview",
-      servers: "My Servers",
-      tickets: "Support Tickets",
-      account: "Account Settings",
-      "create-server": "Create Server",
-      "manage-users": "Manage Users",
-      "all-servers": "All Servers",
-      "manage-tickets": "Manage Tickets"
-    };
+    $("menuToggle")?.addEventListener("click", () => {
+        $("sidebar")?.classList.toggle("active");
+    });
 
-    document.getElementById("pageTitle").textContent =
-      titles[pageName] || "ASTRIX CLOUD";
+    // ---------- SERVERS (DEMO STORAGE) ----------
 
-    if (pageName === "overview") renderDashboard();
-    if (pageName === "servers") renderMyServers();
-    if (pageName === "tickets") renderMyTickets();
-    if (pageName === "manage-users") renderUsers();
-    if (pageName === "all-servers") renderAllServers();
-    if (pageName === "manage-tickets") renderAdminTickets();
-  }
-
-  // =====================================
-  // MOBILE SIDEBAR
-  // =====================================
-
-  menuToggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-  });
-
-  document.addEventListener("click", event => {
-    if (
-      window.innerWidth <= 768 &&
-      sidebar.classList.contains("open") &&
-      !sidebar.contains(event.target) &&
-      !menuToggle.contains(event.target)
-    ) {
-      sidebar.classList.remove("open");
-    }
-  });
-
-  // =====================================
-  // DASHBOARD STATISTICS
-  // =====================================
-
-  function renderDashboard() {
-
-    const visibleServers = getUserServers();
-    const visibleTickets = getUserTickets();
-
-    const online = visibleServers.filter(server =>
-      server.status === "Online"
-    ).length;
-
-    document.getElementById("totalServers").textContent =
-      visibleServers.length;
-
-    document.getElementById("onlineServers").textContent =
-      online;
-
-    document.getElementById("offlineServers").textContent =
-      visibleServers.length - online;
-
-    document.getElementById("totalTickets").textContent =
-      visibleTickets.length;
-
-    const recent = document.getElementById("recentServers");
-
-    if (visibleServers.length === 0) {
-      recent.innerHTML =
-        '<p class="empty-state">No servers available yet.</p>';
-      return;
+    function saveServers() {
+        localStorage.setItem("astrix_servers", JSON.stringify(servers));
     }
 
-    recent.innerHTML = visibleServers.slice(-4).reverse()
-      .map(server => `
-        <div class="ticket-card">
-          <h3>${escapeHTML(server.name)}</h3>
-          <p>Software: ${escapeHTML(server.software)}</p>
-          <p>RAM: ${escapeHTML(server.memory)}</p>
-          <span class="server-status ${
-            server.status === "Online" ? "" : "offline"
-          }">${escapeHTML(server.status)}</span>
-        </div>
-      `).join("");
-  }
-
-  // =====================================
-  // MY SERVERS
-  // =====================================
-
-  function renderMyServers() {
-
-    const container = document.getElementById("myServersList");
-    const visibleServers = getUserServers();
-
-    if (visibleServers.length === 0) {
-      container.innerHTML =
-        '<p class="empty-state">No servers found.</p>';
-      return;
+    function getUserServers() {
+        if (isStaff()) return servers;
+        return servers.filter(server => server.owner === currentUser?.email);
     }
 
-    container.innerHTML = visibleServers.map(server => `
-      <div class="server-card">
-        <h3>${escapeHTML(server.name)}</h3>
-        <p>Software: ${escapeHTML(server.software)}</p>
-        <p>RAM: ${escapeHTML(server.memory)}</p>
-        <p>Owner: ${escapeHTML(server.owner)}</p>
-        <span class="server-status ${
-          server.status === "Online" ? "" : "offline"
-        }">${escapeHTML(server.status)}</span>
-      </div>
-    `).join("");
-  }
+    function renderServers() {
+        const myList = $("myServersList");
+        const allList = $("allServersList");
+        const recentList = $("recentServers");
 
-  // =====================================
-  // CREATE SERVER - ADMIN ONLY
-  // =====================================
+        const myServers = getUserServers();
 
-  const createServerForm =
-    document.getElementById("createServerForm");
+        function serverHTML(server) {
+            return `
+                <div class="server-card">
+                    <h3>${escapeHTML(server.name)}</h3>
+                    <p>Owner: ${escapeHTML(server.owner)}</p>
+                    <p>Software: ${escapeHTML(server.software)}</p>
+                    <p>Memory: ${escapeHTML(server.memory)} MB</p>
+                    <span>${escapeHTML(server.status || "Offline")}</span>
+                </div>
+            `;
+        }
 
-  createServerForm.addEventListener("submit", event => {
+        if (myList) {
+            myList.innerHTML = myServers.length
+                ? myServers.map(serverHTML).join("")
+                : "<p>No servers found.</p>";
+        }
 
-    event.preventDefault();
+        if (allList && isStaff()) {
+            allList.innerHTML = servers.length
+                ? servers.map(serverHTML).join("")
+                : "<p>No servers created yet.</p>";
+        }
 
-    if (!isAdmin()) return;
-
-    const name = document.getElementById("serverName")
-      .value.trim();
-
-    const owner = document.getElementById("serverOwner")
-      .value.trim().toLowerCase();
-
-    const software = document.getElementById("serverSoftware").value;
-    const memory = document.getElementById("serverMemory").value;
-
-    if (!name || !owner || !software || !memory) {
-      showMessage(
-        document.getElementById("createServerMessage"),
-        "Please complete all fields.",
-        true
-      );
-      return;
+        if (recentList) {
+            recentList.innerHTML = servers.length
+                ? servers.slice(-3).reverse().map(serverHTML).join("")
+                : "<p>No recent servers.</p>";
+        }
     }
 
-    const newServer = {
-      id: "SRV-" + Date.now(),
-      name,
-      owner,
-      software,
-      memory,
-      status: "Online",
-      createdAt: new Date().toLocaleString()
-    };
+    $("createServerForm")?.addEventListener("submit", (event) => {
+        event.preventDefault();
 
-    servers.push(newServer);
-    saveServers();
+        if (!isStaff()) return;
 
-    createServerForm.reset();
+        const name = $("serverName")?.value.trim();
+        const owner = $("serverOwner")?.value.trim() || currentUser.email;
+        const software = $("serverSoftware")?.value;
+        const memory = $("serverMemory")?.value;
 
-    showMessage(
-      document.getElementById("createServerMessage"),
-      "Demo server created successfully!"
-    );
+        if (!name) {
+            showMessage($("createServerMessage"), "Enter a server name.");
+            return;
+        }
 
-    renderDashboard();
-    renderAllServers();
-  });
+        servers.push({
+            id: Date.now(),
+            name,
+            owner,
+            software,
+            memory,
+            status: "Offline",
+            createdAt: new Date().toISOString()
+        });
 
-  // =====================================
-  // ADMIN: ALL SERVERS
-  // =====================================
+        saveServers();
+        $("createServerForm").reset();
+        showMessage($("createServerMessage"), "Server added to demo list.", true);
+        renderServers();
+        updateDashboard();
+    });
 
-  function renderAllServers() {
+    // ---------- SUPPORT TICKETS ----------
 
-    const container = document.getElementById("allServersList");
+    async function loadTickets() {
+        if (!currentUser) return;
 
-    if (!isAdmin()) return;
+        try {
+            const result = await api("/api/tickets");
+            tickets = Array.isArray(result)
+                ? result
+                : (result.tickets || result.data || []);
 
-    if (servers.length === 0) {
-      container.innerHTML =
-        '<p class="empty-state">No servers found.</p>';
-      return;
+            renderTickets();
+            updateDashboard();
+        } catch (error) {
+            console.error("Ticket loading error:", error);
+
+            if ($("myTicketsList")) {
+                $("myTicketsList").innerHTML =
+                    `<p>Could not load tickets: ${escapeHTML(error.message)}</p>`;
+            }
+
+            if ($("adminTicketsList")) {
+                $("adminTicketsList").innerHTML =
+                    `<p>Could not load tickets: ${escapeHTML(error.message)}</p>`;
+            }
+        }
     }
 
-    container.innerHTML = `
-      <div style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th>Server</th>
-              <th>Owner</th>
-              <th>Software</th>
-              <th>RAM</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${servers.map(server => `
-              <tr>
-                <td>${escapeHTML(server.name)}</td>
-                <td>${escapeHTML(server.owner)}</td>
-                <td>${escapeHTML(server.software)}</td>
-                <td>${escapeHTML(server.memory)}</td>
-                <td>${escapeHTML(server.status)}</td>
-                <td>
-                  <button
-                    class="secondary-btn"
-                    data-delete-server="${escapeHTML(server.id)}"
-                  >Delete</button>
-                </td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
+    function ticketHTML(ticket) {
+        const status = String(ticket.status || "open").toLowerCase();
+        const staff = isStaff();
 
-  // =====================================
-  // DELETE SERVER
-  // =====================================
+        return `
+            <div class="ticket-card" data-ticket-id="${Number(ticket.id)}">
+                <h3>${escapeHTML(ticket.subject)}</h3>
+                <p><strong>Ticket #${Number(ticket.id)}</strong></p>
+                <p>Category: ${escapeHTML(ticket.category || "General")}</p>
+                ${staff ? `<p>Member: ${escapeHTML(ticket.username || ticket.email || "Member")}</p>` : ""}
+                <p>${escapeHTML(ticket.description || "")}</p>
+                <p>Status: <strong>${escapeHTML(status.toUpperCase())}</strong></p>
+                <p>Created: ${escapeHTML(formatDate(ticket.created_at))}</p>
 
-  document.addEventListener("click", event => {
+                <button type="button" data-open-replies="${Number(ticket.id)}">
+                    View / Reply
+                </button>
 
-    const button = event.target.closest("[data-delete-server]");
+                ${staff ? `
+                    <button type="button"
+                        data-ticket-status="${Number(ticket.id)}"
+                        data-status="${status === "closed" ? "open" : "closed"}">
+                        ${status === "closed" ? "Reopen" : "Close"} Ticket
+                    </button>
+                ` : ""}
 
-    if (!button || !isAdmin()) return;
-
-    const serverId = button.dataset.deleteServer;
-
-    if (!confirm("Delete this demo server?")) return;
-
-    servers = servers.filter(server => server.id !== serverId);
-
-    saveServers();
-    renderAllServers();
-    renderMyServers();
-    renderDashboard();
-  });
-
-  // =====================================
-  // ADMIN: MANAGE USERS
-  // =====================================
-
-  function renderUsers() {
-
-    const container = document.getElementById("usersList");
-
-    if (!isAdmin()) return;
-
-    container.innerHTML = `
-      <div style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${accounts.map(user => `
-              <tr>
-                <td>${escapeHTML(user.name)}</td>
-                <td>${escapeHTML(user.email)}</td>
-                <td>${escapeHTML(user.role)}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-      <p class="empty-state">
-        These are demo accounts built into this frontend.
-      </p>
-    `;
-  }
-
-  // =====================================
-  // CREATE SUPPORT TICKET
-  // =====================================
-
-  const ticketForm = document.getElementById("ticketForm");
-
-  ticketForm.addEventListener("submit", event => {
-
-    event.preventDefault();
-
-    if (!currentUser) return;
-
-    const subject = document.getElementById("ticketSubject")
-      .value.trim();
-
-    const category = document.getElementById("ticketCategory").value;
-
-    const description = document.getElementById("ticketDescription")
-      .value.trim();
-
-    if (!subject || !category || !description) return;
-
-    const newTicket = {
-      id: "TKT-" + Date.now(),
-      name: currentUser.name,
-      email: currentUser.email,
-      subject,
-      category,
-      description,
-      status: "Open",
-      createdAt: new Date().toLocaleString()
-    };
-
-    tickets.push(newTicket);
-    saveTickets();
-
-    ticketForm.reset();
-
-    renderMyTickets();
-    renderDashboard();
-
-    alert("Your demo support ticket was submitted!");
-  });
-
-  // =====================================
-  // MY TICKETS
-  // =====================================
-
-  function renderMyTickets() {
-
-    const container = document.getElementById("myTicketsList");
-    const visibleTickets = getUserTickets();
-
-    if (visibleTickets.length === 0) {
-      container.innerHTML =
-        '<p class="empty-state">No tickets submitted.</p>';
-      return;
+                <div class="ticket-replies" id="replies-${Number(ticket.id)}" style="display:none;">
+                    <div class="reply-list">Loading replies...</div>
+                    <form class="reply-form" data-reply-form="${Number(ticket.id)}">
+                        <textarea name="message" placeholder="Write your reply..." required></textarea>
+                        <button type="submit">Send Reply</button>
+                    </form>
+                </div>
+            </div>
+        `;
     }
 
-    container.innerHTML = visibleTickets.slice().reverse()
-      .map(ticket => `
-        <div class="ticket-card">
-          <h3>${escapeHTML(ticket.subject)}</h3>
-          <p>Ticket ID: ${escapeHTML(ticket.id)}</p>
-          <p>Category: ${escapeHTML(ticket.category)}</p>
-          <p>${escapeHTML(ticket.description)}</p>
-          <p>Created: ${escapeHTML(ticket.createdAt)}</p>
-          <span class="ticket-status ${
-            ticket.status === "Open" ? "open" : "closed"
-          }">${escapeHTML(ticket.status)}</span>
-        </div>
-      `).join("");
-  }
+    function renderTickets() {
+        const myList = $("myTicketsList");
+        const staffList = $("adminTicketsList");
 
-  // =====================================
-  // ADMIN: MANAGE TICKETS
-  // =====================================
+        if (myList) {
+            const mine = tickets.filter(ticket =>
+                Number(ticket.user_id) === Number(currentUser?.id)
+            );
 
-  function renderAdminTickets() {
+            myList.innerHTML = mine.length
+                ? mine.map(ticketHTML).join("")
+                : "<p>You haven't created any support tickets yet.</p>";
+        }
 
-    const container = document.getElementById("adminTicketsList");
-
-    if (!isAdmin()) return;
-
-    if (tickets.length === 0) {
-      container.innerHTML =
-        '<p class="empty-state">No tickets found.</p>';
-      return;
+        if (staffList && isStaff()) {
+            staffList.innerHTML = tickets.length
+                ? tickets.map(ticketHTML).join("")
+                : "<p>No support tickets found.</p>";
+        }
     }
 
-    container.innerHTML = tickets.slice().reverse()
-      .map(ticket => `
-        <div class="ticket-card">
-          <h3>${escapeHTML(ticket.subject)}</h3>
-          <p>Ticket ID: ${escapeHTML(ticket.id)}</p>
-          <p>User: ${escapeHTML(ticket.name)}</p>
-          <p>Email: ${escapeHTML(ticket.email)}</p>
-          <p>Category: ${escapeHTML(ticket.category)}</p>
-          <p>${escapeHTML(ticket.description)}</p>
-          <p>Created: ${escapeHTML(ticket.createdAt)}</p>
+    $("ticketForm")?.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-          <span class="ticket-status ${
-            ticket.status === "Open" ? "open" : "closed"
-          }">${escapeHTML(ticket.status)}</span>
+        const subject = $("ticketSubject")?.value.trim();
+        const category = $("ticketCategory")?.value;
+        const description = $("ticketDescription")?.value.trim();
 
-          <div style="margin-top:15px">
-            <button
-              class="secondary-btn"
-              data-toggle-ticket="${escapeHTML(ticket.id)}"
-            >
-              ${ticket.status === "Open" ? "Close Ticket" : "Reopen Ticket"}
-            </button>
-          </div>
-        </div>
-      `).join("");
-  }
+        if (!subject || !description) {
+            alert("Please fill in the subject and description.");
+            return;
+        }
 
-  // =====================================
-  // ADMIN: UPDATE TICKET STATUS
-  // =====================================
+        try {
+            await api("/api/tickets", {
+                method: "POST",
+                body: JSON.stringify({ subject, category, description })
+            });
 
-  document.addEventListener("click", event => {
+            $("ticketForm").reset();
+            alert("Your support ticket has been created!");
+            await loadTickets();
+        } catch (error) {
+            alert("Ticket error: " + error.message);
+        }
+    });
 
-    const button = event.target.closest("[data-toggle-ticket]");
+    // ---------- TICKET REPLIES ----------
 
-    if (!button || !isAdmin()) return;
+    async function loadReplies(ticketId) {
+        const container = $("replies-" + ticketId);
+        if (!container) return;
 
-    const ticketId = button.dataset.toggleTicket;
+        const list = container.querySelector(".reply-list");
+        if (list) list.textContent = "Loading replies...";
 
-    const ticket = tickets.find(item => item.id === ticketId);
+        try {
+            const result = await api(
+                "/api/ticket-replies?ticket_id=" + encodeURIComponent(ticketId)
+            );
 
-    if (!ticket) return;
+            const replies = Array.isArray(result)
+                ? result
+                : (result.replies || result.data || []);
 
-    ticket.status = ticket.status === "Open" ? "Closed" : "Open";
+            if (!list) return;
 
-    saveTickets();
+            list.innerHTML = replies.length
+                ? replies.map(reply => `
+                    <div class="ticket-reply">
+                        <strong>${escapeHTML(reply.username || reply.sender_name || "User")}</strong>
+                        <p>${escapeHTML(reply.message)}</p>
+                        <small>${escapeHTML(formatDate(reply.created_at))}</small>
+                    </div>
+                `).join("")
+                : "<p>No replies yet.</p>";
+        } catch (error) {
+            if (list) {
+                list.textContent = "Could not load replies: " + error.message;
+            }
+        }
+    }
 
-    renderAdminTickets();
-    renderDashboard();
-  });
+    document.addEventListener("click", async (event) => {
+        const replyButton = event.target.closest("[data-open-replies]");
 
+        if (replyButton) {
+            const ticketId = replyButton.dataset.openReplies;
+            const container = $("replies-" + ticketId);
+
+            if (container) {
+                const opening = container.style.display === "none";
+                container.style.display = opening ? "block" : "none";
+
+                if (opening) await loadReplies(ticketId);
+            }
+        }
+
+        const statusButton = event.target.closest("[data-ticket-status]");
+
+        if (statusButton) {
+            const ticketId = statusButton.dataset.ticketStatus;
+            const status = statusButton.dataset.status;
+
+            try {
+                await api("/api/ticket-status", {
+                    method: "PATCH",
+                    body: JSON.stringify({
+                        ticket_id: Number(ticketId),
+                        status
+                    })
+                });
+
+                await loadTickets();
+            } catch (error) {
+                alert("Could not update ticket: " + error.message);
+            }
+        }
+    });
+
+    document.addEventListener("submit", async (event) => {
+        const form = event.target.closest("[data-reply-form]");
+        if (!form) return;
+
+        event.preventDefault();
+
+        const ticketId = Number(form.dataset.replyForm);
+        const message = form.querySelector('[name="message"]')?.value.trim();
+
+        if (!message) return;
+
+        const button = form.querySelector('button[type="submit"]');
+        if (button) button.disabled = true;
+
+        try {
+            await api("/api/ticket-replies", {
+                method: "POST",
+                body: JSON.stringify({
+                    ticket_id: ticketId,
+                    message
+                })
+            });
+
+            form.reset();
+            await loadReplies(ticketId);
+        } catch (error) {
+            alert("Could not send reply: " + error.message);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    });
+
+    // ---------- USERS ----------
+
+    function renderUsers() {
+        if (!$("usersList")) return;
+
+        $("usersList").innerHTML = `
+            <p>User management is not connected yet.
+            The database login and staff permissions are active.</p>
+        `;
+    }
+
+    // ---------- DASHBOARD ----------
+
+    function updateDashboard() {
+        if (!currentUser) return;
+
+        const visibleServers = getUserServers();
+
+        if ($("totalServers")) {
+            $("totalServers").textContent = visibleServers.length;
+        }
+
+        if ($("onlineServers")) {
+            $("onlineServers").textContent =
+                visibleServers.filter(server => server.status === "Online").length;
+        }
+
+        if ($("offlineServers")) {
+            $("offlineServers").textContent =
+                visibleServers.filter(server => server.status !== "Online").length;
+        }
+
+        if ($("totalTickets")) {
+            $("totalTickets").textContent = isStaff()
+                ? tickets.length
+                : tickets.filter(ticket =>
+                    Number(ticket.user_id) === Number(currentUser.id)
+                ).length;
+        }
+
+        renderServers();
+        renderUsers();
+    }
+
+    // ---------- START ----------
+
+    restoreSession();
 });
