@@ -198,7 +198,55 @@ function showDashboard() {
 
     // ---------- NAVIGATION ----------
 
-    function navigateTo(page) {
+    
+function navigateTo(page) {
+    if (!page) return;
+
+    const restricted = [
+        "create-server",
+        "manage-users",
+        "all-servers",
+        "manage-tickets"
+    ];
+
+    if (restricted.includes(page) && !isStaff()) {
+        page = "overview";
+    }
+
+    document.querySelectorAll(".page").forEach(section => {
+        section.classList.remove("active");
+        section.style.display = "none";
+    });
+
+    const target = $("page-" + page);
+
+    if (target) {
+        target.classList.add("active");
+        target.style.display = "block";
+    }
+
+    document.querySelectorAll("[data-page]").forEach(link => {
+        link.classList.toggle("active", link.dataset.page === page);
+    });
+
+    const activeLink = document.querySelector(
+        `[data-page="${page}"]`
+    );
+
+    if ($("pageTitle")) {
+        $("pageTitle").textContent =
+            activeLink ? activeLink.textContent.trim() : "ASTRIX CLOUD";
+    }
+
+    if (page.includes("ticket")) loadTickets();
+    if (page === "overview") updateDashboard();
+    if (page.includes("server")) showServerNotice();
+    if (page === "manage-users") showUsersNotice();
+
+    $("sidebar")?.classList.remove("open");
+    $("sidebar")?.classList.remove("active");
+}
+
         if (!page) return;
 
         const restricted = [
