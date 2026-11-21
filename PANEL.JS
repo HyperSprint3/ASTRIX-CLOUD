@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
             page = "overview";
         }
 
-        document.querySelectorAll(".page-content").forEach(section => {
+        document.querySelectorAll(".page").forEach(section => {
             section.style.display = "none";
         });
 
