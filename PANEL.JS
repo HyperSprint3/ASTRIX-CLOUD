@@ -293,7 +293,7 @@ function navigateTo(page) {
     });
 
     $("menuToggle")?.addEventListener("click", () => {
-        $("sidebar")?.classList.toggle("active");
+        $("sidebar")?.classList.toggle("open");
     });
 
     // ---------- REAL SERVER MANAGEMENT STATUS ----------
