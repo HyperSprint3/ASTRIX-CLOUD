@@ -25,8 +25,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatDate(value) {
         if (!value) return "Unknown";
-        const date = new Date(value.replace(" ", "T") + "Z");
-        return isNaN(date.getTime()) ? value : date.toLocaleString();
+
+        const date = new Date(
+            String(value).replace(" ", "T") + "Z"
+        );
+
+        return isNaN(date.getTime())
+            ? value
+            : date.toLocaleString();
     }
 
     async function api(url, options = {}) {
@@ -34,12 +40,15 @@ document.addEventListener("DOMContentLoaded", () => {
             credentials: "same-origin",
             ...options,
             headers: {
-                ...(options.body ? { "Content-Type": "application/json" } : {}),
+                ...(options.body
+                    ? { "Content-Type": "application/json" }
+                    : {}),
                 ...(options.headers || {})
             }
         });
 
         let data;
+
         try {
             data = await response.json();
         } catch {
@@ -47,7 +56,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!response.ok) {
-            throw new Error(data.error || data.message || "Request failed.");
+            throw new Error(
+                data.error || data.message || "Request failed."
+            );
         }
 
         return data;
@@ -55,12 +66,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function showMessage(element, message, success = false) {
         if (!element) return;
+
         element.textContent = message;
         element.style.color = success ? "#22c55e" : "#ef4444";
     }
 
     function normalizeUser(user) {
         if (!user) return null;
+
         return {
             ...user,
             username: user.username || "User",
@@ -71,27 +84,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // ---------- PAGE VISIBILITY ----------
 
     function showLogin() {
-        if ($("loginPage")) $("loginPage").style.display = "flex";
-        if ($("dashboard")) $("dashboard").style.display = "none";
+        if ($("loginPage")) {
+            $("loginPage").style.display = "flex";
+        }
+
+        if ($("dashboard")) {
+            $("dashboard").classList.add("hidden");
+            $("dashboard").style.display = "none";
+        }
     }
 
-    
-function showDashboard() {
-    if ($("loginPage")) $("loginPage").style.display = "none";
+    function showDashboard() {
+        if ($("loginPage")) {
+            $("loginPage").style.display = "none";
+        }
 
-    if ($("dashboard")) {
-        $("dashboard").classList.remove("hidden");
-        $("dashboard").style.display = "flex";
-    }
-
-    updateUserDetails();
-    updatePermissions();
-    navigateTo("overview");
-    updateDashboard();
-}
-
-        if ($("loginPage")) $("loginPage").style.display = "none";
-        if ($("dashboard")) $("dashboard").style.display = "block";
+        if ($("dashboard")) {
+            $("dashboard").classList.remove("hidden");
+            $("dashboard").style.display = "flex";
+        }
 
         updateUserDetails();
         updatePermissions();
@@ -99,38 +110,66 @@ function showDashboard() {
         updateDashboard();
     }
 
+    // ---------- USER DETAILS ----------
+
     function updateUserDetails() {
         if (!currentUser) return;
 
         const username = currentUser.username;
         const initial = username.charAt(0).toUpperCase();
 
-        if ($("sidebarUserName")) $("sidebarUserName").textContent = username;
-        if ($("sidebarUserRole")) $("sidebarUserRole").textContent = currentUser.role;
-        if ($("userAvatar")) $("userAvatar").textContent = initial;
-        if ($("topbarUserName")) $("topbarUserName").textContent = username;
-        if ($("accountAvatar")) $("accountAvatar").textContent = initial;
-        if ($("accountName")) $("accountName").textContent = username;
-        if ($("accountEmail")) $("accountEmail").textContent = currentUser.email;
-        if ($("accountRole")) $("accountRole").textContent = currentUser.role;
+        if ($("sidebarUserName")) {
+            $("sidebarUserName").textContent = username;
+        }
+
+        if ($("sidebarUserRole")) {
+            $("sidebarUserRole").textContent = currentUser.role;
+        }
+
+        if ($("userAvatar")) {
+            $("userAvatar").textContent = initial;
+        }
+
+        if ($("topbarUserName")) {
+            $("topbarUserName").textContent = username;
+        }
+
+        if ($("accountAvatar")) {
+            $("accountAvatar").textContent = initial;
+        }
+
+        if ($("accountName")) {
+            $("accountName").textContent = username;
+        }
+
+        if ($("accountEmail")) {
+            $("accountEmail").textContent = currentUser.email || "";
+        }
+
+        if ($("accountRole")) {
+            $("accountRole").textContent = currentUser.role;
+        }
     }
 
-    function updatePermissions() {
-        document.querySelectorAll("[data-page]").forEach(link => {
-            const restricted = [
-                "create-server",
-                "manage-users",
-                "all-servers",
-                "manage-tickets"
-            ];
+    // ---------- PERMISSIONS ----------
 
+    function updatePermissions() {
+        const restricted = [
+            "create-server",
+            "manage-users",
+            "all-servers",
+            "manage-tickets"
+        ];
+
+        document.querySelectorAll("[data-page]").forEach(link => {
             if (restricted.includes(link.dataset.page)) {
                 link.style.display = isStaff() ? "" : "none";
             }
         });
 
         if ($("adminNavigation")) {
-            $("adminNavigation").style.display = isStaff() ? "" : "none";
+            $("adminNavigation").style.display =
+                isStaff() ? "" : "none";
         }
     }
 
@@ -142,26 +181,56 @@ function showDashboard() {
         const email = $("loginEmail")?.value.trim();
         const password = $("loginPassword")?.value;
 
-        showMessage($("loginMessage"), "Logging in...", true);
+        if (!email || !password) {
+            showMessage(
+                $("loginMessage"),
+                "Please enter your email and password."
+            );
+            return;
+        }
+
+        showMessage(
+            $("loginMessage"),
+            "Logging in...",
+            true
+        );
 
         try {
             const result = await api("/api/login", {
                 method: "POST",
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({
+                    email,
+                    password
+                })
             });
 
-            currentUser = normalizeUser(result.user || result);
+            currentUser = normalizeUser(
+                result.user || result
+            );
 
-            if (!currentUser.id) {
-                throw new Error("User information missing from login response.");
+            if (!currentUser || !currentUser.id) {
+                throw new Error(
+                    "User information missing from login response."
+                );
             }
 
-            if ($("loginPassword")) $("loginPassword").value = "";
+            if ($("loginPassword")) {
+                $("loginPassword").value = "";
+            }
 
             showDashboard();
+
             await loadTickets();
+
         } catch (error) {
-            showMessage($("loginMessage"), error.message);
+            currentUser = null;
+
+            showMessage(
+                $("loginMessage"),
+                error.message || "Login failed."
+            );
+
+            console.error("Login error:", error);
         }
     });
 
@@ -169,13 +238,16 @@ function showDashboard() {
 
     $("logoutBtn")?.addEventListener("click", async () => {
         try {
-            await api("/api/logout", { method: "POST" });
+            await api("/api/logout", {
+                method: "POST"
+            });
         } catch (error) {
-            console.error(error);
+            console.error("Logout error:", error);
         }
 
         currentUser = null;
         tickets = [];
+
         showLogin();
     });
 
@@ -184,13 +256,20 @@ function showDashboard() {
     async function restoreSession() {
         try {
             const result = await api("/api/me");
-            currentUser = normalizeUser(result.user || result);
 
-            if (!currentUser.id) throw new Error("No active session.");
+            currentUser = normalizeUser(
+                result.user || result
+            );
+
+            if (!currentUser || !currentUser.id) {
+                throw new Error("No active session.");
+            }
 
             showDashboard();
+
             await loadTickets();
-        } catch {
+
+        } catch (error) {
             currentUser = null;
             showLogin();
         }
@@ -198,55 +277,7 @@ function showDashboard() {
 
     // ---------- NAVIGATION ----------
 
-    
-function navigateTo(page) {
-    if (!page) return;
-
-    const restricted = [
-        "create-server",
-        "manage-users",
-        "all-servers",
-        "manage-tickets"
-    ];
-
-    if (restricted.includes(page) && !isStaff()) {
-        page = "overview";
-    }
-
-    document.querySelectorAll(".page").forEach(section => {
-        section.classList.remove("active");
-        section.style.display = "none";
-    });
-
-    const target = $("page-" + page);
-
-    if (target) {
-        target.classList.add("active");
-        target.style.display = "block";
-    }
-
-    document.querySelectorAll("[data-page]").forEach(link => {
-        link.classList.toggle("active", link.dataset.page === page);
-    });
-
-    const activeLink = document.querySelector(
-        `[data-page="${page}"]`
-    );
-
-    if ($("pageTitle")) {
-        $("pageTitle").textContent =
-            activeLink ? activeLink.textContent.trim() : "ASTRIX CLOUD";
-    }
-
-    if (page.includes("ticket")) loadTickets();
-    if (page === "overview") updateDashboard();
-    if (page.includes("server")) showServerNotice();
-    if (page === "manage-users") showUsersNotice();
-
-    $("sidebar")?.classList.remove("open");
-    $("sidebar")?.classList.remove("active");
-}
-
+    function navigateTo(page) {
         if (!page) return;
 
         const restricted = [
@@ -261,29 +292,56 @@ function navigateTo(page) {
         }
 
         document.querySelectorAll(".page").forEach(section => {
+            section.classList.remove("active");
             section.style.display = "none";
         });
 
         const target = $("page-" + page);
-        if (target) target.style.display = "block";
 
-        document.querySelectorAll("[data-page]").forEach(link => {
-            link.classList.toggle("active", link.dataset.page === page);
-        });
-
-        const activeLink = document.querySelector(`[data-page="${page}"]`);
-
-        if ($("pageTitle") && activeLink) {
-            $("pageTitle").textContent = activeLink.textContent.trim();
+        if (target) {
+            target.classList.add("active");
+            target.style.display = "block";
         }
 
-        if (page.includes("ticket")) loadTickets();
-        if (page === "overview") updateDashboard();
-        if (page.includes("server")) showServerNotice();
-        if (page === "manage-users") showUsersNotice();
+        document.querySelectorAll("[data-page]").forEach(link => {
+            link.classList.toggle(
+                "active",
+                link.dataset.page === page
+            );
+        });
 
+        const activeLink = document.querySelector(
+            `[data-page="${page}"]`
+        );
+
+        if ($("pageTitle")) {
+            $("pageTitle").textContent =
+                activeLink
+                    ? activeLink.textContent.trim()
+                    : "ASTRIX CLOUD";
+        }
+
+        if (page.includes("ticket")) {
+            loadTickets();
+        }
+
+        if (page === "overview") {
+            updateDashboard();
+        }
+
+        if (page.includes("server")) {
+            showServerNotice();
+        }
+
+        if (page === "manage-users") {
+            showUsersNotice();
+        }
+
+        $("sidebar")?.classList.remove("open");
         $("sidebar")?.classList.remove("active");
     }
+
+    // ---------- NAVIGATION BUTTONS ----------
 
     document.querySelectorAll("[data-page]").forEach(link => {
         link.addEventListener("click", event => {
@@ -296,23 +354,38 @@ function navigateTo(page) {
         $("sidebar")?.classList.toggle("open");
     });
 
-    // ---------- REAL SERVER MANAGEMENT STATUS ----------
+    // ---------- SERVER MANAGEMENT STATUS ----------
 
     function showServerNotice() {
         const message =
             "Server management is not connected yet. No demo servers are being displayed or created.";
 
-        ["myServersList", "allServersList", "recentServers"].forEach(id => {
-            if ($(id)) $(id).textContent = message;
+        [
+            "myServersList",
+            "allServersList",
+            "recentServers"
+        ].forEach(id => {
+            if ($(id)) {
+                $(id).textContent = message;
+            }
         });
 
-        if ($("totalServers")) $("totalServers").textContent = "—";
-        if ($("onlineServers")) $("onlineServers").textContent = "—";
-        if ($("offlineServers")) $("offlineServers").textContent = "—";
+        if ($("totalServers")) {
+            $("totalServers").textContent = "—";
+        }
+
+        if ($("onlineServers")) {
+            $("onlineServers").textContent = "—";
+        }
+
+        if ($("offlineServers")) {
+            $("offlineServers").textContent = "—";
+        }
     }
 
     $("createServerForm")?.addEventListener("submit", event => {
         event.preventDefault();
+
         showMessage(
             $("createServerMessage"),
             "Server creation is unavailable until a real hosting node and server API are connected."
@@ -333,8 +406,12 @@ function navigateTo(page) {
 
             renderTickets();
             updateDashboard();
+
         } catch (error) {
-            console.error("Ticket loading failed:", error);
+            console.error(
+                "Ticket loading failed:",
+                error
+            );
 
             if ($("myTicketsList")) {
                 $("myTicketsList").textContent =
@@ -348,45 +425,88 @@ function navigateTo(page) {
         }
     }
 
+    // ---------- TICKET HTML ----------
+
     function ticketHTML(ticket) {
         const id = Number(ticket.id);
-        const status = String(ticket.status || "open").toLowerCase();
+
+        const status = String(
+            ticket.status || "open"
+        ).toLowerCase();
 
         return `
             <div class="ticket-card" data-ticket-id="${id}">
                 <h3>${escapeHTML(ticket.subject)}</h3>
+
                 <p><strong>Ticket #${id}</strong></p>
-                <p>Category: ${escapeHTML(ticket.category || "General")}</p>
+
+                <p>
+                    Category:
+                    ${escapeHTML(ticket.category || "General")}
+                </p>
+
                 ${isStaff()
-                    ? `<p>Member: ${escapeHTML(ticket.username || ticket.email || "Member")}</p>`
-                    : ""}
+                    ? `<p>Member: ${escapeHTML(
+                        ticket.username || ticket.email || "Member"
+                    )}</p>`
+                    : ""
+                }
+
                 <p>${escapeHTML(ticket.description || "")}</p>
-                <p>Status: <strong>${escapeHTML(status.toUpperCase())}</strong></p>
-                <p>Created: ${escapeHTML(formatDate(ticket.created_at))}</p>
+
+                <p>
+                    Status:
+                    <strong>${escapeHTML(status.toUpperCase())}</strong>
+                </p>
+
+                <p>
+                    Created:
+                    ${escapeHTML(formatDate(ticket.created_at))}
+                </p>
 
                 <button type="button" data-open-replies="${id}">
                     View / Reply
                 </button>
 
                 ${isStaff() ? `
-                    <button type="button"
+                    <button
+                        type="button"
                         data-ticket-status="${id}"
-                        data-status="${status === "closed" ? "open" : "closed"}">
-                        ${status === "closed" ? "Reopen Ticket" : "Close Ticket"}
+                        data-status="${status === "closed" ? "open" : "closed"}"
+                    >
+                        ${status === "closed"
+                            ? "Reopen Ticket"
+                            : "Close Ticket"
+                        }
                     </button>
                 ` : ""}
 
-                <div id="replies-${id}" class="ticket-replies" style="display:none;">
-                    <div class="reply-list">Loading replies...</div>
+                <div
+                    id="replies-${id}"
+                    class="ticket-replies"
+                    style="display:none;"
+                >
+                    <div class="reply-list">
+                        Loading replies...
+                    </div>
 
                     <form data-reply-form="${id}">
-                        <textarea name="message" placeholder="Write your reply..." required></textarea>
-                        <button type="submit">Send Reply</button>
+                        <textarea
+                            name="message"
+                            placeholder="Write your reply..."
+                            required
+                        ></textarea>
+
+                        <button type="submit">
+                            Send Reply
+                        </button>
                     </form>
                 </div>
             </div>
         `;
     }
+
+    // ---------- DISPLAY TICKETS ----------
 
     function renderTickets() {
         if (!currentUser) return;
@@ -418,21 +538,34 @@ function navigateTo(page) {
         const description = $("ticketDescription")?.value.trim();
 
         if (!subject || !description) {
-            alert("Please fill in the subject and description.");
+            alert(
+                "Please fill in the subject and description."
+            );
             return;
         }
 
         try {
             await api("/api/tickets", {
                 method: "POST",
-                body: JSON.stringify({ subject, category, description })
+                body: JSON.stringify({
+                    subject,
+                    category,
+                    description
+                })
             });
 
             $("ticketForm").reset();
-            alert("Support ticket created successfully.");
+
+            alert(
+                "Support ticket created successfully."
+            );
+
             await loadTickets();
+
         } catch (error) {
-            alert("Could not create ticket: " + error.message);
+            alert(
+                "Could not create ticket: " + error.message
+            );
         }
     });
 
@@ -448,7 +581,8 @@ function navigateTo(page) {
 
         try {
             const result = await api(
-                "/api/ticket-replies?ticket_id=" + encodeURIComponent(ticketId)
+                "/api/ticket-replies?ticket_id=" +
+                encodeURIComponent(ticketId)
             );
 
             const replies = Array.isArray(result)
@@ -458,49 +592,77 @@ function navigateTo(page) {
             list.innerHTML = replies.length
                 ? replies.map(reply => `
                     <div class="ticket-reply">
-                        <strong>${escapeHTML(reply.username || reply.sender_name || "User")}</strong>
+                        <strong>
+                            ${escapeHTML(
+                                reply.username ||
+                                reply.sender_name ||
+                                "User"
+                            )}
+                        </strong>
+
                         <p>${escapeHTML(reply.message)}</p>
-                        <small>${escapeHTML(formatDate(reply.created_at))}</small>
+
+                        <small>
+                            ${escapeHTML(
+                                formatDate(reply.created_at)
+                            )}
+                        </small>
                     </div>
                 `).join("")
                 : "<p>No replies yet.</p>";
+
         } catch (error) {
-            list.textContent = "Could not load replies: " + error.message;
+            list.textContent =
+                "Could not load replies: " + error.message;
         }
     }
 
     // ---------- REPLY AND STATUS BUTTONS ----------
 
     document.addEventListener("click", async event => {
-        const replyButton = event.target.closest("[data-open-replies]");
+        const replyButton = event.target.closest(
+            "[data-open-replies]"
+        );
 
         if (replyButton) {
             const id = replyButton.dataset.openReplies;
             const container = $("replies-" + id);
 
             if (container) {
-                const opening = container.style.display === "none";
-                container.style.display = opening ? "block" : "none";
+                const opening =
+                    container.style.display === "none";
 
-                if (opening) await loadReplies(id);
+                container.style.display =
+                    opening ? "block" : "none";
+
+                if (opening) {
+                    await loadReplies(id);
+                }
             }
         }
 
-        const statusButton = event.target.closest("[data-ticket-status]");
+        const statusButton = event.target.closest(
+            "[data-ticket-status]"
+        );
 
         if (statusButton) {
             try {
                 await api("/api/ticket-status", {
                     method: "PATCH",
                     body: JSON.stringify({
-                        ticket_id: Number(statusButton.dataset.ticketStatus),
+                        ticket_id: Number(
+                            statusButton.dataset.ticketStatus
+                        ),
                         status: statusButton.dataset.status
                     })
                 });
 
                 await loadTickets();
+
             } catch (error) {
-                alert("Could not update ticket: " + error.message);
+                alert(
+                    "Could not update ticket: " + error.message
+                );
             }
         }
     });
@@ -508,31 +670,52 @@ function navigateTo(page) {
     // ---------- SEND REPLY ----------
 
     document.addEventListener("submit", async event => {
-        const form = event.target.closest("[data-reply-form]");
+        const form = event.target.closest(
+            "[data-reply-form]"
+        );
+
         if (!form) return;
 
         event.preventDefault();
 
         const ticketId = Number(form.dataset.replyForm);
-        const message = form.querySelector('[name="message"]')?.value.trim();
+
+        const message = form.querySelector(
+            '[name="message"]'
+        )?.value.trim();
 
         if (!message) return;
 
-        const button = form.querySelector('button[type="submit"]');
-        if (button) button.disabled = true;
+        const button = form.querySelector(
+            'button[type="submit"]'
+        );
+
+        if (button) {
+            button.disabled = true;
+        }
 
         try {
             await api("/api/ticket-replies", {
                 method: "POST",
-                body: JSON.stringify({ ticket_id: ticketId, message })
+                body: JSON.stringify({
+                    ticket_id: ticketId,
+                    message
+                })
             });
 
             form.reset();
+
             await loadReplies(ticketId);
+
         } catch (error) {
-            alert("Could not send reply: " + error.message);
+            alert(
+                "Could not send reply: " + error.message
+            );
+
         } finally {
-            if (button) button.disabled = false;
+            if (button) {
+                button.disabled = false;
+            }
         }
     });
 
