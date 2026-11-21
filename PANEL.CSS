@@ -1,29 +1,30 @@
 
-/* =========================================
-   ASTRIX CLOUD - PANEL.CSS
-   Main Website Styling
-========================================= */
+/* =====================================
+   ASTRIX CLOUD - PREMIUM CLIENT PANEL
+   Horizontal Navigation Edition
+===================================== */
 
-/* RESET */
+:root {
+  --bg: #080b14;
+  --surface: #101625;
+  --card: #141d2e;
+  --card-hover: #19243a;
+  --border: #26334a;
+  --primary: #7965ff;
+  --primary-light: #a69aff;
+  --cyan: #42d9ee;
+  --text: #f5f7ff;
+  --muted: #929db2;
+  --green: #32d583;
+  --red: #ff647c;
+  --orange: #ffb454;
+  --radius: 16px;
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-:root {
-  --bg: #080711;
-  --panel: #100d1c;
-  --card: #171326;
-  --border: #29233d;
-  --purple: #8b5cf6;
-  --purple-light: #a78bfa;
-  --text: #ffffff;
-  --muted: #9993aa;
-  --green: #22c55e;
-  --red: #ef4444;
-  --orange: #f59e0b;
-  --blue: #3b82f6;
 }
 
 html {
@@ -32,16 +33,15 @@ html {
 
 body {
   min-height: 100vh;
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse at 50% -20%, #252052 0%, transparent 48%),
+    var(--bg);
   color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, Arial, Helvetica, sans-serif;
   overflow-x: hidden;
 }
 
-button,
-input,
-select,
-textarea {
+button, input, select, textarea {
   font: inherit;
 }
 
@@ -53,199 +53,181 @@ button {
   display: none !important;
 }
 
-/* =========================================
-   LOGIN PAGE
-========================================= */
+/* LOGIN */
 
 .login-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   background:
-    radial-gradient(circle at top, #211442 0%, transparent 45%),
+    radial-gradient(circle at 50% 20%, #30245f 0%, transparent 45%),
     var(--bg);
 }
 
 .login-card {
   width: 100%;
-  max-width: 420px;
-  padding: 38px;
-  background: var(--panel);
+  max-width: 430px;
+  padding: 42px;
+  background: rgba(16, 22, 37, .95);
   border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  border-radius: 22px;
+  box-shadow: 0 30px 100px rgba(0,0,0,.45);
 }
 
 .logo {
+  text-align: center;
   font-size: 30px;
   font-weight: 900;
-  text-align: center;
   letter-spacing: 2px;
 }
 
 .logo span,
 .brand h2 span {
-  color: var(--purple);
+  color: var(--primary-light);
 }
 
 .subtitle {
+  margin: 12px 0 32px;
   text-align: center;
   color: var(--muted);
-  margin-top: 10px;
-  margin-bottom: 30px;
-  font-size: 13px;
+  font-size: 11px;
+  letter-spacing: 3px;
 }
 
 .login-card label,
 .content-card label {
   display: block;
-  margin: 16px 0 8px;
-  color: #d5d0e2;
+  margin: 18px 0 9px;
   font-size: 13px;
   font-weight: 600;
+  color: #dce3f2;
 }
 
 .login-footer {
+  margin-top: 25px;
   text-align: center;
   color: var(--muted);
-  margin-top: 24px;
   font-size: 12px;
 }
 
-/* =========================================
-   INPUTS
-========================================= */
+/* INPUTS */
 
-input,
-select,
-textarea {
+input, select, textarea {
   width: 100%;
-  padding: 13px 14px;
-  background: #0c0a16;
-  color: white;
+  padding: 14px 15px;
+  color: var(--text);
+  background: #0a101d;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 10px;
   outline: none;
-  transition: 0.2s;
+  transition: .2s ease;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(121,101,255,.14);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #716b80;
+  color: #657188;
 }
 
 select option {
-  background: var(--panel);
-  color: white;
+  background: var(--surface);
 }
 
 textarea {
+  min-height: 120px;
   resize: vertical;
-  min-height: 110px;
 }
 
-/* =========================================
-   BUTTONS
-========================================= */
+/* BUTTONS */
 
 .primary-btn {
   width: 100%;
-  padding: 13px 18px;
   margin-top: 20px;
-  border: none;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  padding: 14px 20px;
   color: white;
-  font-weight: 700;
-  transition: 0.2s;
+  font-weight: 800;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #7965ff, #5944d9);
+  box-shadow: 0 8px 25px rgba(121,101,255,.2);
+  transition: .2s ease;
 }
 
 .primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 12px 30px rgba(121,101,255,.35);
 }
 
 .secondary-btn {
   padding: 10px 16px;
+  color: var(--text);
+  background: #202b42;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: #211a35;
-  color: white;
-  transition: 0.2s;
+  border-radius: 9px;
 }
 
 .secondary-btn:hover {
-  background: var(--purple);
+  background: var(--primary);
 }
 
 .logout-btn {
-  width: calc(100% - 30px);
-  padding: 13px;
-  margin: 15px;
-  border: 1px solid #49212c;
-  border-radius: 9px;
-  background: #25121a;
-  color: #ff7777;
-  text-align: left;
+  width: auto;
+  padding: 11px 16px;
+  margin: 0;
+  color: #ff8294;
+  background: rgba(255,100,124,.08);
+  border: 1px solid rgba(255,100,124,.25);
+  border-radius: 10px;
+  white-space: nowrap;
 }
 
 .logout-btn:hover {
-  background: #3a1722;
+  background: rgba(255,100,124,.18);
 }
 
-/* =========================================
-   DASHBOARD LAYOUT
-========================================= */
+/* MAIN DASHBOARD */
 
 .dashboard {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   width: 100%;
 }
 
-/* =========================================
-   SIDEBAR
-========================================= */
+/* TOP NAVIGATION - NO LEFT SIDEBAR */
 
 .sidebar {
-  width: 250px;
-  min-width: 250px;
-  height: 100vh;
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
   z-index: 100;
+  width: 100%;
+  min-width: 0;
+  height: auto;
   display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  scrollbar-width: thin;
-  scrollbar-color: #51416f transparent;
-}
-
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: #51416f;
-  border-radius: 10px;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 15px 4%;
+  background: rgba(12,17,30,.96);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 8px 30px rgba(0,0,0,.2);
+  backdrop-filter: blur(18px);
 }
 
 .brand {
-  padding: 25px 20px;
-  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
 }
 
 .brand h2 {
@@ -255,127 +237,138 @@ textarea {
 
 .brand small {
   display: block;
-  margin-top: 7px;
+  margin-top: 5px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 2px;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
+  gap: 10px;
+  padding: 0 12px;
+  border: 0;
+  border-left: 1px solid var(--border);
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--purple);
-  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #4432a8);
+  border-radius: 11px;
   font-weight: 800;
 }
 
 .user-profile strong {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .user-profile small {
   display: block;
+  margin-top: 4px;
   color: var(--muted);
-  margin-top: 5px;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .navigation {
-  flex: 1;
-  padding: 15px 12px;
+  display: flex;
+  flex: 1 1 400px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0;
 }
 
 .nav-heading {
-  color: #706981;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  padding: 15px 10px 10px;
+  display: none;
 }
 
 .nav-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 5px;
-  border: none;
-  border-radius: 8px;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  padding: 11px 13px;
+  margin: 0;
+  color: #aab5c9;
   background: transparent;
-  color: #aaa4ba;
-  text-align: left;
-  font-size: 13px;
-  transition: 0.2s;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: .2s ease;
 }
 
 .nav-link span {
-  width: 20px;
-  font-size: 17px;
-  text-align: center;
+  width: auto;
+  font-size: 15px;
 }
 
 .nav-link:hover {
-  background: #211a35;
   color: white;
+  background: #1b2740;
 }
 
 .nav-link.active {
-  background: rgba(139, 92, 246, 0.18);
-  color: var(--purple-light);
-  border-left: 3px solid var(--purple);
+  color: white;
+  background: rgba(121,101,255,.17);
+  border-color: rgba(121,101,255,.3);
 }
 
-/* =========================================
-   MAIN CONTENT
-========================================= */
+#adminNavigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+#menuToggle {
+  display: none !important;
+}
+
+/* MAIN CONTENT */
 
 .main-content {
-  width: calc(100% - 250px);
-  min-height: 100vh;
-  margin-left: 250px;
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  margin: 0;
   display: flex;
   flex-direction: column;
 }
 
 .topbar {
-  height: 75px;
-  min-height: 75px;
+  min-height: 85px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 30px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
+  gap: 15px;
+  padding: 18px 4%;
+  background: transparent;
+  border-bottom: 1px solid rgba(38,51,74,.6);
 }
 
 .topbar h3 {
-  font-size: 17px;
+  font-size: 19px;
+  font-weight: 800;
 }
 
 .topbar p {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .topbar-user {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #ccc6d9;
+  color: #d2d9e8;
   font-size: 12px;
 }
 
@@ -384,83 +377,76 @@ textarea {
   height: 8px;
   background: var(--green);
   border-radius: 50%;
-}
-
-.menu-toggle {
-  display: none;
-  padding: 8px 12px;
-  background: #211a35;
-  color: white;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  font-size: 18px;
+  box-shadow: 0 0 12px var(--green);
 }
 
 .page-container {
   flex: 1;
   width: 100%;
-  padding: 28px;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 35px 4%;
 }
 
-/* =========================================
-   PAGES
-========================================= */
+/* PAGE SWITCHING */
 
 .page {
   display: none;
-  animation: fadeIn 0.25s ease;
+  animation: pageEnter .3s ease;
 }
 
 .page.active {
   display: block;
 }
 
-@keyframes fadeIn {
+@keyframes pageEnter {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* =========================================
-   WELCOME BANNER
-========================================= */
+/* WELCOME BANNER */
 
 .welcome-banner {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 160px;
-  padding: 30px;
+  min-height: 205px;
+  padding: 40px;
   margin-bottom: 25px;
-  background: linear-gradient(120deg, #25164b, #171126);
-  border: 1px solid #39265e;
-  border-radius: 15px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 85% 40%, rgba(66,217,238,.2), transparent 25%),
+    linear-gradient(120deg, #25205a, #171b37 65%, #11283a);
+  border: 1px solid #39376e;
+  border-radius: 20px;
 }
 
 .welcome-banner h1 {
-  font-size: 25px;
-  margin-bottom: 12px;
+  max-width: 650px;
+  margin-bottom: 13px;
+  font-size: clamp(25px, 4vw, 38px);
+  letter-spacing: -1px;
 }
 
 .welcome-banner p {
-  color: #b8abcF;
-  font-size: 13px;
+  color: #c2c9df;
+  font-size: 14px;
 }
 
 .banner-icon {
-  font-size: 65px;
-  opacity: 0.8;
+  font-size: 85px;
+  opacity: .8;
+  filter: drop-shadow(0 0 25px rgba(66,217,238,.3));
 }
 
-/* =========================================
-   STAT CARDS
-========================================= */
+/* STATISTICS */
 
 .stats-grid {
   display: grid;
@@ -470,47 +456,50 @@ textarea {
 }
 
 .stat-card {
-  padding: 22px;
-  background: var(--card);
+  position: relative;
+  padding: 24px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #182238, #111a2b);
   border: 1px solid var(--border);
-  border-radius: 13px;
-  transition: 0.2s;
+  border-radius: var(--radius);
+  transition: .25s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-3px);
-  border-color: #59417f;
+  transform: translateY(-4px);
+  border-color: #6256c8;
+  background: var(--card-hover);
 }
 
 .stat-icon {
-  width: 38px;
-  height: 38px;
+  width: 43px;
+  height: 43px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  font-size: 19px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  font-size: 20px;
 }
 
 .stat-icon.purple {
-  background: #38215f;
-  color: #b18aff;
+  color: #b7aaff;
+  background: rgba(121,101,255,.17);
 }
 
 .stat-icon.green {
-  background: #123e2a;
-  color: #4ade80;
+  color: var(--green);
+  background: rgba(50,213,131,.12);
 }
 
 .stat-icon.orange {
-  background: #493117;
-  color: #fbbf24;
+  color: var(--orange);
+  background: rgba(255,180,84,.12);
 }
 
 .stat-icon.blue {
-  background: #172f55;
-  color: #60a5fa;
+  color: var(--cyan);
+  background: rgba(66,217,238,.12);
 }
 
 .stat-card p {
@@ -520,24 +509,23 @@ textarea {
 
 .stat-card h2 {
   margin-top: 9px;
-  font-size: 27px;
+  font-size: 30px;
+  font-weight: 800;
 }
 
-/* =========================================
-   CONTENT CARDS
-========================================= */
+/* CONTENT CARDS */
 
 .content-card {
-  padding: 23px;
+  padding: 25px;
   margin-bottom: 22px;
-  background: var(--card);
+  background: linear-gradient(145deg, #151f32, #111a29);
   border: 1px solid var(--border);
-  border-radius: 13px;
+  border-radius: var(--radius);
 }
 
 .content-card h2 {
-  font-size: 17px;
   margin-bottom: 18px;
+  font-size: 17px;
 }
 
 .section-header {
@@ -545,12 +533,12 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .section-header h1 {
-  font-size: 24px;
   margin-bottom: 8px;
+  font-size: 27px;
 }
 
 .section-header p {
@@ -559,15 +547,13 @@ textarea {
 }
 
 .empty-state {
-  padding: 25px 10px;
+  padding: 28px 12px;
   color: var(--muted);
   text-align: center;
   font-size: 13px;
 }
 
-/* =========================================
-   SERVER CARDS
-========================================= */
+/* SERVER CARDS */
 
 .server-grid {
   display: grid;
@@ -576,50 +562,53 @@ textarea {
 }
 
 .server-card {
-  padding: 22px;
+  padding: 23px;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 13px;
+  border-radius: 14px;
+  transition: .2s ease;
+}
+
+.server-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
 }
 
 .server-card h3 {
-  font-size: 16px;
   margin-bottom: 10px;
+  font-size: 16px;
 }
 
 .server-card p {
-  color: var(--muted);
   margin-top: 8px;
+  color: var(--muted);
   font-size: 12px;
 }
 
 .server-status {
   display: inline-block;
-  padding: 5px 10px;
+  padding: 6px 11px;
   margin-top: 12px;
+  color: var(--green);
+  background: rgba(50,213,131,.12);
   border-radius: 20px;
-  background: #123e2a;
-  color: #4ade80;
   font-size: 11px;
 }
 
 .server-status.offline {
-  background: #421a20;
-  color: #ff8585;
+  color: var(--red);
+  background: rgba(255,100,124,.12);
 }
 
-/* =========================================
-   TABLES / LIST ITEMS
-========================================= */
+/* TABLES */
 
 table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th,
-td {
-  padding: 14px 12px;
+th, td {
+  padding: 15px 12px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   font-size: 12px;
@@ -631,75 +620,76 @@ th {
 }
 
 td {
-  color: #e1dceb;
+  color: #e2e8f4;
 }
 
 tr:last-child td {
-  border-bottom: none;
+  border-bottom: 0;
 }
 
-/* =========================================
-   TICKET STYLING
-========================================= */
+/* TICKETS */
 
 .ticket-card {
-  padding: 17px;
-  margin-bottom: 12px;
-  background: #100d1c;
+  padding: 20px;
+  margin-bottom: 14px;
+  background: #101a2b;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 13px;
+  transition: .2s ease;
+}
+
+.ticket-card:hover {
+  border-color: #514a9d;
 }
 
 .ticket-card h3 {
-  margin-bottom: 9px;
-  font-size: 14px;
+  margin-bottom: 10px;
+  font-size: 15px;
 }
 
 .ticket-card p {
-  margin-top: 7px;
+  margin-top: 8px;
   color: var(--muted);
   font-size: 12px;
 }
 
 .ticket-status {
   display: inline-block;
-  padding: 5px 10px;
-  margin-top: 10px;
+  padding: 6px 11px;
+  margin-top: 12px;
+  color: #c3b5ff;
+  background: rgba(121,101,255,.15);
   border-radius: 20px;
-  background: #352650;
-  color: #c4a5ff;
   font-size: 11px;
 }
 
 .ticket-status.open {
-  background: #493117;
-  color: #fbbf24;
+  color: var(--orange);
+  background: rgba(255,180,84,.13);
 }
 
 .ticket-status.closed {
-  background: #123e2a;
-  color: #4ade80;
+  color: var(--green);
+  background: rgba(50,213,131,.12);
 }
 
-/* =========================================
-   ACCOUNT SETTINGS
-========================================= */
+/* ACCOUNT */
 
 .account-avatar {
-  width: 75px;
-  height: 75px;
+  width: 78px;
+  height: 78px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 18px;
-  background: linear-gradient(135deg, #8b5cf6, #5b21b6);
-  border-radius: 50%;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--primary), #3432a0);
+  border-radius: 22px;
   font-size: 28px;
   font-weight: 800;
 }
 
 #accountName {
-  margin-bottom: 7px;
+  margin-bottom: 8px;
 }
 
 #accountEmail {
@@ -710,9 +700,9 @@ tr:last-child td {
 .account-details {
   display: flex;
   flex-wrap: wrap;
-  gap: 35px;
-  margin-top: 25px;
-  padding-top: 20px;
+  gap: 45px;
+  margin-top: 28px;
+  padding-top: 22px;
   border-top: 1px solid var(--border);
 }
 
@@ -735,84 +725,104 @@ tr:last-child td {
   color: var(--green);
 }
 
-/* =========================================
-   MESSAGES
-========================================= */
+/* MESSAGES */
 
 .message {
-  margin-top: 15px;
-  font-size: 13px;
+  margin-top: 14px;
   color: var(--green);
+  font-size: 13px;
 }
 
 .message.error {
   color: var(--red);
 }
 
-/* =========================================
-   FOOTER
-========================================= */
+/* FOOTER */
 
 .footer {
-  padding: 20px;
-  border-top: 1px solid var(--border);
+  padding: 25px;
   color: var(--muted);
+  border-top: 1px solid var(--border);
   text-align: center;
   font-size: 11px;
 }
 
-/* =========================================
-   RESPONSIVE DESIGN
-========================================= */
+/* RESPONSIVE */
 
-@media (max-width: 1100px) {
+@media (max-width: 1050px) {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (max-width: 768px) {
   .sidebar {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
-
-  .main-content {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .menu-toggle {
-    display: block;
-  }
-
-  .topbar {
-    padding: 0 15px;
     gap: 12px;
   }
 
-  .topbar > div:nth-child(2) {
+  .navigation {
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .logout-btn {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .sidebar {
+    position: relative;
+    padding: 15px 4%;
+    gap: 12px;
+  }
+
+  .brand {
     flex: 1;
   }
 
+  .user-profile {
+    display: none;
+  }
+
+  .navigation {
+    flex-basis: 100%;
+    order: 4;
+    gap: 5px;
+  }
+
+  .nav-link {
+    flex: 1 1 auto;
+    padding: 10px;
+    font-size: 11px;
+  }
+
+  #adminNavigation {
+    flex-basis: 100%;
+  }
+
+  .logout-btn {
+    margin-left: 0;
+  }
+
+  .topbar {
+    min-height: 70px;
+    padding: 15px 5%;
+  }
+
   .page-container {
-    padding: 18px;
+    padding: 22px 4%;
   }
 
   .welcome-banner {
-    padding: 22px;
+    min-height: 165px;
+    padding: 25px;
   }
 
   .welcome-banner h1 {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .banner-icon {
-    font-size: 45px;
+    font-size: 50px;
   }
 
   .server-grid {
@@ -822,43 +832,53 @@ tr:last-child td {
 
 @media (max-width: 480px) {
   .login-card {
-    padding: 25px 20px;
+    padding: 28px 21px;
   }
 
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
   .stat-card {
-    padding: 15px;
+    padding: 16px;
   }
 
   .stat-card h2 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
-  .topbar-user {
-    font-size: 10px;
-  }
-
-  .section-header h1 {
-    font-size: 20px;
+  .stat-icon {
+    margin-bottom: 13px;
   }
 
   .welcome-banner {
-    min-height: 130px;
+    min-height: 145px;
+    padding: 20px;
+  }
+
+  .welcome-banner h1 {
+    font-size: 21px;
   }
 
   .banner-icon {
-    font-size: 35px;
+    font-size: 38px;
   }
 
   .content-card {
-    padding: 17px;
+    padding: 18px;
+  }
+
+  .section-header h1 {
+    font-size: 22px;
   }
 
   .account-details {
-    gap: 20px;
+    gap: 22px;
+  }
+
+  th, td {
+    padding: 11px 8px;
+    font-size: 11px;
   }
 }
