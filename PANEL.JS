@@ -75,7 +75,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if ($("dashboard")) $("dashboard").style.display = "none";
     }
 
-    function showDashboard() {
+    
+function showDashboard() {
+    if ($("loginPage")) $("loginPage").style.display = "none";
+
+    if ($("dashboard")) {
+        $("dashboard").classList.remove("hidden");
+        $("dashboard").style.display = "flex";
+    }
+
+    updateUserDetails();
+    updatePermissions();
+    navigateTo("overview");
+    updateDashboard();
+}
+
         if ($("loginPage")) $("loginPage").style.display = "none";
         if ($("dashboard")) $("dashboard").style.display = "block";
 
