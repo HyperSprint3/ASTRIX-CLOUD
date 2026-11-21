@@ -5,317 +5,494 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080711">
-    <title>ASTRIX CLOUD | Client Panel</title>
+    <title>ASTRIX CLOUD | Control Panel</title>
     <link rel="stylesheet" href="PANEL.CSS">
 </head>
 <body>
 
-    <!-- AUTHENTICATION -->
-    <section id="loginPage" class="login-page">
-        <div class="login-card">
+<!-- ================= LOGIN ================= -->
 
-            <div class="logo">ASTRIX <span>CLOUD</span></div>
-            <p class="subtitle">CLIENT CONTROL PANEL</p>
+<section id="loginPage" class="login-page">
+    <div class="login-card">
+        <div class="login-brand">
+            <div class="brand-symbol">A</div>
+            <h1>ASTRIX <span>CLOUD</span></h1>
+            <p>CONTROL PANEL</p>
+        </div>
 
-            <!-- LOGIN -->
-            <form id="loginForm">
-                <label for="loginEmail">Email Address</label>
-                <input type="email" id="loginEmail"
-                    placeholder="Enter your email"
-                    autocomplete="username" required>
+        <form id="loginForm">
+            <h2>Welcome Back</h2>
+            <p class="form-description">Sign in to manage your cloud services.</p>
 
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword"
-                    placeholder="Enter your password"
-                    autocomplete="current-password" required>
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail"
+                placeholder="you@example.com" autocomplete="username" required>
 
-                <button type="submit" class="primary-btn">
-                    Sign In to Panel
-                </button>
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword"
+                placeholder="Enter your password"
+                autocomplete="current-password" required>
 
-                <p id="loginMessage" class="message"></p>
-            </form>
+            <button type="submit" class="primary-btn">
+                Sign In <span>→</span>
+            </button>
+
+            <p id="loginMessage" class="message"></p>
+        </form>
+
+        <div class="auth-switch">
+            <button type="button" id="showSignupBtn">
+                Don't have an account? <strong>Create Account</strong>
+            </button>
+        </div>
+
+        <!-- SIGNUP -->
+
+        <form id="signupForm" style="display:none;">
+            <h2>Create Account</h2>
+            <p class="form-description">Join the ASTRIX CLOUD community.</p>
+
+            <label for="signupUsername">Username</label>
+            <input type="text" id="signupUsername"
+                placeholder="Choose username" minlength="3"
+                maxlength="30" required>
+
+            <label for="signupEmail">Email Address</label>
+            <input type="email" id="signupEmail"
+                placeholder="you@example.com" required>
+
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword"
+                placeholder="At least 12 characters"
+                minlength="12" maxlength="128" required>
+
+            <button type="submit" class="primary-btn">
+                Send Verification Code →
+            </button>
+
+            <p id="signupMessage" class="message"></p>
 
             <div class="auth-switch">
-                <button type="button" id="showSignupBtn">
-                    Don't have an account? Create one
+                <button type="button" id="showLoginBtn">
+                    Already registered? Sign in
                 </button>
             </div>
+        </form>
 
-            <!-- SIGNUP -->
-            <form id="signupForm" style="display:none;">
-                <h2>Create Account</h2>
-                <p>Join ASTRIX CLOUD today.</p>
+        <!-- EMAIL VERIFICATION -->
 
-                <label for="signupUsername">Username</label>
-                <input type="text" id="signupUsername"
-                    placeholder="Choose a username"
-                    minlength="3" maxlength="30" required>
-
-                <label for="signupEmail">Email Address</label>
-                <input type="email" id="signupEmail"
-                    placeholder="Enter your email" required>
-
-                <label for="signupPassword">Password</label>
-                <input type="password" id="signupPassword"
-                    placeholder="Minimum 12 characters"
-                    minlength="12" maxlength="128" required>
-
-                <button type="submit" class="primary-btn">
-                    Send Verification Code
-                </button>
-
-                <p id="signupMessage" class="message"></p>
-
-                <div class="auth-switch">
-                    <button type="button" id="showLoginBtn">
-                        Already have an account? Sign in
-                    </button>
-                </div>
-            </form>
-
-            <!-- EMAIL VERIFICATION -->
-            <form id="verifyForm" style="display:none;">
-                <h2>Verify Your Email</h2>
-                <p>Enter the six-digit code sent to your email.</p>
-
-                <label for="verificationCode">Verification Code</label>
-                <input type="text" id="verificationCode"
-                    inputmode="numeric"
-                    maxlength="6"
-                    pattern="[0-9]{6}"
-                    placeholder="000000" required>
-
-                <button type="submit" class="primary-btn">
-                    Verify & Create Account
-                </button>
-
-                <p id="verifyMessage" class="message"></p>
-            </form>
-
-            <p class="login-footer">
-                Secure Client Access · ASTRIX CLOUD
+        <form id="verifyForm" style="display:none;">
+            <div class="verification-icon">✉</div>
+            <h2>Verify Your Email</h2>
+            <p class="form-description">
+                Enter the six-digit verification code.
             </p>
+
+            <label for="verificationCode">Verification Code</label>
+            <input type="text" id="verificationCode"
+                inputmode="numeric" maxlength="6"
+                pattern="[0-9]{6}" placeholder="000000" required>
+
+            <button type="submit" class="primary-btn">
+                Verify Account →
+            </button>
+
+            <p id="verifyMessage" class="message"></p>
+        </form>
+
+        <div class="login-bottom">
+            <span class="status-dot"></span>
+            Secure Authentication
+            <span>•</span>
+            ASTRIX CLOUD © 2026
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="dashboard hidden">
 
-        <!-- NAVIGATION -->
-        <aside id="sidebar" class="sidebar">
+<!-- ================= DASHBOARD ================= -->
 
-            <div class="brand">
+<div id="dashboard" class="dashboard hidden">
+
+    <!-- LEFT SIDEBAR -->
+
+    <aside id="sidebar" class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-symbol">A</div>
+            <div class="brand-text">
                 <h2>ASTRIX <span>CLOUD</span></h2>
-                <small>CLIENT CONTROL PANEL</small>
+                <p>CONTROL PANEL</p>
             </div>
+        </div>
 
-            <div class="user-profile">
-                <div class="avatar" id="userAvatar">U</div>
+        <div class="sidebar-profile">
+            <div class="avatar" id="userAvatar">U</div>
+            <div class="profile-info">
+                <strong id="sidebarUserName">User</strong>
+                <span id="sidebarUserRole">Member</span>
+            </div>
+            <span class="profile-online"></span>
+        </div>
+
+        <nav class="navigation">
+
+            <p class="nav-heading">WORKSPACE</p>
+
+            <button class="nav-link active" data-page="overview">
+                <span class="nav-icon">⌂</span>
+                <span>Overview</span>
+            </button>
+
+            <button class="nav-link" data-page="servers">
+                <span class="nav-icon">▣</span>
+                <span>My Servers</span>
+            </button>
+
+            <button class="nav-link" data-page="tickets">
+                <span class="nav-icon">✉</span>
+                <span>Support Tickets</span>
+            </button>
+
+            <p class="nav-heading">ACCOUNT</p>
+
+            <button class="nav-link" data-page="account">
+                <span class="nav-icon">◉</span>
+                <span>My Account</span>
+            </button>
+
+            <div id="adminNavigation">
+
+                <p class="nav-heading">ADMINISTRATION</p>
+
+                <button class="nav-link" data-page="create-server">
+                    <span class="nav-icon">＋</span>
+                    <span>Create Server</span>
+                </button>
+
+                <button class="nav-link" data-page="all-servers">
+                    <span class="nav-icon">▤</span>
+                    <span>All Servers</span>
+                </button>
+
+                <button class="nav-link" data-page="manage-users">
+                    <span class="nav-icon">♙</span>
+                    <span>Manage Users</span>
+                </button>
+
+                <button class="nav-link" data-page="manage-tickets">
+                    <span class="nav-icon">▣</span>
+                    <span>Manage Tickets</span>
+                </button>
+
+            </div>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-status">
+                <span class="status-dot"></span>
                 <div>
-                    <strong id="sidebarUserName">User</strong>
-                    <small id="sidebarUserRole">Member</small>
+                    <strong>Panel Status</strong>
+                    <small>Interface online</small>
                 </div>
             </div>
-
-            <nav class="navigation">
-                <p class="nav-heading">MAIN MENU</p>
-
-                <button class="nav-link active" data-page="overview">
-                    <span>⌂</span> Overview
-                </button>
-
-                <button class="nav-link" data-page="servers">
-                    <span>▣</span> My Servers
-                </button>
-
-                <button class="nav-link" data-page="tickets">
-                    <span>✉</span> Support Tickets
-                </button>
-
-                <button class="nav-link" data-page="account">
-                    <span>◉</span> My Account
-                </button>
-
-                <div id="adminNavigation">
-                    <p class="nav-heading">STAFF MANAGEMENT</p>
-
-                    <button class="nav-link" data-page="create-server">
-                        <span>＋</span> Create Server
-                    </button>
-
-                    <button class="nav-link" data-page="all-servers">
-                        <span>▤</span> All Servers
-                    </button>
-
-                    <button class="nav-link" data-page="manage-users">
-                        <span>♙</span> Manage Users
-                    </button>
-
-                    <button class="nav-link" data-page="manage-tickets">
-                        <span>▣</span> Manage Tickets
-                    </button>
-                </div>
-            </nav>
 
             <button id="logoutBtn" class="logout-btn">
-                ↪ &nbsp; Sign Out
+                <span>↪</span> Sign Out
             </button>
-        </aside>
 
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
+            <div class="sidebar-footer">
+                ASTRIX CLOUD v1.0
+            </div>
+        </div>
+    </aside>
 
-            <!-- TOP BAR -->
-            <header class="topbar">
-                <button id="menuToggle" class="menu-toggle" type="button">
+
+    <!-- MOBILE SIDEBAR OVERLAY -->
+
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+
+    <!-- MAIN AREA -->
+
+    <main class="main-content">
+
+        <!-- TOP HEADER -->
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+                <button id="menuToggle" class="menu-toggle"
+                    type="button" aria-label="Toggle navigation">
                     ☰
                 </button>
 
-                <div>
-                    <h3 id="pageTitle">Overview</h3>
-                    <p>Welcome to your ASTRIX CLOUD control panel.</p>
+                <div class="breadcrumb">
+                    <span>ASTRIX CLOUD</span>
+                    <span class="breadcrumb-divider">/</span>
+                    <strong id="pageTitle">Overview</strong>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <div class="topbar-status">
+                    <span class="status-dot"></span>
+                    <span>System Online</span>
                 </div>
 
                 <div class="topbar-user">
-                    <span class="status-dot"></span>
+                    <div class="topbar-avatar" id="topbarAvatar">U</div>
                     <span id="topbarUserName">User</span>
                 </div>
-            </header>
+            </div>
 
-            <div class="page-container">
+        </header>
 
-                <!-- OVERVIEW -->
-                <section id="page-overview" class="page active">
-                    <div class="welcome-banner">
-                        <div>
-                            <h1>Welcome to ASTRIX CLOUD</h1>
-                            <p>Your hosting control center, all in one place.</p>
-                        </div>
-                        <div class="banner-icon">☁</div>
+
+        <!-- PAGE CONTENT -->
+
+        <div class="page-container">
+
+            <!-- OVERVIEW -->
+
+            <section id="page-overview" class="page active">
+
+                <div class="welcome-banner">
+                    <div class="welcome-content">
+                        <span class="eyebrow">YOUR CLOUD WORKSPACE</span>
+                        <h1>Welcome back, <span id="welcomeName">User</span></h1>
+                        <p>
+                            Everything you need to manage your hosting,
+                            all in one place.
+                        </p>
+
+                        <button type="button"
+                            class="banner-button"
+                            data-page="servers">
+                            Explore Servers →
+                        </button>
                     </div>
 
-                    <div class="stats-grid">
-                        <div class="stat-card">
+                    <div class="banner-visual">
+                        <div class="orbit orbit-one"></div>
+                        <div class="orbit orbit-two"></div>
+                        <div class="banner-cloud">☁</div>
+                    </div>
+                </div>
+
+
+                <!-- STATISTICS -->
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span>Total Servers</span>
                             <div class="stat-icon purple">▣</div>
-                            <p>Total Servers</p>
-                            <h2 id="totalServers">—</h2>
                         </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon green">●</div>
-                            <p>Online Servers</p>
-                            <h2 id="onlineServers">—</h2>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon orange">●</div>
-                            <p>Offline Servers</p>
-                            <h2 id="offlineServers">—</h2>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-icon blue">✉</div>
-                            <p>Support Tickets</p>
-                            <h2 id="totalTickets">0</h2>
-                        </div>
+                        <h2 id="totalServers">—</h2>
+                        <small>Registered servers</small>
                     </div>
 
-                    <div class="content-card">
-                        <h2>Recent Server Activity</h2>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span>Online Servers</span>
+                            <div class="stat-icon green">●</div>
+                        </div>
+                        <h2 id="onlineServers">—</h2>
+                        <small>Active servers</small>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span>Offline Servers</span>
+                            <div class="stat-icon orange">◉</div>
+                        </div>
+                        <h2 id="offlineServers">—</h2>
+                        <small>Inactive servers</small>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <span>Support Tickets</span>
+                            <div class="stat-icon cyan">✉</div>
+                        </div>
+                        <h2 id="totalTickets">0</h2>
+                        <small>Your support requests</small>
+                    </div>
+
+                </div>
+
+
+                <!-- DASHBOARD CONTENT -->
+
+                <div class="dashboard-grid">
+
+                    <div class="content-card activity-card">
+                        <div class="card-heading">
+                            <div>
+                                <span class="eyebrow">ACTIVITY</span>
+                                <h2>Recent Server Activity</h2>
+                            </div>
+                            <span class="card-heading-icon">◷</span>
+                        </div>
+
                         <div id="recentServers" class="empty-state">
                             Server management is not connected yet.
                         </div>
                     </div>
 
-                    <div class="content-card">
-                        <h2>Control Panel Information</h2>
-                        <p>
-                            Manage your account and contact our support team
-                            through the ticket system.
-                        </p>
-                    </div>
-                </section>
-
-                <!-- MY SERVERS -->
-                <section id="page-servers" class="page">
-                    <div class="section-header">
-                        <div>
-                            <h1>My Servers</h1>
-                            <p>View your hosting services.</p>
+                    <div class="content-card quick-card">
+                        <div class="card-heading">
+                            <div>
+                                <span class="eyebrow">SHORTCUTS</span>
+                                <h2>Quick Actions</h2>
+                            </div>
                         </div>
+
+                        <button class="quick-action" data-page="servers">
+                            <span class="quick-icon purple">▣</span>
+                            <span>
+                                <strong>My Servers</strong>
+                                <small>View your hosting services</small>
+                            </span>
+                            <b>→</b>
+                        </button>
+
+                        <button class="quick-action" data-page="tickets">
+                            <span class="quick-icon cyan">✉</span>
+                            <span>
+                                <strong>Get Support</strong>
+                                <small>Contact our support team</small>
+                            </span>
+                            <b>→</b>
+                        </button>
+
+                        <button class="quick-action" data-page="account">
+                            <span class="quick-icon green">◉</span>
+                            <span>
+                                <strong>Account Settings</strong>
+                                <small>Manage your profile</small>
+                            </span>
+                            <b>→</b>
+                        </button>
                     </div>
 
-                    <div class="content-card">
-                        <div id="myServersList" class="empty-state">
-                            No server information available.
-                        </div>
+                </div>
+
+                <div class="content-card information-card">
+                    <span class="eyebrow">ABOUT YOUR PANEL</span>
+                    <h2>ASTRIX CLOUD Control Center</h2>
+                    <p>
+                        Manage your account, view your hosting information
+                        and communicate with support. Hosting node
+                        integration will be added separately.
+                    </p>
+                </div>
+
+            </section>
+
+
+            <!-- SERVERS -->
+
+            <section id="page-servers" class="page">
+
+                <div class="section-header">
+                    <div>
+                        <span class="eyebrow">HOSTING</span>
+                        <h1>My Servers</h1>
+                        <p>Manage and view your hosting services.</p>
                     </div>
-                </section>
+                </div>
 
-                <!-- SUPPORT TICKETS -->
-                <section id="page-tickets" class="page">
-                    <div class="section-header">
-                        <div>
-                            <h1>Support Center</h1>
-                            <p>Create a ticket and communicate with our staff.</p>
-                        </div>
+                <div class="content-card">
+                    <div class="card-heading">
+                        <h2>Your Server List</h2>
                     </div>
-
-                    <div class="content-card">
-                        <h2>Create a Support Ticket</h2>
-
-                        <form id="ticketForm">
-                            <label for="ticketSubject">Ticket Subject</label>
-                            <input type="text" id="ticketSubject"
-                                maxlength="150"
-                                placeholder="What do you need help with?"
-                                required>
-
-                            <label for="ticketCategory">Category</label>
-                            <select id="ticketCategory" required>
-                                <option value="General">General Support</option>
-                                <option value="Technical">Technical Support</option>
-                                <option value="Billing">Billing Support</option>
-                                <option value="Other">Other</option>
-                            </select>
-
-                            <label for="ticketDescription">Description</label>
-                            <textarea id="ticketDescription"
-                                maxlength="5000"
-                                placeholder="Explain your issue..."
-                                required></textarea>
-
-                            <button type="submit" class="primary-btn">
-                                Submit Ticket
-                            </button>
-                        </form>
+                    <div id="myServersList" class="empty-state">
+                        No server information available.
                     </div>
+                </div>
 
-                    <div class="content-card">
-                        <h2>My Support Tickets</h2>
-                        <div id="myTicketsList" class="empty-state">
-                            Your tickets will appear here.
-                        </div>
+            </section>
+
+
+            <!-- SUPPORT TICKETS -->
+
+            <section id="page-tickets" class="page">
+
+                <div class="section-header">
+                    <div>
+                        <span class="eyebrow">HELP CENTER</span>
+                        <h1>Support Tickets</h1>
+                        <p>Our support team is here to help.</p>
                     </div>
-                </section>
+                </div>
 
-                <!-- MY ACCOUNT -->
-                <section id="page-account" class="page">
-                    <div class="section-header">
-                        <div>
-                            <h1>My Account</h1>
-                            <p>Manage your personal account settings.</p>
-                        </div>
+                <div class="content-card">
+                    <h2>Create New Ticket</h2>
+
+                    <form id="ticketForm">
+
+                        <label for="ticketSubject">Subject</label>
+                        <input type="text" id="ticketSubject"
+                            maxlength="150"
+                            placeholder="Enter your issue title"
+                            required>
+
+                        <label for="ticketCategory">Category</label>
+                        <select id="ticketCategory" required>
+                            <option value="General">General Support</option>
+                            <option value="Technical">Technical Support</option>
+                            <option value="Billing">Billing Support</option>
+                            <option value="Other">Other</option>
+                        </select>
+
+                        <label for="ticketDescription">Description</label>
+                        <textarea id="ticketDescription"
+                            maxlength="5000"
+                            placeholder="Describe your issue in detail..."
+                            required></textarea>
+
+                        <button type="submit" class="primary-btn">
+                            Submit Support Ticket →
+                        </button>
+
+                    </form>
+                </div>
+
+                <div class="content-card">
+                    <h2>Your Tickets</h2>
+                    <div id="myTicketsList" class="empty-state">
+                        Your support tickets will appear here.
                     </div>
+                </div>
 
-                    <div class="content-card">
-                        <h2>Profile Picture</h2>
+            </section>
+
+
+            <!-- ACCOUNT -->
+
+            <section id="page-account" class="page">
+
+                <div class="section-header">
+                    <div>
+                        <span class="eyebrow">PERSONAL SETTINGS</span>
+                        <h1>My Account</h1>
+                        <p>Manage your profile and account information.</p>
+                    </div>
+                </div>
+
+                <div class="account-grid">
+
+                    <div class="content-card profile-card">
+                        <span class="eyebrow">PROFILE CUSTOMIZATION</span>
+                        <h2>Your Profile Logo</h2>
 
                         <div class="account-avatar" id="accountAvatar">U</div>
 
                         <label for="accountLogoInput">
-                            Change Profile Logo
+                            Upload Profile Logo
                         </label>
 
                         <input type="file"
@@ -323,14 +500,16 @@
                             accept="image/png,image/jpeg,image/webp">
 
                         <p id="logoMessage" class="message">
-                            Choose an image for your account profile.
+                            PNG, JPG or WEBP. Maximum 1 MB.
                         </p>
                     </div>
 
                     <div class="content-card">
-                        <h2>Account Information</h2>
+                        <span class="eyebrow">ACCOUNT DETAILS</span>
+                        <h2>Personal Information</h2>
 
                         <div class="account-details">
+
                             <div>
                                 <span>Username</span>
                                 <strong id="accountName">User</strong>
@@ -345,95 +524,122 @@
                                 <span>Account Role</span>
                                 <strong id="accountRole">Member</strong>
                             </div>
-                        </div>
-                    </div>
-                </section>
 
-                <!-- CREATE SERVER -->
-                <section id="page-create-server" class="page">
-                    <div class="section-header">
-                        <div>
-                            <h1>Create Server</h1>
-                            <p>Staff server management.</p>
                         </div>
                     </div>
 
-                    <div class="content-card">
-                        <h2>Server Provisioning</h2>
-                        <p>
-                            Server creation is currently unavailable because
-                            a hosting node and server provisioning API have
-                            not yet been connected.
-                        </p>
+                </div>
 
-                        <form id="createServerForm">
-                            <button type="submit" class="primary-btn">
-                                Check Server Availability
-                            </button>
-                        </form>
+            </section>
 
-                        <p id="createServerMessage" class="message"></p>
+
+            <!-- CREATE SERVER -->
+
+            <section id="page-create-server" class="page">
+
+                <div class="section-header">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>Create Server</h1>
+                        <p>Configure new hosting services.</p>
                     </div>
-                </section>
+                </div>
 
-                <!-- ALL SERVERS -->
-                <section id="page-all-servers" class="page">
-                    <div class="section-header">
-                        <div>
-                            <h1>All Servers</h1>
-                            <p>Staff server overview.</p>
-                        </div>
+                <div class="content-card">
+                    <h2>Server Provisioning</h2>
+                    <p>
+                        A hosting node and provisioning API are required
+                        before servers can be created.
+                    </p>
+
+                    <form id="createServerForm">
+                        <button type="submit" class="primary-btn">
+                            Check Availability
+                        </button>
+                    </form>
+
+                    <p id="createServerMessage" class="message"></p>
+                </div>
+
+            </section>
+
+
+            <!-- ALL SERVERS -->
+
+            <section id="page-all-servers" class="page">
+
+                <div class="section-header">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>All Servers</h1>
+                        <p>View hosting server information.</p>
                     </div>
+                </div>
 
-                    <div class="content-card">
-                        <div id="allServersList" class="empty-state">
-                            No server information available.
-                        </div>
+                <div class="content-card">
+                    <div id="allServersList" class="empty-state">
+                        No server information available.
                     </div>
-                </section>
+                </div>
 
-                <!-- MANAGE USERS -->
-                <section id="page-manage-users" class="page">
-                    <div class="section-header">
-                        <div>
-                            <h1>Manage Users</h1>
-                            <p>Staff account management.</p>
-                        </div>
+            </section>
+
+
+            <!-- MANAGE USERS -->
+
+            <section id="page-manage-users" class="page">
+
+                <div class="section-header">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>Manage Users</h1>
+                        <p>Manage ASTRIX CLOUD accounts.</p>
                     </div>
+                </div>
 
-                    <div class="content-card">
-                        <div id="usersList" class="empty-state">
-                            User management is not connected yet.
-                        </div>
+                <div class="content-card">
+                    <div id="usersList" class="empty-state">
+                        User management is not connected yet.
                     </div>
-                </section>
+                </div>
 
-                <!-- MANAGE TICKETS -->
-                <section id="page-manage-tickets" class="page">
-                    <div class="section-header">
-                        <div>
-                            <h1>Manage Support Tickets</h1>
-                            <p>View and respond to member support requests.</p>
-                        </div>
+            </section>
+
+
+            <!-- MANAGE TICKETS -->
+
+            <section id="page-manage-tickets" class="page">
+
+                <div class="section-header">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>Manage Tickets</h1>
+                        <p>Review and respond to member requests.</p>
                     </div>
+                </div>
 
-                    <div class="content-card">
-                        <h2>All Member Tickets</h2>
-                        <div id="adminTicketsList" class="empty-state">
-                            Loading tickets...
-                        </div>
+                <div class="content-card">
+                    <h2>All Support Tickets</h2>
+                    <div id="adminTicketsList" class="empty-state">
+                        Loading support tickets...
                     </div>
-                </section>
+                </div>
 
-            </div>
+            </section>
 
-            <footer class="footer">
-                © 2026 ASTRIX CLOUD. All rights reserved.
-            </footer>
+        </div>
 
-        </main>
-    </div>
 
-    <script src="PANEL.JS"></script>
+        <!-- FOOTER -->
+
+        <footer class="footer">
+            <span>© 2026 ASTRIX CLOUD</span>
+            <span>Built for the future.</span>
+        </footer>
+
+    </main>
+</div>
+
+<script src="PANEL.JS"></script>
 </body>
 </html>
