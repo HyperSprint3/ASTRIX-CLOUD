@@ -10,36 +10,87 @@
 </head>
 <body>
 
-    <!-- LOGIN PAGE -->
+    <!-- AUTHENTICATION -->
     <section id="loginPage" class="login-page">
         <div class="login-card">
+
             <div class="logo">ASTRIX <span>CLOUD</span></div>
             <p class="subtitle">CLIENT CONTROL PANEL</p>
 
+            <!-- LOGIN -->
             <form id="loginForm">
                 <label for="loginEmail">Email Address</label>
-                <input
-                    type="email"
-                    id="loginEmail"
+                <input type="email" id="loginEmail"
                     placeholder="Enter your email"
-                    autocomplete="username"
-                    required
-                >
+                    autocomplete="username" required>
 
                 <label for="loginPassword">Password</label>
-                <input
-                    type="password"
-                    id="loginPassword"
+                <input type="password" id="loginPassword"
                     placeholder="Enter your password"
-                    autocomplete="current-password"
-                    required
-                >
+                    autocomplete="current-password" required>
 
                 <button type="submit" class="primary-btn">
                     Sign In to Panel
                 </button>
 
                 <p id="loginMessage" class="message"></p>
+            </form>
+
+            <div class="auth-switch">
+                <button type="button" id="showSignupBtn">
+                    Don't have an account? Create one
+                </button>
+            </div>
+
+            <!-- SIGNUP -->
+            <form id="signupForm" style="display:none;">
+                <h2>Create Account</h2>
+                <p>Join ASTRIX CLOUD today.</p>
+
+                <label for="signupUsername">Username</label>
+                <input type="text" id="signupUsername"
+                    placeholder="Choose a username"
+                    minlength="3" maxlength="30" required>
+
+                <label for="signupEmail">Email Address</label>
+                <input type="email" id="signupEmail"
+                    placeholder="Enter your email" required>
+
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword"
+                    placeholder="Minimum 12 characters"
+                    minlength="12" maxlength="128" required>
+
+                <button type="submit" class="primary-btn">
+                    Send Verification Code
+                </button>
+
+                <p id="signupMessage" class="message"></p>
+
+                <div class="auth-switch">
+                    <button type="button" id="showLoginBtn">
+                        Already have an account? Sign in
+                    </button>
+                </div>
+            </form>
+
+            <!-- EMAIL VERIFICATION -->
+            <form id="verifyForm" style="display:none;">
+                <h2>Verify Your Email</h2>
+                <p>Enter the six-digit code sent to your email.</p>
+
+                <label for="verificationCode">Verification Code</label>
+                <input type="text" id="verificationCode"
+                    inputmode="numeric"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    placeholder="000000" required>
+
+                <button type="submit" class="primary-btn">
+                    Verify & Create Account
+                </button>
+
+                <p id="verifyMessage" class="message"></p>
             </form>
 
             <p class="login-footer">
@@ -51,7 +102,7 @@
     <!-- DASHBOARD -->
     <div id="dashboard" class="dashboard hidden">
 
-        <!-- SIDEBAR -->
+        <!-- NAVIGATION -->
         <aside id="sidebar" class="sidebar">
 
             <div class="brand">
@@ -68,7 +119,6 @@
             </div>
 
             <nav class="navigation">
-
                 <p class="nav-heading">MAIN MENU</p>
 
                 <button class="nav-link active" data-page="overview">
@@ -106,13 +156,11 @@
                         <span>▣</span> Manage Tickets
                     </button>
                 </div>
-
             </nav>
 
             <button id="logoutBtn" class="logout-btn">
                 ↪ &nbsp; Sign Out
             </button>
-
         </aside>
 
         <!-- MAIN CONTENT -->
@@ -120,7 +168,6 @@
 
             <!-- TOP BAR -->
             <header class="topbar">
-
                 <button id="menuToggle" class="menu-toggle" type="button">
                     ☰
                 </button>
@@ -134,14 +181,12 @@
                     <span class="status-dot"></span>
                     <span id="topbarUserName">User</span>
                 </div>
-
             </header>
 
             <div class="page-container">
 
                 <!-- OVERVIEW -->
                 <section id="page-overview" class="page active">
-
                     <div class="welcome-banner">
                         <div>
                             <h1>Welcome to ASTRIX CLOUD</h1>
@@ -151,7 +196,6 @@
                     </div>
 
                     <div class="stats-grid">
-
                         <div class="stat-card">
                             <div class="stat-icon purple">▣</div>
                             <p>Total Servers</p>
@@ -175,7 +219,6 @@
                             <p>Support Tickets</p>
                             <h2 id="totalTickets">0</h2>
                         </div>
-
                     </div>
 
                     <div class="content-card">
@@ -192,12 +235,10 @@
                             through the ticket system.
                         </p>
                     </div>
-
                 </section>
 
                 <!-- MY SERVERS -->
                 <section id="page-servers" class="page">
-
                     <div class="section-header">
                         <div>
                             <h1>My Servers</h1>
@@ -210,12 +251,10 @@
                             No server information available.
                         </div>
                     </div>
-
                 </section>
 
                 <!-- SUPPORT TICKETS -->
                 <section id="page-tickets" class="page">
-
                     <div class="section-header">
                         <div>
                             <h1>Support Center</h1>
@@ -227,15 +266,11 @@
                         <h2>Create a Support Ticket</h2>
 
                         <form id="ticketForm">
-
                             <label for="ticketSubject">Ticket Subject</label>
-                            <input
-                                type="text"
-                                id="ticketSubject"
+                            <input type="text" id="ticketSubject"
                                 maxlength="150"
                                 placeholder="What do you need help with?"
-                                required
-                            >
+                                required>
 
                             <label for="ticketCategory">Category</label>
                             <select id="ticketCategory" required>
@@ -246,17 +281,14 @@
                             </select>
 
                             <label for="ticketDescription">Description</label>
-                            <textarea
-                                id="ticketDescription"
+                            <textarea id="ticketDescription"
                                 maxlength="5000"
                                 placeholder="Explain your issue..."
-                                required
-                            ></textarea>
+                                required></textarea>
 
                             <button type="submit" class="primary-btn">
                                 Submit Ticket
                             </button>
-
                         </form>
                     </div>
 
@@ -266,28 +298,39 @@
                             Your tickets will appear here.
                         </div>
                     </div>
-
                 </section>
 
-                <!-- ACCOUNT -->
+                <!-- MY ACCOUNT -->
                 <section id="page-account" class="page">
-
                     <div class="section-header">
                         <div>
                             <h1>My Account</h1>
-                            <p>Your account information.</p>
+                            <p>Manage your personal account settings.</p>
                         </div>
                     </div>
 
                     <div class="content-card">
+                        <h2>Profile Picture</h2>
 
                         <div class="account-avatar" id="accountAvatar">U</div>
 
-                        <h2 id="accountName">User</h2>
-                        <p id="accountEmail">user@example.com</p>
+                        <label for="accountLogoInput">
+                            Change Profile Logo
+                        </label>
+
+                        <input type="file"
+                            id="accountLogoInput"
+                            accept="image/png,image/jpeg,image/webp">
+
+                        <p id="logoMessage" class="message">
+                            Choose an image for your account profile.
+                        </p>
+                    </div>
+
+                    <div class="content-card">
+                        <h2>Account Information</h2>
 
                         <div class="account-details">
-
                             <div>
                                 <span>Username</span>
                                 <strong id="accountName">User</strong>
@@ -302,16 +345,12 @@
                                 <span>Account Role</span>
                                 <strong id="accountRole">Member</strong>
                             </div>
-
                         </div>
-
                     </div>
-
                 </section>
 
                 <!-- CREATE SERVER -->
                 <section id="page-create-server" class="page">
-
                     <div class="section-header">
                         <div>
                             <h1>Create Server</h1>
@@ -320,9 +359,7 @@
                     </div>
 
                     <div class="content-card">
-
                         <h2>Server Provisioning</h2>
-
                         <p>
                             Server creation is currently unavailable because
                             a hosting node and server provisioning API have
@@ -336,14 +373,11 @@
                         </form>
 
                         <p id="createServerMessage" class="message"></p>
-
                     </div>
-
                 </section>
 
                 <!-- ALL SERVERS -->
                 <section id="page-all-servers" class="page">
-
                     <div class="section-header">
                         <div>
                             <h1>All Servers</h1>
@@ -356,12 +390,10 @@
                             No server information available.
                         </div>
                     </div>
-
                 </section>
 
                 <!-- MANAGE USERS -->
                 <section id="page-manage-users" class="page">
-
                     <div class="section-header">
                         <div>
                             <h1>Manage Users</h1>
@@ -374,12 +406,10 @@
                             User management is not connected yet.
                         </div>
                     </div>
-
                 </section>
 
                 <!-- MANAGE TICKETS -->
                 <section id="page-manage-tickets" class="page">
-
                     <div class="section-header">
                         <div>
                             <h1>Manage Support Tickets</h1>
@@ -393,7 +423,6 @@
                             Loading tickets...
                         </div>
                     </div>
-
                 </section>
 
             </div>
@@ -403,10 +432,8 @@
             </footer>
 
         </main>
-
     </div>
 
     <script src="PANEL.JS"></script>
-
 </body>
 </html>
