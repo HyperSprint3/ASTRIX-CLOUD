@@ -6,13 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#080711">
   <title>ASTRIX CLOUD | Control Panel</title>
-
-  <!-- Separate CSS file -->
   <link rel="stylesheet" href="PANEL.CSS">
 </head>
 
 <body>
-
   <!-- LOGIN PAGE -->
   <section id="loginPage" class="login-page">
     <div class="login-card">
@@ -21,24 +18,12 @@
 
       <form id="loginForm">
         <label for="loginEmail">Email Address</label>
-        <input
-          type="email"
-          id="loginEmail"
-          placeholder="Enter your email"
-          required
-        >
+        <input type="email" id="loginEmail" placeholder="Enter your email" required>
 
         <label for="loginPassword">Password</label>
-        <input
-          type="password"
-          id="loginPassword"
-          placeholder="Enter your password"
-          required
-        >
+        <input type="password" id="loginPassword" placeholder="Enter your password" required>
 
-        <button type="submit" class="primary-btn">
-          Login to Panel
-        </button>
+        <button type="submit" class="primary-btn">Login to Panel</button>
       </form>
 
       <p id="loginMessage" class="message"></p>
@@ -46,13 +31,9 @@
     </div>
   </section>
 
-
   <!-- MAIN DASHBOARD -->
   <div id="dashboard" class="dashboard hidden">
-
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
-
       <div class="brand">
         <h2>ASTRIX <span>CLOUD</span></h2>
         <small>CONTROL PANEL</small>
@@ -67,7 +48,6 @@
       </div>
 
       <nav class="navigation">
-
         <p class="nav-heading">MAIN MENU</p>
 
         <button class="nav-link active" data-page="overview">
@@ -105,23 +85,14 @@
             <span>☷</span> Manage Tickets
           </button>
         </div>
-
       </nav>
 
-      <button id="logoutBtn" class="logout-btn">
-        ↪ Logout
-      </button>
-
+      <button id="logoutBtn" class="logout-btn">↪ Logout</button>
     </aside>
 
-
-    <!-- MAIN CONTENT -->
     <main class="main-content">
-
-      <!-- TOPBAR -->
       <header class="topbar">
         <button id="menuToggle" class="menu-toggle">☰</button>
-
         <div>
           <h3 id="pageTitle">Overview</h3>
           <p>Welcome to ASTRIX CLOUD</p>
@@ -133,14 +104,9 @@
         </div>
       </header>
 
-
-      <!-- PAGE CONTAINER -->
       <div class="page-container">
-
-
         <!-- OVERVIEW -->
         <section id="page-overview" class="page active">
-
           <div class="welcome-banner">
             <div>
               <h1>Welcome to ASTRIX CLOUD</h1>
@@ -150,7 +116,6 @@
           </div>
 
           <div class="stats-grid">
-
             <div class="stat-card">
               <div class="stat-icon purple">▣</div>
               <p>Total Servers</p>
@@ -174,28 +139,21 @@
               <p>Support Tickets</p>
               <h2 id="totalTickets">0</h2>
             </div>
-
           </div>
 
           <div class="content-card">
             <div class="section-header">
               <h2>Recent Servers</h2>
-              <button class="secondary-btn" data-page="servers">
-                View All
-              </button>
+              <button class="secondary-btn" data-page="servers">View All</button>
             </div>
-
             <div id="recentServers">
               <p class="empty-state">No servers available yet.</p>
             </div>
           </div>
-
         </section>
-
 
         <!-- MY SERVERS -->
         <section id="page-servers" class="page">
-
           <div class="section-header">
             <div>
               <h1>My Servers</h1>
@@ -206,13 +164,10 @@
           <div id="myServersList" class="server-grid">
             <p class="empty-state">No servers found.</p>
           </div>
-
         </section>
-
 
         <!-- SUPPORT TICKETS -->
         <section id="page-tickets" class="page">
-
           <div class="section-header">
             <div>
               <h1>Support Tickets</h1>
@@ -221,18 +176,11 @@
           </div>
 
           <div class="content-card">
-
             <h2>Create New Ticket</h2>
 
             <form id="ticketForm">
-
               <label for="ticketSubject">Subject</label>
-              <input
-                type="text"
-                id="ticketSubject"
-                placeholder="Enter ticket subject"
-                required
-              >
+              <input type="text" id="ticketSubject" placeholder="Enter ticket subject" required>
 
               <label for="ticketCategory">Category</label>
               <select id="ticketCategory" required>
@@ -244,19 +192,10 @@
               </select>
 
               <label for="ticketDescription">Description</label>
-              <textarea
-                id="ticketDescription"
-                rows="5"
-                placeholder="Describe your problem..."
-                required
-              ></textarea>
+              <textarea id="ticketDescription" rows="5" placeholder="Describe your problem..." required></textarea>
 
-              <button type="submit" class="primary-btn">
-                Submit Ticket
-              </button>
-
+              <button type="submit" class="primary-btn">Submit Ticket</button>
             </form>
-
           </div>
 
           <div class="content-card">
@@ -265,13 +204,10 @@
               <p class="empty-state">No tickets submitted.</p>
             </div>
           </div>
-
         </section>
-
 
         <!-- ACCOUNT SETTINGS -->
         <section id="page-account" class="page">
-
           <div class="section-header">
             <div>
               <h1>Account Settings</h1>
@@ -280,9 +216,7 @@
           </div>
 
           <div class="content-card">
-
             <div class="account-avatar" id="accountAvatar">A</div>
-
             <h2 id="accountName">User</h2>
             <p id="accountEmail">user@example.com</p>
 
@@ -291,21 +225,16 @@
                 <span>Account Role</span>
                 <strong id="accountRole">User</strong>
               </div>
-
               <div>
                 <span>Account Status</span>
                 <strong class="success-text">Active</strong>
               </div>
             </div>
-
           </div>
-
         </section>
-
 
         <!-- ADMIN: CREATE SERVER -->
         <section id="page-create-server" class="page">
-
           <div class="section-header">
             <div>
               <h1>Create Server</h1>
@@ -314,24 +243,12 @@
           </div>
 
           <div class="content-card">
-
             <form id="createServerForm">
-
               <label for="serverName">Server Name</label>
-              <input
-                type="text"
-                id="serverName"
-                placeholder="My Minecraft Server"
-                required
-              >
+              <input type="text" id="serverName" placeholder="My Minecraft Server" required>
 
               <label for="serverOwner">Owner Email</label>
-              <input
-                type="email"
-                id="serverOwner"
-                placeholder="user@example.com"
-                required
-              >
+              <input type="email" id="serverOwner" placeholder="user@example.com" required>
 
               <label for="serverSoftware">Server Software</label>
               <select id="serverSoftware" required>
@@ -351,26 +268,19 @@
                 <option value="4 GB">4 GB</option>
               </select>
 
-              <button type="submit" class="primary-btn">
-                Create Demo Server
-              </button>
-
+              <button type="submit" class="primary-btn">Create Demo Server</button>
             </form>
 
             <p id="createServerMessage" class="message"></p>
-
           </div>
-
         </section>
-
 
         <!-- ADMIN: MANAGE USERS -->
         <section id="page-manage-users" class="page">
-
           <div class="section-header">
             <div>
               <h1>Manage Users</h1>
-              <p>View registered demo accounts.</p>
+              <p>View registered accounts.</p>
             </div>
           </div>
 
@@ -379,13 +289,10 @@
               <p class="empty-state">No users found.</p>
             </div>
           </div>
-
         </section>
-
 
         <!-- ADMIN: ALL SERVERS -->
         <section id="page-all-servers" class="page">
-
           <div class="section-header">
             <div>
               <h1>All Servers</h1>
@@ -398,17 +305,14 @@
               <p class="empty-state">No servers found.</p>
             </div>
           </div>
-
         </section>
-
 
         <!-- ADMIN: MANAGE TICKETS -->
         <section id="page-manage-tickets" class="page">
-
           <div class="section-header">
             <div>
               <h1>Manage Tickets</h1>
-              <p>Review and update demo support tickets.</p>
+              <p>Review and update support tickets.</p>
             </div>
           </div>
 
@@ -417,22 +321,15 @@
               <p class="empty-state">No tickets found.</p>
             </div>
           </div>
-
         </section>
-
-
       </div>
 
       <footer class="footer">
         © 2026 ASTRIX CLOUD. All rights reserved.
       </footer>
-
     </main>
-
   </div>
 
-  <!-- Separate JavaScript file -->
   <script src="PANEL.JS"></script>
-
 </body>
 </html>
