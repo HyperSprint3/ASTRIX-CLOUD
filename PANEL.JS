@@ -2,10 +2,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     let currentUser = null;
     let tickets = [];
+    let pendingSignupEmail = "";
 
     const $ = id => document.getElementById(id);
 
-    // ---------- SECURITY HELPERS ----------
+    // ---------- HELPERS ----------
 
     function escapeHTML(value) {
         return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -23,11 +24,29 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
+    function normalizeUser(user) {
+        if (!user) return null;
+
+        return {
+            ...user,
+            username: user.username || "User",
+            role: String(user.role || "member").toLowerCase()
+        };
+    }
+
+    function showMessage(element, message, success = false) {
+        if (!element) return;
+        element.textContent = message;
+        element.style.color = success ? "#22c55e" : "#ef4444";
+    }
+
     function formatDate(value) {
         if (!value) return "Unknown";
 
         const date = new Date(
-            String(value).replace(" ", "T") + "Z"
+            String(value).includes("T")
+                ? value
+                : String(value).replace(" ", "T") + "Z"
         );
 
         return isNaN(date.getTime())
@@ -64,24 +83,27 @@ document.addEventListener("DOMContentLoaded", () => {
         return data;
     }
 
-    function showMessage(element, message, success = false) {
-        if (!element) return;
+    // ---------- AUTHENTICATION SCREENS ----------
 
-        element.textContent = message;
-        element.style.color = success ? "#22c55e" : "#ef4444";
+    function showAuthForm(formName) {
+        ["loginForm", "signupForm", "verifyForm"].forEach(id => {
+            if ($(id)) {
+                $(id).style.display = id === formName ? "block" : "none";
+            }
+        });
+
+        if ($("loginMessage")) $("loginMessage").textContent = "";
+        if ($("signupMessage")) $("signupMessage").textContent = "";
+        if ($("verifyMessage")) $("verifyMessage").textContent = "";
     }
 
-    function normalizeUser(user) {
-        if (!user) return null;
+    $("showSignupBtn")?.addEventListener("click", () => {
+        showAuthForm("signupForm");
+    });
 
-        return {
-            ...user,
-            username: user.username || "User",
-            role: String(user.role || "member").toLowerCase()
-        };
-    }
-
-    // ---------- PAGE VISIBILITY ----------
+    $("showLoginBtn")?.addEventListener("click", () => {
+        showAuthForm("loginForm");
+    });
 
     function showLogin() {
         if ($("loginPage")) {
@@ -92,6 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
             $("dashboard").classList.add("hidden");
             $("dashboard").style.display = "none";
         }
+
+        showAuthForm("loginForm");
     }
 
     function showDashboard() {
@@ -110,6 +134,302 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDashboard();
     }
 
+    // ---------- SIGNUP: SEND EMAIL CODE ----------
+
+    $("signupForm")?.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const username = $("signupUsername")?.value.trim();
+        const email = $("signupEmail")?.value.trim().toLowerCase();
+        const password = $("signupPassword")?.value;
+
+        if (!username || !email || !password) {
+            showMessage(
+                $("signupMessage"),
+                "Please fill in all fields."
+            );
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
+            showMessage(
+                $("signupMessage"),
+                "Username must be 3–30 letters, numbers or underscores."
+            );
+            return;
+        }
+
+        if (password.length < 12) {
+            showMessage(
+                $("signupMessage"),
+                "Password must be at least 12 characters."
+            );
+            return;
+        }
+
+        const button = $("signupForm").querySelector(
+            'button[type="submit"]'
+        );
+
+        if (button) button.disabled = true;
+
+        showMessage(
+            $("signupMessage"),
+            "Sending verification email...",
+            true
+        );
+
+        try {
+            const result = await api("/api/send-verification", {
+                method: "POST",
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password
+                })
+            });
+
+            pendingSignupEmail = email;
+
+            showAuthForm("verifyForm");
+
+            showMessage(
+                $("verifyMessage"),
+                result.message || "Verification code sent. Check your email.",
+                true
+            );
+
+        } catch (error) {
+            showMessage($("signupMessage"), error.message);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    });
+
+    // ---------- VERIFY EMAIL AND CREATE ACCOUNT ----------
+
+    $("verifyForm")?.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const code = $("verificationCode")?.value.trim();
+
+        if (!pendingSignupEmail) {
+            showMessage(
+                $("verifyMessage"),
+                "Please start signup again."
+            );
+            showAuthForm("signupForm");
+            return;
+        }
+
+        if (!/^\d{6}$/.test(code)) {
+            showMessage(
+                $("verifyMessage"),
+                "Enter a valid six-digit code."
+            );
+            return;
+        }
+
+        const button = $("verifyForm").querySelector(
+            'button[type="submit"]'
+        );
+
+        if (button) button.disabled = true;
+
+        showMessage(
+            $("verifyMessage"),
+            "Verifying your email...",
+            true
+        );
+
+        try {
+            const result = await api("/api/verify-signup", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: pendingSignupEmail,
+                    code
+                })
+            });
+
+            pendingSignupEmail = "";
+
+            $("verifyForm").reset();
+            $("signupForm").reset();
+
+            showAuthForm("loginForm");
+
+            showMessage(
+                $("loginMessage"),
+                result.message || "Account created! You can now log in.",
+                true
+            );
+
+        } catch (error) {
+            showMessage($("verifyMessage"), error.message);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    });
+
+    // ---------- LOGIN ----------
+
+    $("loginForm")?.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const email = $("loginEmail")?.value.trim();
+        const password = $("loginPassword")?.value;
+
+        if (!email || !password) {
+            showMessage(
+                $("loginMessage"),
+                "Please enter your email and password."
+            );
+            return;
+        }
+
+        const button = $("loginForm").querySelector(
+            'button[type="submit"]'
+        );
+
+        if (button) button.disabled = true;
+
+        showMessage($("loginMessage"), "Logging in...", true);
+
+        try {
+            const result = await api("/api/login", {
+                method: "POST",
+                body: JSON.stringify({ email, password })
+            });
+
+            currentUser = normalizeUser(result.user || result);
+
+            if (!currentUser || !currentUser.id) {
+                throw new Error("User information missing from login response.");
+            }
+
+            $("loginPassword").value = "";
+
+            showDashboard();
+            await loadTickets();
+
+        } catch (error) {
+            currentUser = null;
+            showMessage($("loginMessage"), error.message);
+            console.error("Login error:", error);
+        } finally {
+            if (button) button.disabled = false;
+        }
+    });
+
+    // ---------- LOGOUT ----------
+
+    $("logoutBtn")?.addEventListener("click", async () => {
+        try {
+            await api("/api/logout", { method: "POST" });
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
+
+        currentUser = null;
+        tickets = [];
+        showLogin();
+    });
+
+    // ---------- RESTORE SESSION ----------
+
+    async function restoreSession() {
+        try {
+            const result = await api("/api/me");
+
+            currentUser = normalizeUser(result.user || result);
+
+            if (!currentUser || !currentUser.id) {
+                throw new Error("No active session.");
+            }
+
+            showDashboard();
+            await loadTickets();
+
+        } catch {
+            currentUser = null;
+            showLogin();
+        }
+    }
+
+    // ---------- PROFILE LOGO ----------
+
+    function loadProfileLogo() {
+        if (!currentUser) return;
+
+        const savedLogo = localStorage.getItem(
+            "astrix_logo_" + currentUser.id
+        );
+
+        ["userAvatar", "accountAvatar"].forEach(id => {
+            const avatar = $(id);
+            if (!avatar) return;
+
+            if (savedLogo) {
+                avatar.innerHTML = "";
+                avatar.style.backgroundImage = `url("${savedLogo}")`;
+                avatar.style.backgroundSize = "cover";
+                avatar.style.backgroundPosition = "center";
+            } else {
+                avatar.style.backgroundImage = "none";
+                avatar.textContent =
+                    currentUser.username.charAt(0).toUpperCase();
+            }
+        });
+    }
+
+    $("accountLogoInput")?.addEventListener("change", event => {
+        const file = event.target.files?.[0];
+
+        if (!file || !currentUser) return;
+
+        if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+            showMessage(
+                $("logoMessage"),
+                "Please choose a PNG, JPG or WEBP image."
+            );
+            return;
+        }
+
+        if (file.size > 1024 * 1024) {
+            showMessage(
+                $("logoMessage"),
+                "Image must be smaller than 1 MB."
+            );
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            try {
+                localStorage.setItem(
+                    "astrix_logo_" + currentUser.id,
+                    reader.result
+                );
+
+                loadProfileLogo();
+
+                showMessage(
+                    $("logoMessage"),
+                    "Profile logo updated successfully!",
+                    true
+                );
+            } catch {
+                showMessage(
+                    $("logoMessage"),
+                    "Could not save the image. Try a smaller image."
+                );
+            }
+        };
+
+        reader.readAsDataURL(file);
+    });
+
     // ---------- USER DETAILS ----------
 
     function updateUserDetails() {
@@ -126,16 +446,8 @@ document.addEventListener("DOMContentLoaded", () => {
             $("sidebarUserRole").textContent = currentUser.role;
         }
 
-        if ($("userAvatar")) {
-            $("userAvatar").textContent = initial;
-        }
-
         if ($("topbarUserName")) {
             $("topbarUserName").textContent = username;
-        }
-
-        if ($("accountAvatar")) {
-            $("accountAvatar").textContent = initial;
         }
 
         if ($("accountName")) {
@@ -149,6 +461,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if ($("accountRole")) {
             $("accountRole").textContent = currentUser.role;
         }
+
+        if ($("userAvatar")) {
+            $("userAvatar").textContent = initial;
+        }
+
+        if ($("accountAvatar")) {
+            $("accountAvatar").textContent = initial;
+        }
+
+        loadProfileLogo();
     }
 
     // ---------- PERMISSIONS ----------
@@ -170,108 +492,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if ($("adminNavigation")) {
             $("adminNavigation").style.display =
                 isStaff() ? "" : "none";
-        }
-    }
-
-    // ---------- LOGIN ----------
-
-    $("loginForm")?.addEventListener("submit", async event => {
-        event.preventDefault();
-
-        const email = $("loginEmail")?.value.trim();
-        const password = $("loginPassword")?.value;
-
-        if (!email || !password) {
-            showMessage(
-                $("loginMessage"),
-                "Please enter your email and password."
-            );
-            return;
-        }
-
-        showMessage(
-            $("loginMessage"),
-            "Logging in...",
-            true
-        );
-
-        try {
-            const result = await api("/api/login", {
-                method: "POST",
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            });
-
-            currentUser = normalizeUser(
-                result.user || result
-            );
-
-            if (!currentUser || !currentUser.id) {
-                throw new Error(
-                    "User information missing from login response."
-                );
-            }
-
-            if ($("loginPassword")) {
-                $("loginPassword").value = "";
-            }
-
-            showDashboard();
-
-            await loadTickets();
-
-        } catch (error) {
-            currentUser = null;
-
-            showMessage(
-                $("loginMessage"),
-                error.message || "Login failed."
-            );
-
-            console.error("Login error:", error);
-        }
-    });
-
-    // ---------- LOGOUT ----------
-
-    $("logoutBtn")?.addEventListener("click", async () => {
-        try {
-            await api("/api/logout", {
-                method: "POST"
-            });
-        } catch (error) {
-            console.error("Logout error:", error);
-        }
-
-        currentUser = null;
-        tickets = [];
-
-        showLogin();
-    });
-
-    // ---------- RESTORE LOGIN SESSION ----------
-
-    async function restoreSession() {
-        try {
-            const result = await api("/api/me");
-
-            currentUser = normalizeUser(
-                result.user || result
-            );
-
-            if (!currentUser || !currentUser.id) {
-                throw new Error("No active session.");
-            }
-
-            showDashboard();
-
-            await loadTickets();
-
-        } catch (error) {
-            currentUser = null;
-            showLogin();
         }
     }
 
@@ -321,27 +541,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     : "ASTRIX CLOUD";
         }
 
-        if (page.includes("ticket")) {
-            loadTickets();
-        }
+        if (page.includes("ticket")) loadTickets();
 
-        if (page === "overview") {
-            updateDashboard();
-        }
+        if (page === "overview") updateDashboard();
 
-        if (page.includes("server")) {
-            showServerNotice();
-        }
+        if (page.includes("server")) showServerNotice();
 
-        if (page === "manage-users") {
-            showUsersNotice();
-        }
+        if (page === "manage-users") showUsersNotice();
 
         $("sidebar")?.classList.remove("open");
-        $("sidebar")?.classList.remove("active");
     }
-
-    // ---------- NAVIGATION BUTTONS ----------
 
     document.querySelectorAll("[data-page]").forEach(link => {
         link.addEventListener("click", event => {
@@ -354,33 +563,19 @@ document.addEventListener("DOMContentLoaded", () => {
         $("sidebar")?.classList.toggle("open");
     });
 
-    // ---------- SERVER MANAGEMENT STATUS ----------
+    // ---------- SERVER STATUS ----------
 
     function showServerNotice() {
         const message =
-            "Server management is not connected yet. No demo servers are being displayed or created.";
+            "Server management is not connected yet. A hosting node and server API are required.";
 
-        [
-            "myServersList",
-            "allServersList",
-            "recentServers"
-        ].forEach(id => {
-            if ($(id)) {
-                $(id).textContent = message;
-            }
+        ["myServersList", "allServersList", "recentServers"].forEach(id => {
+            if ($(id)) $(id).textContent = message;
         });
 
-        if ($("totalServers")) {
-            $("totalServers").textContent = "—";
-        }
-
-        if ($("onlineServers")) {
-            $("onlineServers").textContent = "—";
-        }
-
-        if ($("offlineServers")) {
-            $("offlineServers").textContent = "—";
-        }
+        ["totalServers", "onlineServers", "offlineServers"].forEach(id => {
+            if ($(id)) $(id).textContent = "—";
+        });
     }
 
     $("createServerForm")?.addEventListener("submit", event => {
@@ -392,7 +587,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     });
 
-    // ---------- TICKETS: DATABASE ----------
+    // ---------- TICKETS ----------
 
     async function loadTickets() {
         if (!currentUser) return;
@@ -408,10 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateDashboard();
 
         } catch (error) {
-            console.error(
-                "Ticket loading failed:",
-                error
-            );
+            console.error("Ticket loading failed:", error);
 
             if ($("myTicketsList")) {
                 $("myTicketsList").textContent =
@@ -425,14 +617,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---------- TICKET HTML ----------
-
     function ticketHTML(ticket) {
         const id = Number(ticket.id);
-
-        const status = String(
-            ticket.status || "open"
-        ).toLowerCase();
+        const status = String(ticket.status || "open").toLowerCase();
 
         return `
             <div class="ticket-card" data-ticket-id="${id}">
@@ -445,12 +632,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${escapeHTML(ticket.category || "General")}
                 </p>
 
-                ${isStaff()
-                    ? `<p>Member: ${escapeHTML(
+                ${isStaff() ? `
+                    <p>Member: ${escapeHTML(
                         ticket.username || ticket.email || "Member"
-                    )}</p>`
-                    : ""
-                }
+                    )}</p>
+                ` : ""}
 
                 <p>${escapeHTML(ticket.description || "")}</p>
 
@@ -459,10 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <strong>${escapeHTML(status.toUpperCase())}</strong>
                 </p>
 
-                <p>
-                    Created:
-                    ${escapeHTML(formatDate(ticket.created_at))}
-                </p>
+                <p>Created: ${escapeHTML(formatDate(ticket.created_at))}</p>
 
                 <button type="button" data-open-replies="${id}">
                     View / Reply
@@ -474,10 +657,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         data-ticket-status="${id}"
                         data-status="${status === "closed" ? "open" : "closed"}"
                     >
-                        ${status === "closed"
-                            ? "Reopen Ticket"
-                            : "Close Ticket"
-                        }
+                        ${status === "closed" ? "Reopen Ticket" : "Close Ticket"}
                     </button>
                 ` : ""}
 
@@ -486,9 +666,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     class="ticket-replies"
                     style="display:none;"
                 >
-                    <div class="reply-list">
-                        Loading replies...
-                    </div>
+                    <div class="reply-list">Loading replies...</div>
 
                     <form data-reply-form="${id}">
                         <textarea
@@ -497,16 +675,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             required
                         ></textarea>
 
-                        <button type="submit">
-                            Send Reply
-                        </button>
+                        <button type="submit">Send Reply</button>
                     </form>
                 </div>
             </div>
         `;
     }
-
-    // ---------- DISPLAY TICKETS ----------
 
     function renderTickets() {
         if (!currentUser) return;
@@ -538,9 +712,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const description = $("ticketDescription")?.value.trim();
 
         if (!subject || !description) {
-            alert(
-                "Please fill in the subject and description."
-            );
+            alert("Please fill in the subject and description.");
             return;
         }
 
@@ -556,16 +728,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             $("ticketForm").reset();
 
-            alert(
-                "Support ticket created successfully."
-            );
+            alert("Support ticket created successfully.");
 
             await loadTickets();
 
         } catch (error) {
-            alert(
-                "Could not create ticket: " + error.message
-            );
+            alert("Could not create ticket: " + error.message);
         }
     });
 
@@ -603,9 +771,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <p>${escapeHTML(reply.message)}</p>
 
                         <small>
-                            ${escapeHTML(
-                                formatDate(reply.created_at)
-                            )}
+                            ${escapeHTML(formatDate(reply.created_at))}
                         </small>
                     </div>
                 `).join("")
@@ -617,7 +783,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---------- REPLY AND STATUS BUTTONS ----------
+    // ---------- TICKET BUTTONS ----------
 
     document.addEventListener("click", async event => {
         const replyButton = event.target.closest(
@@ -629,15 +795,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const container = $("replies-" + id);
 
             if (container) {
-                const opening =
-                    container.style.display === "none";
+                const opening = container.style.display === "none";
 
-                container.style.display =
-                    opening ? "block" : "none";
+                container.style.display = opening ? "block" : "none";
 
-                if (opening) {
-                    await loadReplies(id);
-                }
+                if (opening) await loadReplies(id);
             }
         }
 
@@ -660,9 +822,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await loadTickets();
 
             } catch (error) {
-                alert(
-                    "Could not update ticket: " + error.message
-                );
+                alert("Could not update ticket: " + error.message);
             }
         }
     });
@@ -670,9 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ---------- SEND REPLY ----------
 
     document.addEventListener("submit", async event => {
-        const form = event.target.closest(
-            "[data-reply-form]"
-        );
+        const form = event.target.closest("[data-reply-form]");
 
         if (!form) return;
 
@@ -690,9 +848,7 @@ document.addEventListener("DOMContentLoaded", () => {
             'button[type="submit"]'
         );
 
-        if (button) {
-            button.disabled = true;
-        }
+        if (button) button.disabled = true;
 
         try {
             await api("/api/ticket-replies", {
@@ -708,23 +864,18 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadReplies(ticketId);
 
         } catch (error) {
-            alert(
-                "Could not send reply: " + error.message
-            );
-
+            alert("Could not send reply: " + error.message);
         } finally {
-            if (button) {
-                button.disabled = false;
-            }
+            if (button) button.disabled = false;
         }
     });
 
-    // ---------- USER MANAGEMENT STATUS ----------
+    // ---------- USER MANAGEMENT ----------
 
     function showUsersNotice() {
         if ($("usersList")) {
             $("usersList").textContent =
-                "User management is not connected yet. No fake users are displayed.";
+                "User management is not connected yet.";
         }
     }
 
@@ -746,7 +897,8 @@ document.addEventListener("DOMContentLoaded", () => {
         showServerNotice();
     }
 
-    // ---------- START APPLICATION ----------
+    // ---------- START ----------
 
+    showLogin();
     restoreSession();
 });
