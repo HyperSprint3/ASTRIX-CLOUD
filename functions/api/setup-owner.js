@@ -24,7 +24,7 @@ async function hashPassword(password) {
   const encode = bytes =>
     btoa(String.fromCharCode(...new Uint8Array(bytes)));
 
-  return `pbkdf2$210000$${encode(salt)}$${encode(bits)}`;
+ return `pbkdf2$100000$${encode(salt)}$${encode(bits)}`;
 }
 
 export async function onRequestPost({ request, env }) {
