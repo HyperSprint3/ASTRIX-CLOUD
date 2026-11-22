@@ -1544,3 +1544,414 @@ textarea::placeholder {
         transition-duration: .01ms !important;
     }
 }
+
+/* =========================================
+   ASTRIX CLOUD — MIDNIGHT BLUE THEME
+   Electric Blue + Neon Cyan
+   ========================================= */
+
+:root {
+    --bg: #070B14;
+    --bg-secondary: #0A1020;
+    --surface: #10192B;
+    --surface-2: #142139;
+    --surface-3: #1A2C49;
+
+    --border: rgba(65, 150, 255, .17);
+    --text: #F2F7FF;
+    --muted: #91A4C0;
+
+    --purple: #1677FF;
+    --purple-light: #53B7FF;
+    --cyan: #00D9FF;
+
+    --green: #49DFAB;
+    --orange: #FFB46B;
+    --red: #FF6685;
+
+    --shadow: 0 18px 60px rgba(0, 0, 0, .35);
+}
+
+/* BACKGROUND */
+
+body {
+    background:
+        radial-gradient(ellipse at 15% 0%, rgba(22, 119, 255, .13), transparent 38%),
+        radial-gradient(ellipse at 95% 80%, rgba(0, 217, 255, .07), transparent 35%),
+        var(--bg);
+}
+
+::selection {
+    background: rgba(22, 119, 255, .4);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline-color: var(--cyan);
+}
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar-track {
+    background: #080E19;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #174477;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--purple);
+}
+
+/* LOGIN PAGE */
+
+.login-page {
+    background:
+        radial-gradient(circle at 15% 20%, rgba(22, 119, 255, .2), transparent 30%),
+        radial-gradient(circle at 85% 75%, rgba(0, 217, 255, .12), transparent 30%),
+        #070B14;
+}
+
+.login-page::before,
+.login-page::after {
+    border-color: rgba(45, 155, 255, .13);
+}
+
+.login-page::before {
+    box-shadow: 0 0 100px rgba(22, 119, 255, .15);
+}
+
+.login-card {
+    border-color: rgba(65, 150, 255, .25);
+    background: linear-gradient(145deg, rgba(17, 29, 49, .98), rgba(8, 14, 26, .99));
+    box-shadow:
+        0 30px 100px rgba(0, 0, 0, .6),
+        0 0 65px rgba(22, 119, 255, .1);
+}
+
+.brand-symbol {
+    background: linear-gradient(135deg, #00D9FF, #1677FF, #1052C9);
+    box-shadow: 0 8px 35px rgba(22, 119, 255, .4);
+}
+
+.login-brand h1 span,
+.sidebar-brand h2 span {
+    color: #53B7FF;
+}
+
+.login-card label,
+.content-card form label,
+.profile-card label {
+    color: #B8CBE5;
+}
+
+.login-card input,
+.content-card input,
+.content-card select,
+.content-card textarea {
+    background: rgba(5, 11, 22, .85);
+    border-color: rgba(65, 150, 255, .18);
+}
+
+.login-card input:hover,
+.content-card input:hover,
+.content-card select:hover,
+.content-card textarea:hover {
+    border-color: rgba(0, 217, 255, .4);
+}
+
+.login-card input:focus,
+.content-card input:focus,
+.content-card select:focus,
+.content-card textarea:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(0, 217, 255, .12);
+}
+
+.content-card select option {
+    background: #101D32;
+}
+
+.primary-btn {
+    background: linear-gradient(110deg, #0757D5, #168BFF, #00C9F0);
+    background-size: 200% 200%;
+    box-shadow: 0 8px 25px rgba(22, 119, 255, .25);
+}
+
+.primary-btn:hover {
+    box-shadow: 0 12px 32px rgba(0, 180, 255, .35);
+}
+
+.auth-switch button strong {
+    color: var(--cyan);
+}
+
+.verification-icon {
+    filter: drop-shadow(0 0 15px rgba(0, 217, 255, .5));
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    background: linear-gradient(180deg, #0C1424, #080D18);
+    border-right-color: rgba(65, 150, 255, .2);
+}
+
+.sidebar-brand .brand-symbol {
+    background: linear-gradient(135deg, #00D9FF, #1677FF, #1052C9);
+}
+
+.sidebar-profile {
+    background: rgba(22, 119, 255, .045);
+    border-color: rgba(65, 150, 255, .17);
+}
+
+.avatar,
+.topbar-avatar,
+.account-avatar {
+    background: linear-gradient(135deg, #00BFEF, #1677FF, #1049B7);
+}
+
+.nav-heading {
+    color: #6F89AD;
+}
+
+.nav-link {
+    color: #9AADC8;
+}
+
+.nav-link:hover {
+    color: white;
+    background: rgba(22, 119, 255, .11);
+    border-color: rgba(0, 217, 255, .12);
+}
+
+.nav-link.active {
+    color: white;
+    border-color: rgba(0, 217, 255, .25);
+    background: linear-gradient(100deg, rgba(22, 119, 255, .27), rgba(0, 217, 255, .06));
+    box-shadow: inset 3px 0 0 var(--cyan);
+}
+
+.sidebar-status {
+    background: rgba(73, 223, 170, .045);
+}
+
+/* TOPBAR */
+
+.topbar {
+    background: rgba(7, 12, 23, .9);
+    border-bottom-color: rgba(65, 150, 255, .16);
+}
+
+.breadcrumb-divider {
+    color: #42618A;
+}
+
+.menu-toggle {
+    background: #101D32;
+}
+
+/* HEADINGS */
+
+.eyebrow {
+    color: var(--cyan);
+}
+
+.section-header p {
+    color: var(--muted);
+}
+
+/* WELCOME BANNER */
+
+.welcome-banner {
+    border-color: rgba(0, 190, 255, .25);
+    background:
+        radial-gradient(circle at 85% 50%, rgba(0, 190, 255, .2), transparent 32%),
+        linear-gradient(110deg, #102C50, #10213B 55%, #0B172A);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
+}
+
+.welcome-banner::before {
+    opacity: .17;
+}
+
+.welcome-content h1 span {
+    color: #00D9FF;
+}
+
+.welcome-content p {
+    color: #B4C9E5;
+}
+
+.banner-button {
+    border-color: rgba(0, 217, 255, .4);
+    background: rgba(22, 119, 255, .2);
+}
+
+.banner-button:hover {
+    background: #1677FF;
+    box-shadow: 0 8px 25px rgba(22, 119, 255, .3);
+}
+
+.banner-cloud {
+    color: #6BDFFF;
+    filter: drop-shadow(0 0 25px rgba(0, 217, 255, .65));
+}
+
+.orbit {
+    border-color: rgba(0, 217, 255, .4);
+}
+
+.orbit-two {
+    border-color: rgba(22, 119, 255, .45);
+}
+
+/* STATISTICS */
+
+.stat-card {
+    background: linear-gradient(145deg, #13213A, #0C1424);
+    border-color: rgba(65, 150, 255, .17);
+}
+
+.stat-card::after {
+    background: rgba(22, 119, 255, .15);
+}
+
+.stat-card:hover {
+    border-color: rgba(0, 217, 255, .4);
+}
+
+.purple {
+    color: #65B9FF;
+    background: rgba(22, 119, 255, .16);
+}
+
+.cyan {
+    color: #00D9FF;
+    background: rgba(0, 217, 255, .13);
+}
+
+/* CONTENT CARDS */
+
+.content-card {
+    background: linear-gradient(145deg, rgba(17, 29, 49, .97), rgba(10, 17, 30, .98));
+    border-color: rgba(65, 150, 255, .17);
+}
+
+.content-card:hover {
+    border-color: rgba(0, 217, 255, .25);
+}
+
+.card-heading-icon {
+    color: #00D9FF;
+    background: rgba(0, 217, 255, .1);
+}
+
+.empty-state {
+    border-color: rgba(65, 150, 255, .2);
+    background: rgba(22, 119, 255, .025);
+}
+
+.quick-action:hover {
+    border-color: rgba(0, 217, 255, .17);
+    background: rgba(22, 119, 255, .09);
+}
+
+.quick-icon {
+    color: #62CFFF;
+    background: rgba(22, 119, 255, .16);
+}
+
+.quick-action > b {
+    color: var(--cyan);
+}
+
+.information-card {
+    background:
+        radial-gradient(circle at 100% 0%, rgba(0, 217, 255, .09), transparent 45%),
+        var(--surface);
+}
+
+/* ACCOUNT */
+
+.account-avatar {
+    border-color: rgba(0, 217, 255, .4);
+    box-shadow: 0 0 35px rgba(22, 119, 255, .2);
+}
+
+/* TICKETS */
+
+.ticket-entry {
+    background: rgba(255, 255, 255, .015);
+    border-color: rgba(65, 150, 255, .17);
+}
+
+.ticket-entry:hover {
+    border-color: rgba(0, 217, 255, .35);
+    background: rgba(22, 119, 255, .045);
+}
+
+.ticket-entry button {
+    color: #61C7FF;
+    border-color: rgba(65, 150, 255, .2);
+    background: rgba(22, 119, 255, .09);
+}
+
+.ticket-entry button:hover {
+    background: rgba(22, 119, 255, .23);
+}
+
+.ticket-replies {
+    border-left-color: var(--cyan);
+    background: rgba(0, 217, 255, .045);
+}
+
+.ticket-reply-form textarea {
+    background: #080F1C;
+}
+
+/* FOOTER */
+
+.footer {
+    border-top-color: rgba(65, 150, 255, .17);
+}
+
+/* MOBILE OVERLAY */
+
+.sidebar-overlay {
+    background: rgba(0, 5, 15, .75);
+}
+
+/* EXTRA DETAILS */
+
+.status-dot {
+    box-shadow: 0 0 12px rgba(73, 223, 170, .7);
+}
+
+.logout-btn {
+    color: #FF8298;
+}
+
+/* SMOOTH THEME TRANSITIONS */
+
+.sidebar,
+.topbar,
+.content-card,
+.stat-card,
+.nav-link,
+.login-card,
+.welcome-banner,
+.quick-action,
+.ticket-entry,
+.primary-btn {
+    transition:
+        background-color .3s ease,
+        border-color .3s ease,
+        box-shadow .3s ease,
+        color .3s ease,
+        transform .3s ease;
+}
