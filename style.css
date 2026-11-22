@@ -580,3 +580,96 @@ button {
     transition-duration: .01ms !important;
   }
 }
+
+/* =====================================
+   ASTRIX CLOUD - SIZE & BUTTON FIX
+===================================== */
+
+/* Smaller header logo */
+.brand img {
+  width: 32px;
+  height: 32px;
+}
+
+/* Smaller Home page orbital logo */
+.orb-wrap {
+  height: 320px;
+}
+
+.orb {
+  width: 185px;
+  height: 185px;
+}
+
+.orbit {
+  width: 285px;
+  height: 120px;
+}
+
+.orbit-b {
+  width: 315px;
+  height: 165px;
+}
+
+/* Premium Discord buttons - Home page */
+.button.primary,
+.nav-cta,
+a.btn-primary,
+.cta-section a[href*="discord.gg"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 25px;
+  border: 1px solid rgba(210, 160, 255, .55);
+  border-radius: 12px;
+  background: linear-gradient(110deg, #7028c9, #a855f7, #d946ef);
+  background-size: 200% 200%;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-decoration: none;
+  box-shadow: 0 5px 22px rgba(168, 85, 247, .28);
+  transition: transform .3s ease, box-shadow .3s ease,
+              background-position .5s ease;
+}
+
+.button.primary:hover,
+.nav-cta:hover,
+a.btn-primary:hover,
+.cta-section a[href*="discord.gg"]:hover {
+  transform: translateY(-4px);
+  background-position: 100% 50%;
+  box-shadow: 0 10px 32px rgba(168, 85, 247, .55);
+}
+
+/* About page button sizing */
+.cta-section a.btn-primary {
+  padding: 16px 30px;
+  border-radius: 12px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 800px) {
+  .orb-wrap {
+    height: 270px;
+    transform: scale(.85);
+  }
+
+  .orb {
+    width: 165px;
+    height: 165px;
+  }
+
+  .orbit {
+    width: 245px;
+    height: 105px;
+  }
+
+  .orbit-b {
+    width: 270px;
+    height: 145px;
+  }
+}
