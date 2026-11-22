@@ -1,1 +1,560 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0B0F19">
+    <meta name="description" content="ASTRIX CLOUD — Modern Cloud Hosting Control Panel">
+    <title>ASTRIX CLOUD — Control Panel</title>
+    <link rel="stylesheet" href="/PANEL.CSS">
+</head>
+<body>
+
+    <!-- AUTHENTICATION -->
+
+    <main id="loginPage" class="auth-page">
+        <div class="auth-background"></div>
+
+        <section class="auth-card">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i data-lucide="cloud"></i>
+                </div>
+                <div>
+                    <h1>ASTRIX <span>CLOUD</span></h1>
+                    <p>Modern Cloud Infrastructure</p>
+                </div>
+            </div>
+
+            <div class="auth-heading">
+                <span class="eyebrow">WELCOME BACK</span>
+                <h2>Sign in to your account</h2>
+                <p>Manage your cloud services in one place.</p>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+                <label for="loginEmail">Email address</label>
+                <div class="input-wrap">
+                    <i data-lucide="mail"></i>
+                    <input id="loginEmail" type="email"
+                        placeholder="you@example.com" autocomplete="email" required>
+                </div>
+
+                <label for="loginPassword">Password</label>
+                <div class="input-wrap">
+                    <i data-lucide="lock"></i>
+                    <input id="loginPassword" type="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password" required>
+                </div>
+
+                <div id="loginMessage" class="form-message"></div>
+
+                <button type="submit" class="primary-button">
+                    Sign In <i data-lucide="arrow-right"></i>
+                </button>
+
+                <p class="auth-switch">
+                    Don't have an account?
+                    <button type="button" id="showSignupBtn">Create account</button>
+                </p>
+            </form>
+
+            <form id="signupForm" class="auth-form" hidden>
+                <span class="eyebrow">GET STARTED</span>
+                <h2>Create your account</h2>
+
+                <label for="signupUsername">Username</label>
+                <div class="input-wrap">
+                    <i data-lucide="user"></i>
+                    <input id="signupUsername" type="text"
+                        placeholder="Your username" autocomplete="username" required>
+                </div>
+
+                <label for="signupEmail">Email address</label>
+                <div class="input-wrap">
+                    <i data-lucide="mail"></i>
+                    <input id="signupEmail" type="email"
+                        placeholder="you@example.com" autocomplete="email" required>
+                </div>
+
+                <label for="signupPassword">Password</label>
+                <div class="input-wrap">
+                    <i data-lucide="lock"></i>
+                    <input id="signupPassword" type="password"
+                        placeholder="At least 12 characters"
+                        autocomplete="new-password" minlength="12" required>
+                </div>
+
+                <div id="signupMessage" class="form-message"></div>
+
+                <button type="submit" class="primary-button">
+                    Create Account <i data-lucide="arrow-right"></i>
+                </button>
+
+                <p class="auth-switch">
+                    Already registered?
+                    <button type="button" id="showLoginBtn">Sign in</button>
+                </p>
+            </form>
+
+            <form id="verifyForm" class="auth-form" hidden>
+                <span class="eyebrow">EMAIL VERIFICATION</span>
+                <h2>Verify your email</h2>
+                <p>Enter the six-digit verification code sent to your email.</p>
+
+                <label for="verificationCode">Verification code</label>
+                <div class="input-wrap">
+                    <i data-lucide="shield-check"></i>
+                    <input id="verificationCode" type="text"
+                        inputmode="numeric" maxlength="6"
+                        placeholder="000000" autocomplete="one-time-code" required>
+                </div>
+
+                <div id="verifyMessage" class="form-message"></div>
+
+                <button type="submit" class="primary-button">
+                    Verify Email <i data-lucide="check"></i>
+                </button>
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <button type="button" id="backToLoginBtn">Back to login</button>
+                </p>
+            </form>
+
+            <div class="auth-footer">
+                <span>SECURE CLOUD MANAGEMENT</span>
+                <span>© 2026 ASTRIX CLOUD</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- DASHBOARD -->
+
+    <div id="dashboard" class="dashboard" hidden>
+
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i data-lucide="cloud"></i>
+                </div>
+                <div>
+                    <strong>ASTRIX <span>CLOUD</span></strong>
+                    <small>CONTROL CENTER</small>
+                </div>
+                <button id="closeSidebar" class="icon-button mobile-only"
+                    type="button" aria-label="Close menu">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-section">
+                <span class="sidebar-label">WORKSPACE</span>
+
+                <nav class="navigation">
+                    <button class="nav-link active" data-page="overview">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Overview</span>
+                    </button>
+                    <button class="nav-link" data-page="servers">
+                        <i data-lucide="server"></i>
+                        <span>My Servers</span>
+                    </button>
+                    <button class="nav-link" data-page="tickets">
+                        <i data-lucide="life-buoy"></i>
+                        <span>Support Tickets</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div id="adminNavigation" class="sidebar-section" hidden>
+                <span class="sidebar-label">ADMINISTRATION</span>
+
+                <nav class="navigation">
+                    <button class="nav-link" data-page="create-server">
+                        <i data-lucide="server-cog"></i>
+                        <span>Create Server</span>
+                    </button>
+                    <button class="nav-link" data-page="all-servers">
+                        <i data-lucide="network"></i>
+                        <span>All Servers</span>
+                    </button>
+                    <button class="nav-link" data-page="manage-users">
+                        <i data-lucide="users"></i>
+                        <span>Manage Users</span>
+                    </button>
+                    <button class="nav-link" data-page="manage-tickets">
+                        <i data-lucide="messages-square"></i>
+                        <span>Manage Tickets</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-bottom">
+                <button class="nav-link" data-page="account">
+                    <i data-lucide="settings"></i>
+                    <span>My Account</span>
+                </button>
+
+                <div class="sidebar-profile">
+                    <div id="userAvatar" class="avatar">AC</div>
+                    <div class="profile-info">
+                        <strong id="sidebarUserName">Cloud User</strong>
+                        <small id="sidebarUserRole">Member</small>
+                    </div>
+                    <button id="logoutBtn" class="icon-button"
+                        type="button" title="Sign out">
+                        <i data-lucide="log-out"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+
+        <main class="main-area">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button id="menuToggle" class="icon-button"
+                        type="button" aria-label="Open menu">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div>
+                        <span class="topbar-caption">WORKSPACE</span>
+                        <h2 id="pageTitle">Overview</h2>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <span class="secure-indicator">
+                        <span class="status-dot"></span>
+                        Secure Session
+                    </span>
+                    <div id="topbarAvatar" class="avatar small-avatar">AC</div>
+                    <strong id="topbarUserName">Cloud User</strong>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <!-- OVERVIEW -->
+
+                <section id="page-overview" class="page active">
+                    <div class="welcome-section">
+                        <div>
+                            <span class="eyebrow">YOUR CLOUD WORKSPACE</span>
+                            <h1>Welcome back, <span id="welcomeName">User</span></h1>
+                            <p>Here's what's happening with your cloud account.</p>
+                        </div>
+                        <button class="primary-button compact-button" data-page="servers">
+                            View Servers <i data-lucide="arrow-up-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <article class="stat-card">
+                            <div class="stat-icon indigo">
+                                <i data-lucide="server"></i>
+                            </div>
+                            <span>Total Servers</span>
+                            <strong id="totalServers">—</strong>
+                            <small>Your cloud instances</small>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon green">
+                                <i data-lucide="activity"></i>
+                            </div>
+                            <span>Online Servers</span>
+                            <strong id="onlineServers">—</strong>
+                            <small>Currently running</small>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon orange">
+                                <i data-lucide="power"></i>
+                            </div>
+                            <span>Offline Servers</span>
+                            <strong id="offlineServers">—</strong>
+                            <small>Currently stopped</small>
+                        </article>
+
+                        <article class="stat-card">
+                            <div class="stat-icon blue">
+                                <i data-lucide="messages-square"></i>
+                            </div>
+                            <span>Support Tickets</span>
+                            <strong id="totalTickets">0</strong>
+                            <small>Your submitted tickets</small>
+                        </article>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <section class="content-card server-overview-card">
+                            <div class="card-heading">
+                                <div>
+                                    <h3>Recent Servers</h3>
+                                    <p>Your latest cloud instances</p>
+                                </div>
+                                <button class="text-button" data-page="servers">
+                                    View all <i data-lucide="arrow-right"></i>
+                                </button>
+                            </div>
+                            <div id="recentServers" class="server-list"></div>
+                        </section>
+
+                        <section class="content-card">
+                            <div class="card-heading">
+                                <div>
+                                    <h3>Quick Access</h3>
+                                    <p>Manage your account</p>
+                                </div>
+                            </div>
+
+                            <button class="quick-link" data-page="servers">
+                                <span class="quick-icon"><i data-lucide="server"></i></span>
+                                <span><strong>My Servers</strong><small>View your instances</small></span>
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+
+                            <button class="quick-link" data-page="tickets">
+                                <span class="quick-icon"><i data-lucide="life-buoy"></i></span>
+                                <span><strong>Get Support</strong><small>Contact our support team</small></span>
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+
+                            <button class="quick-link" data-page="account">
+                                <span class="quick-icon"><i data-lucide="user-round"></i></span>
+                                <span><strong>My Account</strong><small>Update your profile</small></span>
+                                <i data-lucide="chevron-right"></i>
+                            </button>
+                        </section>
+                    </div>
+                </section>
+
+                <!-- SERVERS -->
+
+                <section id="page-servers" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">INFRASTRUCTURE</span>
+                            <h1>My Servers</h1>
+                            <p>View and manage your cloud instances.</p>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div id="myServersList" class="server-list"></div>
+                    </div>
+                </section>
+
+                <!-- TICKETS -->
+
+                <section id="page-tickets" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">CUSTOMER SUPPORT</span>
+                            <h1>Support Tickets</h1>
+                            <p>Get help from the ASTRIX CLOUD team.</p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid ticket-layout">
+                        <section class="content-card">
+                            <div class="card-heading">
+                                <div>
+                                    <h3>Create a ticket</h3>
+                                    <p>Describe your issue below.</p>
+                                </div>
+                            </div>
+
+                            <form id="ticketForm" class="standard-form">
+                                <label for="ticketSubject">Subject</label>
+                                <input id="ticketSubject" type="text"
+                                    placeholder="What do you need help with?" required>
+
+                                <label for="ticketCategory">Category</label>
+                                <select id="ticketCategory" required>
+                                    <option value="">Select category</option>
+                                    <option value="Technical Support">Technical Support</option>
+                                    <option value="Billing">Billing</option>
+                                    <option value="Account">Account</option>
+                                    <option value="Other">Other</option>
+                                </select>
+
+                                <label for="ticketDescription">Description</label>
+                                <textarea id="ticketDescription" rows="5"
+                                    placeholder="Explain your issue..." required></textarea>
+
+                                <div id="ticketFormMessage" class="form-message"></div>
+
+                                <button type="submit" class="primary-button">
+                                    Submit Ticket <i data-lucide="send"></i>
+                                </button>
+                            </form>
+                        </section>
+
+                        <section class="content-card">
+                            <div class="card-heading">
+                                <div>
+                                    <h3>My Tickets</h3>
+                                    <p>Your support conversations.</p>
+                                </div>
+                            </div>
+                            <div id="myTicketsList" class="ticket-list"></div>
+                        </section>
+                    </div>
+                </section>
+
+                <!-- ACCOUNT -->
+
+                <section id="page-account" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">PERSONAL SETTINGS</span>
+                            <h1>My Account</h1>
+                            <p>Manage your profile and account information.</p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid account-grid">
+                        <section class="content-card account-profile-card">
+                            <div class="account-avatar-wrap">
+                                <div id="accountAvatar" class="avatar account-avatar">AC</div>
+                            </div>
+                            <h2 id="accountName">Cloud User</h2>
+                            <p id="accountEmail">user@example.com</p>
+                            <span id="accountRole" class="role-badge">Member</span>
+
+                            <div class="divider"></div>
+
+                            <label for="accountLogoInput">Profile image</label>
+                            <input id="accountLogoInput" type="file"
+                                accept="image/png,image/jpeg,image/webp">
+                            <p class="helper-text">PNG, JPG or WEBP · Maximum 1 MB</p>
+                            <div id="logoMessage" class="form-message"></div>
+                        </section>
+
+                        <section class="content-card">
+                            <div class="card-heading">
+                                <div>
+                                    <h3>Account Information</h3>
+                                    <p>Your registered account details.</p>
+                                </div>
+                            </div>
+
+                            <div class="detail-row">
+                                <span>Username</span>
+                                <strong id="accountNameDetail">—</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Email address</span>
+                                <strong id="accountEmailDetail">—</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Account role</span>
+                                <strong id="accountRoleDetail">—</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Platform</span>
+                                <strong>ASTRIX CLOUD</strong>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+
+                <!-- ADMIN: CREATE SERVER -->
+
+                <section id="page-create-server" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">ADMINISTRATION</span>
+                            <h1>Create Server</h1>
+                            <p>Server provisioning integration is not connected yet.</p>
+                        </div>
+                    </div>
+
+                    <section class="content-card">
+                        <form id="createServerForm" class="standard-form">
+                            <label for="serverName">Server name</label>
+                            <input id="serverName" placeholder="Example: Minecraft Survival">
+
+                            <label for="serverOwner">Owner email</label>
+                            <input id="serverOwner" type="email" placeholder="user@example.com">
+
+                            <label for="serverType">Server type</label>
+                            <select id="serverType">
+                                <option value="minecraft">Minecraft</option>
+                                <option value="other">Other</option>
+                            </select>
+
+                            <div id="createServerMessage" class="form-message"></div>
+
+                            <button type="submit" class="primary-button">
+                                Create Server
+                            </button>
+                        </form>
+                    </section>
+                </section>
+
+                <!-- ADMIN: ALL SERVERS -->
+
+                <section id="page-all-servers" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">ADMINISTRATION</span>
+                            <h1>All Servers</h1>
+                            <p>Platform server overview.</p>
+                        </div>
+                    </div>
+                    <section class="content-card">
+                        <div id="allServersList" class="server-list"></div>
+                    </section>
+                </section>
+
+                <!-- ADMIN: USERS -->
+
+                <section id="page-manage-users" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">ADMINISTRATION</span>
+                            <h1>Manage Users</h1>
+                            <p>User management integration is not connected yet.</p>
+                        </div>
+                    </div>
+                    <section class="content-card">
+                        <div id="usersList"></div>
+                    </section>
+                </section>
+
+                <!-- ADMIN: TICKETS -->
+
+                <section id="page-manage-tickets" class="page">
+                    <div class="page-heading">
+                        <div>
+                            <span class="eyebrow">ADMINISTRATION</span>
+                            <h1>Manage Tickets</h1>
+                            <p>Review customer support conversations.</p>
+                        </div>
+                    </div>
+                    <section class="content-card">
+                        <div id="adminTicketsList" class="ticket-list"></div>
+                    </section>
+                </section>
+
+                <footer class="main-footer">
+                    <span>© 2026 ASTRIX CLOUD</span>
+                    <span>Modern Cloud Infrastructure</span>
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/PANEL.JS"></script>
+</body>
+</html>
