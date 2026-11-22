@@ -1,13 +1,13 @@
 
-/* =========================================================
-   ASTRIX CLOUD — CONTROL PANEL
-   Modern Cloud Dashboard
-   Deep Navy-Slate + Electric Indigo
-   ========================================================= */
-
 "use strict";
 
-/* ================= CONFIGURATION ================= */
+/* ==========================================================
+   ASTRIX CLOUD — CONTROL PANEL
+   Pterodactyl-inspired interface
+   Authentication • Navigation • Account • Support
+   ========================================================== */
+
+/* ================= API CONFIGURATION ================= */
 
 const API = {
     login: "/api/login",
@@ -20,56 +20,49 @@ const API = {
     ticketStatus: "/api/ticket-status"
 };
 
-const $ = selector => document.querySelector(selector);
+const SELECTORS = {
+    loginPage: "#loginPage",
+    dashboard: "#dashboard",
+    loginForm: "#loginForm",
+    signupForm: "#signupForm",
+    verifyForm: "#verifyForm"
+};
 
 let currentUser = null;
-let currentPage = "overview";
-let cachedServers = [];
-let cachedTickets = [];
+let pendingSignupEmail = "";
+let pendingSignupDetails = null;
+let isLoadingTickets = false;
 
 /* ================= HELPERS ================= */
 
-function getUserId(user = currentUser) {
-    return user?.id || user?.user_id || user?.email || "guest";
-}
+const $ = (selector, root = document) => root.querySelector(selector);
 
-function getInitials(name = "A") {
-    return String(name)
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map(part => part[0]?.toUpperCase() || "")
-        .join("") || "A";
-}
+const $$ = (selector, root = document) =>
+    Array.from(root.querySelectorAll(selector));
 
-function escapeHTML(value = "") {
-    return String(value).replace(/[&<>"']/g, char => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[char]);
-}
-
-function showMessage(element, message, type = "error") {
+function setMessage(selector, message, type = "error") {
+    const element = $(selector);
     if (!element) return;
 
-    element.textContent = message;
-    element.className = message ? `message ${type}` : "message";
-    element.hidden = !message;
+    element.textContent = message || "";
+    element.className = "form-message";
+
+    if (message) {
+        element.classList.add(type === "success" ? "success-message" : "error-message");
+    }
 }
 
-function setButtonLoading(button, loading, text = "Please wait...") {
+function setButtonLoading(button, loading, loadingText = "Please wait...") {
     if (!button) return;
 
     if (loading) {
-        button.dataset.originalText = button.innerHTML;
+        if (!button.dataset.originalText) {
+            button.dataset.originalText = button.innerHTML;
+        }
         button.disabled = true;
-        button.textContent = text;
+        button.textContent = loadingText;
     } else {
         button.disabled = false;
-
         if (button.dataset.originalText) {
             button.innerHTML = button.dataset.originalText;
             delete button.dataset.originalText;
@@ -78,782 +71,301 @@ function setButtonLoading(button, loading, text = "Please wait...") {
 }
 
 async function apiRequest(url, options = {}) {
-    const response = await fetch(url, {
+    const config = {
+        method: options.method || "GET",
         credentials: "same-origin",
-        ...options,
         headers: {
-            "Content-Type": "application/json",
+            "Accept": "application/json",
+            ...(options.body ? { "Content-Type": "application/json" } : {}),
             ...(options.headers || {})
-        }
-    });
+        },
+        ...(options.body ? { body: JSON.stringify(options.body) } : {})
+    };
 
+    const response = await fetch(url, config);
+
+    const contentType = response.headers.get("content-type") || "";
     let data = {};
 
-    try {
+    if (contentType.includes("application/json")) {
         data = await response.json();
-    } catch {
-        data = {};
+    } else {
+        const text = await response.text();
+        data = text ? { message: text } : {};
     }
 
     if (!response.ok) {
-        throw new Error(
-            data.error ||
+        const message =
             data.message ||
-            `Request failed (${response.status})`
-        );
-    }
+            data.error ||
+            `Request failed (${response.status})`;
 
-    if (data.success === false) {
-        throw new Error(data.error || data.message || "Request failed");
+        throw new Error(message);
     }
 
     return data;
 }
 
-function getArray(result, key) {
-    if (Array.isArray(result)) return result;
-    if (Array.isArray(result?.[key])) return result[key];
-    if (Array.isArray(result?.data)) return result.data;
-    return [];
+function getUserId(user = currentUser) {
+    return user?.id ?? user?.user_id ?? user?.uuid ?? "default";
 }
 
-/* ================= AUTH SCREENS ================= */
-
-function showAuthScreen(screen) {
-    const screens = [
-        "#loginForm",
-        "#signupForm",
-        "#verifyForm"
-    ];
-
-    screens.forEach(selector => {
-        const element = $(selector);
-        if (element) element.hidden = true;
-    });
-
-    const selected = $(
-        screen === "signup"
-            ? "#signupForm"
-            : screen === "verify"
-                ? "#verifyForm"
-                : "#loginForm"
+function getUserName(user = currentUser) {
+    return (
+        user?.username ||
+        user?.name ||
+        user?.email?.split("@")[0] ||
+        "Cloud User"
     );
+}
 
-    if (selected) selected.hidden = false;
+function getUserEmail(user = currentUser) {
+    return user?.email || "No email available";
+}
 
-    [
-        "#loginMessage",
-        "#signupMessage",
-        "#verifyMessage"
-    ].forEach(selector => showMessage($(selector), ""));
+function getUserRole(user = currentUser) {
+    return String(user?.role || "member").toLowerCase();
+}
+
+function isStaff(user = currentUser) {
+    return ["owner", "admin", "staff"].includes(getUserRole(user));
+}
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[character]);
+}
+
+function getInitials(name) {
+    return String(name || "AC")
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(part => part[0] || "")
+        .join("")
+        .toUpperCase();
+}
+
+function showIcons() {
+    if (window.lucide?.createIcons) {
+        window.lucide.createIcons();
+    }
 }
 
 function showLogin() {
-    showAuthScreen("login");
+    $(SELECTORS.loginPage).hidden = false;
+    $(SELECTORS.dashboard).hidden = true;
+    closeSidebar();
+    showIcons();
 }
 
-function showSignup() {
-    showAuthScreen("signup");
+function showDashboard() {
+    $(SELECTORS.loginPage).hidden = true;
+    $(SELECTORS.dashboard).hidden = false;
+    updateUserInterface();
+    navigateTo("overview");
+    closeSidebar();
+    showIcons();
 }
 
-function showVerification() {
-    showAuthScreen("verify");
+/* ================= AUTH FORM SWITCHING ================= */
+
+function showAuthForm(formName) {
+    const forms = {
+        login: $(SELECTORS.loginForm),
+        signup: $(SELECTORS.signupForm),
+        verify: $(SELECTORS.verifyForm)
+    };
+
+    Object.entries(forms).forEach(([name, form]) => {
+        if (form) form.hidden = name !== formName;
+    });
+
+    setMessage("#loginMessage", "");
+    setMessage("#signupMessage", "");
+    setMessage("#verifyMessage", "");
+
+    showIcons();
 }
+
+$("#showSignupBtn")?.addEventListener("click", () => {
+    showAuthForm("signup");
+});
+
+$("#showLoginBtn")?.addEventListener("click", () => {
+    showAuthForm("login");
+});
+
+$("#backToLoginBtn")?.addEventListener("click", () => {
+    showAuthForm("login");
+});
 
 /* ================= LOGIN ================= */
 
-async function handleLogin(event) {
+$(SELECTORS.loginForm)?.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const button = $("#loginForm button[type='submit']");
-    const message = $("#loginMessage");
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
 
     const email = $("#loginEmail")?.value.trim();
     const password = $("#loginPassword")?.value;
 
     if (!email || !password) {
-        return showMessage(message, "Please enter your email and password.");
+        setMessage("#loginMessage", "Enter your email and password.");
+        return;
     }
 
-    setButtonLoading(button, true);
+    setButtonLoading(button, true, "Signing in...");
+    setMessage("#loginMessage", "");
 
     try {
         const result = await apiRequest(API.login, {
             method: "POST",
-            body: JSON.stringify({ email, password })
+            body: { email, password }
         });
 
-        const user = result.user || result.data?.user || result.data;
+        currentUser = result.user || result.data?.user || null;
 
-        if (!user || typeof user !== "object") {
-            throw new Error("Login succeeded but user information was not returned.");
+        if (!currentUser) {
+            const me = await apiRequest(API.me);
+            currentUser = me.user || me.data?.user || me;
         }
 
-        currentUser = user;
-        showDashboard(currentUser);
+        if (!currentUser || !getUserEmail(currentUser)) {
+            throw new Error("Login succeeded but user details could not be loaded.");
+        }
+
+        $("#loginPassword").value = "";
+        showDashboard();
+        await loadTickets();
 
     } catch (error) {
-        showMessage(message, error.message);
+        setMessage("#loginMessage", error.message || "Unable to sign in.");
     } finally {
         setButtonLoading(button, false);
     }
-}
+});
 
 /* ================= SIGNUP ================= */
 
-async function handleSignup(event) {
+$(SELECTORS.signupForm)?.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const button = $("#signupForm button[type='submit']");
-    const message = $("#signupMessage");
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
 
     const username = $("#signupUsername")?.value.trim();
     const email = $("#signupEmail")?.value.trim();
     const password = $("#signupPassword")?.value;
 
     if (!username || !email || !password) {
-        return showMessage(message, "Please complete all fields.");
+        setMessage("#signupMessage", "Complete all fields.");
+        return;
     }
 
-    if (password.length < 8) {
-        return showMessage(message, "Password must be at least 8 characters.");
+    if (username.length < 3 || username.length > 30) {
+        setMessage("#signupMessage", "Username must be 3–30 characters.");
+        return;
     }
 
-    setButtonLoading(button, true);
+    if (!/^[a-zA-Z0-9_.-]+$/.test(username)) {
+        setMessage("#signupMessage", "Username contains unsupported characters.");
+        return;
+    }
+
+    if (password.length < 12 || password.length > 128) {
+        setMessage("#signupMessage", "Password must be 12–128 characters.");
+        return;
+    }
+
+    setButtonLoading(button, true, "Sending verification...");
+    setMessage("#signupMessage", "");
 
     try {
         await apiRequest(API.sendVerification, {
             method: "POST",
-            body: JSON.stringify({
-                username,
-                email,
-                password
-            })
+            body: { username, email, password }
         });
 
-        const emailInput = $("#verifyForm input[name='email']");
-        if (emailInput) emailInput.value = email;
+        pendingSignupEmail = email;
+        pendingSignupDetails = { username, email, password };
 
-        const verifyForm = $("#verifyForm");
-        if (verifyForm) verifyForm.dataset.email = email;
-
-        showVerification();
-
-        showMessage(
-            $("#verifyMessage"),
+        showAuthForm("verify");
+        setMessage(
+            "#verifyMessage",
             "Verification code sent. Check your email.",
             "success"
         );
 
     } catch (error) {
-        showMessage(message, error.message);
+        setMessage("#signupMessage", error.message || "Unable to start signup.");
     } finally {
         setButtonLoading(button, false);
     }
-}
+});
 
 /* ================= EMAIL VERIFICATION ================= */
 
-async function handleVerification(event) {
+$(SELECTORS.verifyForm)?.addEventListener("submit", async event => {
     event.preventDefault();
 
-    const button = $("#verifyForm button[type='submit']");
-    const message = $("#verifyMessage");
-
-    const email =
-        $("#verifyForm")?.dataset.email ||
-        $("#verifyEmail")?.value.trim();
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
 
     const code = $("#verificationCode")?.value.trim();
+    const email = pendingSignupEmail || pendingSignupDetails?.email;
 
-    if (!email || !code) {
-        return showMessage(message, "Enter your verification code.");
+    if (!email) {
+        setMessage("#verifyMessage", "Signup session not found. Start again.");
+        return;
     }
 
-    setButtonLoading(button, true);
+    if (!/^\d{6}$/.test(code || "")) {
+        setMessage("#verifyMessage", "Enter the six-digit verification code.");
+        return;
+    }
+
+    setButtonLoading(button, true, "Verifying...");
+    setMessage("#verifyMessage", "");
 
     try {
-        await apiRequest(API.verifySignup, {
+        const result = await apiRequest(API.verifySignup, {
             method: "POST",
-            body: JSON.stringify({ email, code })
+            body: { email, code }
         });
 
-        showLogin();
+        pendingSignupDetails = null;
+        pendingSignupEmail = "";
+        $("#verificationCode").value = "";
 
-        showMessage(
-            $("#loginMessage"),
-            "Account verified! You can now log in.",
-            "success"
-        );
+        const returnedUser = result.user || result.data?.user;
 
-        if ($("#loginEmail")) {
+        if (returnedUser) {
+            currentUser = returnedUser;
+            showDashboard();
+            await loadTickets();
+        } else {
+            showAuthForm("login");
             $("#loginEmail").value = email;
-        }
-
-    } catch (error) {
-        showMessage(message, error.message);
-    } finally {
-        setButtonLoading(button, false);
-    }
-}
-
-/* ================= DASHBOARD ================= */
-
-function showDashboard(user) {
-    currentUser = user;
-
-    const loginPage = $("#loginPage");
-    const dashboard = $("#dashboard");
-
-    if (loginPage) loginPage.hidden = true;
-    if (dashboard) dashboard.hidden = false;
-
-    updateProfile();
-    setupRoleNavigation();
-
-    navigateTo("overview");
-    loadDashboardData();
-}
-
-function showAuth() {
-    if ($("#dashboard")) $("#dashboard").hidden = true;
-    if ($("#loginPage")) $("#loginPage").hidden = false;
-
-    currentUser = null;
-    closeSidebar();
-}
-
-/* ================= PROFILE ================= */
-
-function updateProfile() {
-    if (!currentUser) return;
-
-    const name =
-        currentUser.username ||
-        currentUser.name ||
-        currentUser.email ||
-        "ASTRIX User";
-
-    const email = currentUser.email || "No email";
-    const role = currentUser.role || "user";
-    const initials = getInitials(name);
-
-    const elements = {
-        "#sidebarUserName": name,
-        "#sidebarUserRole": role,
-        "#topbarUserName": name,
-        "#accountName": name,
-        "#accountEmail": email,
-        "#accountRole": role,
-        "#accountNameDetail": name,
-        "#accountEmailDetail": email,
-        "#accountRoleDetail": role,
-        "#welcomeName": name
-    };
-
-    Object.entries(elements).forEach(([selector, value]) => {
-        const element = $(selector);
-        if (element) element.textContent = value;
-    });
-
-    [
-        "#userAvatar",
-        "#topbarAvatar",
-        "#accountAvatar"
-    ].forEach(selector => {
-        const element = $(selector);
-        if (element) element.textContent = initials;
-    });
-
-    loadSavedLogo();
-}
-
-/* ================= ROLE NAVIGATION ================= */
-
-function isAdmin() {
-    return ["admin", "owner", "staff"].includes(
-        String(currentUser?.role || "").toLowerCase()
-    );
-}
-
-function setupRoleNavigation() {
-    const adminNavigation = $("#adminNavigation");
-
-    if (adminNavigation) {
-        adminNavigation.hidden = !isAdmin();
-    }
-}
-
-/* ================= PAGE NAVIGATION ================= */
-
-const PAGE_TITLES = {
-    overview: "Overview",
-    servers: "My Servers",
-    tickets: "Support Tickets",
-    account: "My Account",
-    "create-server": "Create Server",
-    "all-servers": "All Servers",
-    "manage-users": "Manage Users",
-    "manage-tickets": "Manage Tickets"
-};
-
-function navigateTo(page) {
-    if (!PAGE_TITLES[page]) return;
-
-    if (
-        ["create-server", "all-servers", "manage-users", "manage-tickets"]
-            .includes(page) &&
-        !isAdmin()
-    ) {
-        page = "overview";
-    }
-
-    currentPage = page;
-
-    document.querySelectorAll("[id^='page-']").forEach(element => {
-        element.hidden = element.id !== `page-${page}`;
-    });
-
-    document.querySelectorAll("[data-page]").forEach(button => {
-        button.classList.toggle(
-            "active",
-            button.dataset.page === page
-        );
-    });
-
-    const title = $("#pageTitle");
-    if (title) title.textContent = PAGE_TITLES[page];
-
-    closeSidebar();
-}
-
-/* ================= SIDEBAR ================= */
-
-function openSidebar() {
-    $("#sidebar")?.classList.add("open");
-
-    if ($("#sidebarOverlay")) {
-        $("#sidebarOverlay").hidden = false;
-    }
-}
-
-function closeSidebar() {
-    $("#sidebar")?.classList.remove("open");
-
-    if ($("#sidebarOverlay")) {
-        $("#sidebarOverlay").hidden = true;
-    }
-}
-
-/* ================= DASHBOARD DATA ================= */
-
-async function loadDashboardData() {
-    await Promise.allSettled([
-        loadServers(),
-        loadTickets()
-    ]);
-
-    updateDashboardStats();
-}
-
-function updateDashboardStats() {
-    const total = cachedServers.length;
-
-    const online = cachedServers.filter(server =>
-        String(server.status || "").toLowerCase() === "online"
-    ).length;
-
-    const offline = total - online;
-
-    if ($("#totalServers")) $("#totalServers").textContent = total;
-    if ($("#onlineServers")) $("#onlineServers").textContent = online;
-    if ($("#offlineServers")) $("#offlineServers").textContent = offline;
-    if ($("#totalTickets")) $("#totalTickets").textContent = cachedTickets.length;
-}
-
-/* ================= SERVERS ================= */
-
-async function loadServers() {
-    // Server provisioning and server-list API are not connected yet.
-    cachedServers = [];
-    renderServers();
-}
-
-function renderServers() {
-    const myServers = $("#myServersList");
-    const recentServers = $("#recentServers");
-    const allServers = $("#allServersList");
-
-    const empty = `
-        <div class="empty-state">
-            <div>☁️</div>
-            <strong>No servers yet</strong>
-            <p>Your cloud servers will appear here when server provisioning is connected.</p>
-        </div>
-    `;
-
-    if (myServers) myServers.innerHTML = empty;
-    if (recentServers) recentServers.innerHTML = empty;
-    if (allServers) allServers.innerHTML = empty;
-}
-
-/* ================= SUPPORT TICKETS ================= */
-
-async function loadTickets() {
-    try {
-        const result = await apiRequest(API.tickets);
-        cachedTickets = getArray(result, "tickets");
-
-        renderTickets();
-        updateDashboardStats();
-
-    } catch (error) {
-        console.error("Ticket loading error:", error);
-        cachedTickets = [];
-        renderTickets();
-    }
-}
-
-function renderTickets() {
-    const myTickets = $("#myTicketsList");
-    const adminTickets = $("#adminTicketsList");
-
-    const empty = `
-        <div class="empty-state">
-            <div>🎫</div>
-            <strong>No support tickets</strong>
-            <p>Create a support ticket if you need help.</p>
-        </div>
-    `;
-
-    if (myTickets) {
-        myTickets.innerHTML = cachedTickets.length
-            ? cachedTickets.map(ticketCard).join("")
-            : empty;
-    }
-
-    if (adminTickets) {
-        adminTickets.innerHTML = cachedTickets.length
-            ? cachedTickets.map(ticketCard).join("")
-            : empty;
-    }
-}
-
-function ticketCard(ticket) {
-    const id = ticket.id || ticket.ticket_id;
-    const subject = escapeHTML(ticket.subject || "Support request");
-    const status = String(ticket.status || "open").toLowerCase();
-
-    const badge = status === "closed"
-        ? "badge-neutral"
-        : status === "resolved"
-            ? "badge-success"
-            : "badge-warning";
-
-    return `
-        <div class="ticket-card">
-            <div class="ticket-card-header">
-                <h3>${subject}</h3>
-                <span class="badge ${badge}">${escapeHTML(status)}</span>
-            </div>
-
-            <p class="ticket-description">
-                ${escapeHTML(ticket.description || ticket.message || "")}
-            </p>
-
-            <div class="list-item-main">
-                <span>Ticket #${escapeHTML(id || "N/A")}</span>
-            </div>
-
-            <div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap">
-                <button class="btn btn-secondary" type="button"
-                    data-ticket-replies="${escapeHTML(id || "")}">
-                    View replies
-                </button>
-
-                ${status !== "closed" ? `
-                    <button class="btn btn-danger" type="button"
-                        data-ticket-close="${escapeHTML(id || "")}">
-                        Close ticket
-                    </button>
-                ` : ""}
-            </div>
-
-            <div id="ticket-replies-${escapeHTML(id || "")}" hidden
-                style="margin-top:15px"></div>
-
-            <form class="ticket-reply-form" data-ticket-id="${escapeHTML(id || "")}"
-                style="margin-top:12px" hidden>
-                <textarea class="form-control" name="message"
-                    placeholder="Write your reply..." required></textarea>
-                <button class="btn btn-primary" type="submit"
-                    style="margin-top:9px">Send reply</button>
-            </form>
-        </div>
-    `;
-}
-
-async function createTicket(event) {
-    event.preventDefault();
-
-    const button = $("#ticketForm button[type='submit']");
-    const message = $("#ticketFormMessage");
-
-    const subject = $("#ticketSubject")?.value.trim();
-    const category = $("#ticketCategory")?.value;
-    const description = $("#ticketDescription")?.value.trim();
-
-    if (!subject || !description) {
-        return showMessage(message, "Please complete the ticket details.");
-    }
-
-    setButtonLoading(button, true);
-
-    try {
-        await apiRequest(API.tickets, {
-            method: "POST",
-            body: JSON.stringify({
-                subject,
-                category,
-                description
-            })
-        });
-
-        $("#ticketForm")?.reset();
-
-        showMessage(message, "Ticket created successfully.", "success");
-
-        await loadTickets();
-
-    } catch (error) {
-        showMessage(message, error.message);
-    } finally {
-        setButtonLoading(button, false);
-    }
-}
-
-async function loadTicketReplies(ticketId) {
-    const container = $(`#ticket-replies-${CSS.escape(ticketId)}`);
-    const form = document.querySelector(
-        `.ticket-reply-form[data-ticket-id="${CSS.escape(ticketId)}"]`
-    );
-
-    if (!container) return;
-
-    container.hidden = false;
-
-    try {
-        const result = await apiRequest(
-            `${API.ticketReplies}?ticket_id=${encodeURIComponent(ticketId)}`
-        );
-
-        const replies = getArray(result, "replies");
-
-        container.innerHTML = replies.length
-            ? replies.map(reply => `
-                <div class="list-item" style="margin-bottom:8px">
-                    <div class="list-item-main">
-                        <strong>${escapeHTML(reply.username || reply.user_name || "User")}</strong>
-                        <span>${escapeHTML(reply.message || "")}</span>
-                    </div>
-                </div>
-            `).join("")
-            : `<p class="muted">No replies yet.</p>`;
-
-        if (form) form.hidden = false;
-
-    } catch (error) {
-        container.textContent = error.message;
-    }
-}
-
-async function sendTicketReply(event) {
-    event.preventDefault();
-
-    const form = event.target.closest(".ticket-reply-form");
-    if (!form) return;
-
-    const ticketId = form.dataset.ticketId;
-    const message = form.querySelector("[name='message']")?.value.trim();
-
-    if (!message) return;
-
-    const button = form.querySelector("button[type='submit']");
-    setButtonLoading(button, true);
-
-    try {
-        await apiRequest(API.ticketReplies, {
-            method: "POST",
-            body: JSON.stringify({
-                ticket_id: ticketId,
-                message
-            })
-        });
-
-        form.reset();
-        await loadTicketReplies(ticketId);
-
-    } catch (error) {
-        alert(error.message);
-    } finally {
-        setButtonLoading(button, false);
-    }
-}
-
-async function closeTicket(ticketId) {
-    if (!confirm("Are you sure you want to close this ticket?")) return;
-
-    try {
-        await apiRequest(API.ticketStatus, {
-            method: "POST",
-            body: JSON.stringify({
-                ticket_id: ticketId,
-                status: "closed"
-            })
-        });
-
-        await loadTickets();
-
-    } catch (error) {
-        alert(error.message);
-    }
-}
-
-/* ================= ACCOUNT LOGO ================= */
-
-function loadSavedLogo() {
-    const logo = localStorage.getItem(
-        `astrix_profile_logo_${getUserId()}`
-    );
-
-    if (!logo) return;
-
-    [
-        "#userAvatar",
-        "#topbarAvatar",
-        "#accountAvatar"
-    ].forEach(selector => {
-        const element = $(selector);
-        if (!element) return;
-
-        element.innerHTML = `<img src="${logo}" alt="Profile logo">`;
-    });
-}
-
-function handleLogoUpload(event) {
-    const file = event.target.files?.[0];
-    const message = $("#logoMessage");
-
-    if (!file) return;
-
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
-        return showMessage(message, "Use PNG, JPG, or WEBP images.");
-    }
-
-    if (file.size > 1024 * 1024) {
-        return showMessage(message, "Image must be smaller than 1 MB.");
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-        try {
-            localStorage.setItem(
-                `astrix_profile_logo_${getUserId()}`,
-                reader.result
+            setMessage(
+                "#loginMessage",
+                "Email verified! You can now sign in.",
+                "success"
             );
-
-            loadSavedLogo();
-
-            showMessage(message, "Profile logo updated.", "success");
-
-        } catch {
-            showMessage(message, "Unable to save this image in browser storage.");
         }
-    };
 
-    reader.readAsDataURL(file);
-}
-
-/* ================= ADMIN PLACEHOLDERS ================= */
-
-async function createServer(event) {
-    event.preventDefault();
-
-    showMessage(
-        $("#createServerMessage"),
-        "Server provisioning is not connected yet. Connect a server provider before creating servers."
-    );
-}
-
-/* ================= LOGOUT ================= */
-
-async function handleLogout() {
-    try {
-        await apiRequest(API.logout, {
-            method: "POST"
-        });
     } catch (error) {
-        console.error("Logout error:", error);
+        setMessage("#verifyMessage", error.message || "Verification failed.");
+    } finally {
+        setButtonLoading(button, false);
     }
-
-    cachedServers = [];
-    cachedTickets = [];
-
-    showAuth();
-    showLogin();
-}
-
-/* ================= EVENT LISTENERS ================= */
-
-function setupEventListeners() {
-    $("#loginForm")?.addEventListener("submit", handleLogin);
-    $("#signupForm")?.addEventListener("submit", handleSignup);
-    $("#verifyForm")?.addEventListener("submit", handleVerification);
-
-    $("#showSignupBtn")?.addEventListener("click", showSignup);
-    $("#showLoginBtn")?.addEventListener("click", showLogin);
-    $("#backToLoginBtn")?.addEventListener("click", showLogin);
-
-    $("#logoutBtn")?.addEventListener("click", handleLogout);
-
-    $("#menuToggle")?.addEventListener("click", openSidebar);
-    $("#closeSidebar")?.addEventListener("click", closeSidebar);
-    $("#sidebarOverlay")?.addEventListener("click", closeSidebar);
-
-    $("#ticketForm")?.addEventListener("submit", createTicket);
-    $("#createServerForm")?.addEventListener("submit", createServer);
-
-    $("#accountLogoInput")?.addEventListener("change", handleLogoUpload);
-
-    document.addEventListener("click", event => {
-        const nav = event.target.closest("[data-page]");
-
-        if (nav) {
-            navigateTo(nav.dataset.page);
-            return;
-        }
-
-        const replies = event.target.closest("[data-ticket-replies]");
-
-        if (replies) {
-            loadTicketReplies(replies.dataset.ticketReplies);
-            return;
-        }
-
-        const close = event.target.closest("[data-ticket-close]");
-
-        if (close) {
-            closeTicket(close.dataset.ticketClose);
-        }
-    });
-
-    document.addEventListener("submit", event => {
-        if (event.target.matches(".ticket-reply-form")) {
-            sendTicketReply(event);
-        }
-    });
-}
+});
 
 /* ================= SESSION RESTORE ================= */
 
@@ -861,24 +373,556 @@ async function restoreSession() {
     try {
         const result = await apiRequest(API.me);
 
-        const user = result.user || result.data?.user || result.data;
+        currentUser = result.user || result.data?.user || result;
 
-        if (user && typeof user === "object") {
-            showDashboard(user);
-        } else {
-            showAuth();
+        if (!currentUser || !getUserEmail(currentUser)) {
+            throw new Error("No active session.");
         }
 
+        showDashboard();
+        await loadTickets();
+
     } catch {
-        showAuth();
+        currentUser = null;
         showLogin();
     }
 }
 
-/* ================= START ================= */
+/* ================= USER INTERFACE ================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-    setupEventListeners();
-    restoreSession();
+function updateUserInterface() {
+    if (!currentUser) return;
+
+    const name = getUserName();
+    const email = getUserEmail();
+    const role = getUserRole();
+
+    const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
+    const initials = getInitials(name);
+
+    $("#sidebarUserName").textContent = name;
+    $("#sidebarUserRole").textContent = roleLabel;
+    $("#topbarUserName").textContent = name;
+
+    $("#accountName").textContent = name;
+    $("#accountEmail").textContent = email;
+    $("#accountRole").textContent = roleLabel;
+
+    $("#accountNameDetail").textContent = name;
+    $("#accountEmailDetail").textContent = email;
+    $("#accountRoleDetail").textContent = roleLabel;
+
+    $("#userAvatar").textContent = initials;
+    $("#topbarAvatar").textContent = initials;
+    $("#accountAvatar").textContent = initials;
+
+    const adminNavigation = $("#adminNavigation");
+    if (adminNavigation) {
+        adminNavigation.hidden = !isStaff();
+    }
+
+    loadProfileLogo();
+}
+
+/* ================= PROFILE LOGO ================= */
+
+function getProfileLogoKey() {
+    return `astrix_profile_logo_${getUserId()}`;
+}
+
+function loadProfileLogo() {
+    if (!currentUser) return;
+
+    let logo = null;
+
+    try {
+        logo = localStorage.getItem(getProfileLogoKey());
+    } catch (error) {
+        console.warn("Profile image storage unavailable.", error);
+    }
+
+    const avatars = [
+        $("#userAvatar"),
+        $("#topbarAvatar"),
+        $("#accountAvatar")
+    ];
+
+    avatars.forEach(avatar => {
+        if (!avatar) return;
+
+        if (logo) {
+            avatar.innerHTML = `<img src="${logo}" alt="Profile image">`;
+        } else {
+            avatar.textContent = getInitials(getUserName());
+        }
+    });
+}
+
+$("#accountLogoInput")?.addEventListener("change", event => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/webp"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+        setMessage("#logoMessage", "Choose a PNG, JPG or WEBP image.");
+        event.target.value = "";
+        return;
+    }
+
+    if (file.size > 1024 * 1024) {
+        setMessage("#logoMessage", "Image must be smaller than 1 MB.");
+        event.target.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        try {
+            localStorage.setItem(getProfileLogoKey(), reader.result);
+            loadProfileLogo();
+            setMessage("#logoMessage", "Profile image updated.", "success");
+        } catch {
+            setMessage("#logoMessage", "Unable to save this image in browser storage.");
+        }
+    };
+
+    reader.onerror = () => {
+        setMessage("#logoMessage", "Unable to read this image.");
+    };
+
+    reader.readAsDataURL(file);
 });
 
+/* ================= NAVIGATION ================= */
+
+const pageNames = {
+    overview: "Console",
+    files: "Files",
+    databases: "Databases",
+    schedules: "Schedules",
+    users: "Users",
+    backups: "Backups",
+    network: "Network",
+    startup: "Startup",
+    settings: "Settings",
+    activity: "Activity",
+    tickets: "Support Tickets",
+    account: "My Account",
+    admin: "Admin",
+    "all-servers": "All Servers",
+    "manage-users": "Manage Users",
+    "manage-tickets": "Manage Tickets"
+};
+
+function navigateTo(pageName) {
+    const page = $(`#page-${CSS.escape(pageName)}`);
+
+    if (!page) return;
+
+    if (
+        ["admin", "all-servers", "manage-users", "manage-tickets"].includes(pageName) &&
+        !isStaff()
+    ) {
+        return;
+    }
+
+    $$(".page").forEach(section => section.classList.remove("active"));
+    page.classList.add("active");
+
+    $$(".nav-link").forEach(link => {
+        link.classList.toggle("active", link.dataset.page === pageName);
+    });
+
+    $("#pageTitle").textContent = pageNames[pageName] || "ASTRIX CLOUD";
+
+    closeSidebar();
+    showIcons();
+
+    if (pageName === "tickets") {
+        loadTickets();
+    }
+}
+
+document.addEventListener("click", event => {
+    const navigationButton = event.target.closest("[data-page]");
+
+    if (!navigationButton) return;
+
+    const pageName = navigationButton.dataset.page;
+    if (pageName) navigateTo(pageName);
+});
+
+/* ================= MOBILE SIDEBAR ================= */
+
+function openSidebar() {
+    $("#sidebar")?.classList.add("open");
+    $("#sidebarOverlay")?.classList.add("active");
+}
+
+function closeSidebar() {
+    $("#sidebar")?.classList.remove("open");
+    $("#sidebarOverlay")?.classList.remove("active");
+}
+
+$("#menuToggle")?.addEventListener("click", openSidebar);
+$("#closeSidebar")?.addEventListener("click", closeSidebar);
+$("#sidebarOverlay")?.addEventListener("click", closeSidebar);
+
+/* ================= LOGOUT ================= */
+
+$("#logoutBtn")?.addEventListener("click", async () => {
+    const button = $("#logoutBtn");
+    if (button) button.disabled = true;
+
+    try {
+        await apiRequest(API.logout, { method: "POST" });
+    } catch (error) {
+        console.warn("Logout endpoint returned an error:", error);
+    }
+
+    currentUser = null;
+    pendingSignupEmail = "";
+    pendingSignupDetails = null;
+
+    showLogin();
+    showAuthForm("login");
+
+    if (button) button.disabled = false;
+});
+
+/* ================= SERVER CONTROLS ================= */
+
+/*
+   These buttons intentionally do not send fake server commands.
+   A real Pterodactyl-compatible server API must be configured first.
+*/
+
+function showServerConnectionNotice(action) {
+    const output = $("#consoleOutput");
+    if (!output) return;
+
+    const line = document.createElement("div");
+    line.className = "console-line warning-line";
+    line.textContent =
+        `[ASTRIX CLOUD] ${action}: server API connection is not configured.`;
+
+    output.appendChild(line);
+    output.scrollTop = output.scrollHeight;
+}
+
+$("#startServerBtn")?.addEventListener("click", () => {
+    showServerConnectionNotice("Start requested");
+});
+
+$("#restartServerBtn")?.addEventListener("click", () => {
+    showServerConnectionNotice("Restart requested");
+});
+
+$("#stopServerBtn")?.addEventListener("click", () => {
+    showServerConnectionNotice("Stop requested");
+});
+
+$("#consoleCommandForm")?.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const input = $("#consoleCommand");
+    const command = input?.value.trim();
+
+    if (!command) return;
+
+    showServerConnectionNotice(
+        `Command not sent (${command}). Console API is not connected`
+    );
+
+    input.value = "";
+});
+
+/* ================= SUPPORT TICKETS ================= */
+
+function normalizeList(result) {
+    if (Array.isArray(result)) return result;
+    if (Array.isArray(result.tickets)) return result.tickets;
+    if (Array.isArray(result.data)) return result.data;
+    if (Array.isArray(result.data?.tickets)) return result.data.tickets;
+    if (Array.isArray(result.users)) return result.users;
+    return [];
+}
+
+function getTicketId(ticket) {
+    return ticket.id ?? ticket.ticket_id ?? ticket.uuid;
+}
+
+function getTicketSubject(ticket) {
+    return ticket.subject || ticket.title || "Support ticket";
+}
+
+function getTicketStatus(ticket) {
+    return String(ticket.status || "open").toLowerCase();
+}
+
+function renderTicket(ticket, adminMode = false) {
+    const id = getTicketId(ticket);
+    const subject = escapeHTML(getTicketSubject(ticket));
+    const status = escapeHTML(getTicketStatus(ticket));
+    const category = escapeHTML(ticket.category || "General");
+    const description = escapeHTML(ticket.message || ticket.description || "");
+
+    const item = document.createElement("article");
+    item.className = "ticket-item";
+
+    item.innerHTML = `
+        <div class="ticket-item-heading">
+            <h4>${subject}</h4>
+            <span class="ticket-status">${status}</span>
+        </div>
+        <p>${category}</p>
+        ${description ? `<p>${description}</p>` : ""}
+        <div class="ticket-actions">
+            <button type="button" class="text-button ticket-reply-button">
+                Reply
+            </button>
+            ${adminMode ? `
+                <button type="button" class="text-button ticket-status-button">
+                    ${status === "closed" ? "Reopen" : "Close"}
+                </button>
+            ` : ""}
+        </div>
+        <div class="ticket-replies"></div>
+    `;
+
+    const replyButton = $(".ticket-reply-button", item);
+
+    replyButton?.addEventListener("click", async () => {
+        if (id == null) return;
+
+        const message = window.prompt("Enter your ticket reply:");
+        if (!message || !message.trim()) return;
+
+        replyButton.disabled = true;
+
+        try {
+            await apiRequest(API.ticketReplies, {
+                method: "POST",
+                body: {
+                    ticket_id: id,
+                    message: message.trim()
+                }
+            });
+
+            await loadTicketReplies(id, $(".ticket-replies", item));
+        } catch (error) {
+            window.alert(error.message || "Unable to send reply.");
+        } finally {
+            replyButton.disabled = false;
+        }
+    });
+
+    const statusButton = $(".ticket-status-button", item);
+
+    statusButton?.addEventListener("click", async () => {
+        if (id == null) return;
+
+        const nextStatus = status === "closed" ? "open" : "closed";
+        statusButton.disabled = true;
+
+        try {
+            await apiRequest(API.ticketStatus, {
+                method: "PATCH",
+                body: {
+                    ticket_id: id,
+                    status: nextStatus
+                }
+            });
+
+            await loadTickets();
+        } catch (error) {
+            window.alert(error.message || "Unable to update ticket.");
+        } finally {
+            statusButton.disabled = false;
+        }
+    });
+
+    return item;
+}
+
+async function loadTicketReplies(ticketId, container) {
+    if (!container) return;
+
+    container.textContent = "Loading replies...";
+
+    try {
+        const result = await apiRequest(
+            `${API.ticketReplies}?ticket_id=${encodeURIComponent(ticketId)}`
+        );
+
+        const replies = normalizeList(result);
+        container.replaceChildren();
+
+        if (!replies.length) {
+            container.textContent = "No replies yet.";
+            return;
+        }
+
+        replies.forEach(reply => {
+            const row = document.createElement("div");
+            row.className = "ticket-reply";
+
+            const author = document.createElement("strong");
+            author.textContent = reply.username || reply.author || "User";
+
+            const message = document.createElement("p");
+            message.textContent = reply.message || "";
+
+            row.append(author, message);
+            container.appendChild(row);
+        });
+
+    } catch (error) {
+        container.textContent = error.message || "Could not load replies.";
+    }
+}
+
+async function loadTickets() {
+    if (!currentUser || isLoadingTickets) return;
+
+    isLoadingTickets = true;
+
+    const myList = $("#myTicketsList");
+    const adminList = $("#adminTicketsList");
+
+    if (myList) myList.textContent = "Loading tickets...";
+    if (adminList && isStaff()) adminList.textContent = "Loading tickets...";
+
+    try {
+        const result = await apiRequest(API.tickets);
+        const tickets = normalizeList(result);
+
+        if (myList) {
+            myList.replaceChildren();
+
+            if (!tickets.length) {
+                myList.textContent = "You have no support tickets yet.";
+            } else {
+                tickets.forEach(ticket => {
+                    myList.appendChild(renderTicket(ticket, false));
+                });
+            }
+        }
+
+        if (adminList && isStaff()) {
+            adminList.replaceChildren();
+
+            if (!tickets.length) {
+                adminList.textContent = "No tickets available.";
+            } else {
+                tickets.forEach(ticket => {
+                    adminList.appendChild(renderTicket(ticket, true));
+                });
+            }
+        }
+
+        showIcons();
+
+    } catch (error) {
+        if (myList) myList.textContent =
+            error.message || "Unable to load tickets.";
+
+        if (adminList && isStaff()) {
+            adminList.textContent =
+                error.message || "Unable to load tickets.";
+        }
+    } finally {
+        isLoadingTickets = false;
+    }
+}
+
+/* ================= CREATE TICKET ================= */
+
+$("#ticketForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
+
+    const subject = $("#ticketSubject")?.value.trim();
+    const category = $("#ticketCategory")?.value;
+    const description = $("#ticketDescription")?.value.trim();
+
+    if (!subject || !category || !description) {
+        setMessage("#ticketFormMessage", "Complete all ticket fields.");
+        return;
+    }
+
+    setButtonLoading(button, true, "Submitting...");
+    setMessage("#ticketFormMessage", "");
+
+    try {
+        await apiRequest(API.tickets, {
+            method: "POST",
+            body: {
+                subject,
+                category,
+                message: description
+            }
+        });
+
+        form.reset();
+        setMessage(
+            "#ticketFormMessage",
+            "Support ticket submitted successfully.",
+            "success"
+        );
+
+        await loadTickets();
+
+    } catch (error) {
+        setMessage(
+            "#ticketFormMessage",
+            error.message || "Unable to submit ticket."
+        );
+    } finally {
+        setButtonLoading(button, false);
+    }
+});
+
+/* ================= ADMIN PLACEHOLDERS ================= */
+
+async function loadAdminUsers() {
+    const container = $("#usersList");
+    if (!container || !isStaff()) return;
+
+    container.textContent =
+        "User management API is not connected yet.";
+}
+
+async function loadAdminServers() {
+    const container = $("#allServersList");
+    if (!container || !isStaff()) return;
+
+    container.textContent =
+        "Server provisioning API is not connected yet.";
+}
+
+/* ================= INITIALIZATION ================= */
+
+async function initializePanel() {
+    showIcons();
+
+    $("#serverDisplayName").textContent = "My Minecraft Server";
+
+    await restoreSession();
+
+    if (currentUser && isStaff()) {
+        loadAdminUsers();
+        loadAdminServers();
+    }
+}
+
+document.addEventListener("DOMContentLoaded", initializePanel);
