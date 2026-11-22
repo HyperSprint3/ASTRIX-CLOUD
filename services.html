@@ -5,124 +5,207 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#080612">
-  <title>Services | ASTRIX CLOUD</title>
-  <meta name="description" content="Explore ASTRIX CLOUD hosting services and upcoming infrastructure solutions.">
+  <meta name="description" content="Explore the services and upcoming cloud hosting solutions from ASTRIX CLOUD.">
+  <title>Services — ASTRIX CLOUD</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <div class="scroll-progress"></div>
+  <div class="ambient"></div>
+  <div class="site-grid"></div>
   <div class="cursor-glow"></div>
 
+  <!-- NAVIGATION -->
   <header class="navbar">
-    <a class="logo" href="index.html">ASTRIX<span> CLOUD</span></a>
-    <button class="menu-toggle" aria-label="Toggle navigation">☰</button>
-    <nav class="nav-links">
+    <a class="logo" href="index.html">ASTRIX <span>CLOUD</span></a>
+
+    <button class="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+
+    <nav class="nav-links" aria-label="Main navigation">
       <a href="index.html">Home</a>
-      <a class="active" href="services.html">Services</a>
+      <a href="services.html" class="active">Services</a>
       <a href="about.html">About</a>
-      <a href="https://astrix-cloud.pages.dev/PANEL.HTML" class="nav-cta">Client Panel ↗</a>
+      <a href="https://discord.gg/RMEctBCFh" target="_blank" rel="noopener noreferrer">Discord</a>
+      <a href="PANEL.HTML" class="nav-cta">Client Panel ↗</a>
     </nav>
   </header>
 
   <main>
-    <section class="hero reveal">
+    <!-- HERO -->
+    <section class="hero page-shell reveal">
       <div class="hero-content">
-        <span class="eyebrow">✦ WHAT WE OFFER</span>
-        <h1>OUR <span class="gradient-text">SERVICES</span></h1>
-        <p>Powerful hosting experiences. Built with performance, simplicity and reliability in mind.</p>
-        <a href="#services" class="btn-primary">Explore Services ↓</a>
+        <div class="eyebrow"><span class="status-dot"></span> EXPLORE OUR PLATFORM</div>
+        <h1>POWERFUL IDEAS.<br><span class="gradient-text">CLOUD POSSIBILITIES.</span></h1>
+        <p>
+          Discover what ASTRIX CLOUD is building.
+          Our goal is to create a modern hosting experience
+          with simplicity and innovation at its core.
+        </p>
+        <div class="actions">
+          <a href="#services" class="button button-primary">Explore Services ↘</a>
+          <a href="https://discord.gg/RMEctBCFh" class="button button-secondary" target="_blank" rel="noopener noreferrer">Join Discord</a>
+        </div>
       </div>
-      <div class="hero-orb">
+
+      <div class="hero-orb" aria-hidden="true">
         <div class="orb-ring ring-one"></div>
         <div class="orb-ring ring-two"></div>
-        <div class="orb-core">A</div>
+        <div class="orb-ring ring-three"></div>
+        <div class="orb-core">A<span>✦</span></div>
       </div>
     </section>
 
-    <section class="section" id="services">
+    <!-- SERVICES -->
+    <section class="section page-shell" id="services">
       <div class="section-heading reveal">
-        <span class="eyebrow">✦ OUR SOLUTIONS</span>
-        <h2>HOSTING <span class="gradient-text">SOLUTIONS</span></h2>
-        <p>Explore the services planned for the ASTRIX CLOUD ecosystem.</p>
+        <div class="eyebrow">WHAT WE'RE WORKING ON</div>
+        <h2>Explore our <span class="gradient-text">services.</span></h2>
+        <p>Our platform is growing. Here's a look at our current plans and development focus.</p>
       </div>
 
       <div class="service-grid">
         <article class="service-card reveal">
-          <div class="service-icon">🎮</div>
+          <div class="service-icon">◈</div>
           <span class="status-badge">PLANNED</span>
-          <h3>Game Hosting</h3>
-          <p>Powerful game server hosting designed for smooth gameplay and a better multiplayer experience.</p>
+          <h3>Game Server Hosting</h3>
+          <p>
+            Our vision is to offer a smooth game hosting experience
+            with easy management and a focus on performance.
+          </p>
           <div class="card-line"></div>
-          <span class="card-footer">GAMING INFRASTRUCTURE</span>
+          <div class="card-footer">
+            <span>GAME HOSTING</span>
+            <span>01 / 03</span>
+          </div>
         </article>
 
         <article class="service-card reveal">
-          <div class="service-icon">🖥️</div>
+          <div class="service-icon">⌘</div>
           <span class="status-badge">COMING SOON</span>
           <h3>Virtual Servers</h3>
-          <p>Flexible virtual server solutions are coming soon, designed for projects that need more control.</p>
+          <p>
+            Flexible virtual server solutions are coming soon.
+            Follow our latest updates as development progresses.
+          </p>
           <div class="card-line"></div>
-          <span class="card-footer">VIRTUAL INFRASTRUCTURE</span>
+          <div class="card-footer">
+            <span>VIRTUAL SERVERS</span>
+            <span>02 / 03</span>
+          </div>
         </article>
 
         <article class="service-card reveal">
-          <div class="service-icon">⚡</div>
-          <span class="status-badge">PLANNED</span>
-          <h3>Cloud Infrastructure</h3>
-          <p>A modern cloud environment focused on performance, scalability and simple management.</p>
-          <div class="card-line"></div>
-          <span class="card-footer">CLOUD TECHNOLOGY</span>
-        </article>
-
-        <article class="service-card reveal">
-          <div class="service-icon">🛡️</div>
-          <span class="status-badge">PLANNED</span>
-          <h3>Security & Protection</h3>
-          <p>Infrastructure protection and security-focused features designed to help safeguard services.</p>
-          <div class="card-line"></div>
-          <span class="card-footer">SECURITY FIRST</span>
-        </article>
-
-        <article class="service-card reveal">
-          <div class="service-icon">🎛️</div>
+          <div class="service-icon">✧</div>
           <span class="status-badge">IN DEVELOPMENT</span>
           <h3>Client Panel</h3>
-          <p>A central place for customers to manage their accounts and access available hosting features.</p>
+          <p>
+            A dedicated place for customers to access their accounts
+            and interact with the ASTRIX CLOUD platform.
+          </p>
           <div class="card-line"></div>
-          <span class="card-footer">EASY MANAGEMENT</span>
-          <a class="card-link" href="PANEL.HTML">Visit Client Panel ↗</a>
+          <div class="card-footer">
+            <span>CONTROL PANEL</span>
+            <span>03 / 03</span>
+          </div>
         </article>
 
         <article class="service-card reveal">
-          <div class="service-icon">💬</div>
-          <span class="status-badge">AVAILABLE</span>
-          <h3>Community Support</h3>
-          <p>Connect with the ASTRIX CLOUD community for announcements, updates and assistance.</p>
+          <div class="service-icon">⬡</div>
+          <span class="status-badge">FUTURE PLANS</span>
+          <h3>Cloud Infrastructure</h3>
+          <p>
+            We're exploring the infrastructure and technology
+            needed to support a growing hosting platform.
+          </p>
           <div class="card-line"></div>
-          <span class="card-footer">COMMUNITY</span>
-          <a class="card-link" href="https://discord.gg/RMEctBCFh">Join Discord ↗</a>
+          <div class="card-footer">
+            <span>INFRASTRUCTURE</span>
+            <span>04 / 06</span>
+          </div>
+        </article>
+
+        <article class="service-card reveal">
+          <div class="service-icon">◎</div>
+          <span class="status-badge">FUTURE PLANS</span>
+          <h3>Community Support</h3>
+          <p>
+            We want to build a helpful community where users
+            can ask questions, share ideas and follow progress.
+          </p>
+          <div class="card-line"></div>
+          <div class="card-footer">
+            <span>COMMUNITY</span>
+            <span>05 / 06</span>
+          </div>
+        </article>
+
+        <article class="service-card reveal">
+          <div class="service-icon">✦</div>
+          <span class="status-badge">FUTURE PLANS</span>
+          <h3>More Possibilities</h3>
+          <p>
+            ASTRIX CLOUD is a growing project.
+            More ideas and improvements may become part of the journey.
+          </p>
+          <div class="card-line"></div>
+          <div class="card-footer">
+            <span>WHAT'S NEXT</span>
+            <span>06 / 06</span>
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="cta-section reveal">
-      <span class="eyebrow">✦ STAY CONNECTED</span>
-      <h2>THE FUTURE IS <span class="gradient-text">ASTRIX</span></h2>
-      <p>Follow our latest updates as we continue building ASTRIX CLOUD.</p>
-      <a href="https://discord.gg/RMEctBCFh" class="btn-primary">Join Our Community ↗</a>
+    <!-- PLATFORM BANNER -->
+    <section class="preview-band page-shell reveal">
+      <div class="preview-content">
+        <div class="eyebrow">ONE PLATFORM. BIG AMBITIONS.</div>
+        <h2>Built around a <span class="gradient-text">better experience.</span></h2>
+        <p>
+          We're shaping ASTRIX CLOUD step by step.
+          Follow development and stay connected with the community.
+        </p>
+        <a href="about.html" class="button button-primary">Discover Our Story ↗</a>
+      </div>
+
+      <div class="preview-art" aria-hidden="true">
+        <div class="preview-ring ring-a"></div>
+        <div class="preview-ring ring-b"></div>
+        <div class="preview-symbol">A<span>✦</span></div>
+        <div class="preview-caption">ASTRIX CLOUD</div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section page-shell reveal">
+      <div class="eyebrow">STAY CONNECTED</div>
+      <h2>Want to follow <span class="gradient-text">our progress?</span></h2>
+      <p>Join our Discord community to follow our latest updates and announcements.</p>
+      <a href="https://discord.gg/RMEctBCFh" class="button button-primary" target="_blank" rel="noopener noreferrer">Join ASTRIX Discord ↗</a>
     </section>
   </main>
 
+  <!-- FOOTER -->
   <footer class="footer">
-    <a class="logo" href="index.html">ASTRIX<span> CLOUD</span></a>
-    <p>© <span id="year"></span> ASTRIX CLOUD. All rights reserved.</p>
-    <div class="footer-links">
-      <a href="index.html">Home</a>
-      <a href="services.html">Services</a>
-      <a href="about.html">About</a>
+    <div class="footer-main page-shell">
+      <a class="logo" href="index.html">ASTRIX <span>CLOUD</span></a>
+      <p>Building a bold new hosting experience.</p>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+        <a href="https://discord.gg/RMEctBCFh" target="_blank" rel="noopener noreferrer">Discord</a>
+        <a href="PANEL.HTML">Client Panel</a>
+      </div>
+    </div>
+
+    <div class="copyright page-shell">
+      <span>© <span id="year"></span> ASTRIX CLOUD. All rights reserved.</span>
+      <span class="credit">MADE WITH ✦ FOR THE FUTURE</span>
     </div>
   </footer>
 
