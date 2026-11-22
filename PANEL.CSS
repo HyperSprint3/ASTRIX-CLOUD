@@ -1639,3 +1639,28 @@ textarea:focus-visible {
         transition-duration: .01ms !important;
     }
 }
+
+/* =========================================
+   ASTRIX CLOUD — FIX CHROME AUTOFILL
+========================================= */
+
+.auth-form input,
+.input-wrap input {
+    background: transparent !important;
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    caret-color: #a78bfa;
+}
+
+.auth-form input:-webkit-autofill,
+.auth-form input:-webkit-autofill:hover,
+.auth-form input:-webkit-autofill:focus,
+.input-wrap input:-webkit-autofill,
+.input-wrap input:-webkit-autofill:hover,
+.input-wrap input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f8fafc !important;
+    -webkit-box-shadow: 0 0 0 1000px #0b0f19 inset !important;
+    box-shadow: 0 0 0 1000px #0b0f19 inset !important;
+    caret-color: #a78bfa;
+    transition: background-color 99999s ease-out;
+}
