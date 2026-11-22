@@ -1334,3 +1334,17 @@ svg {
         transition-duration: .01ms !important;
     }
 }
+
+/* ASTRIX CLOUD BACKGROUND WALLPAPER */
+
+body {
+    background: #0B0F19 url("/panel-background.png") center center / cover fixed no-repeat !important;
+}
+
+.dashboard {
+    background: rgba(11, 15, 25, 0.72) !important;
+}
+
+.main-area {
+    background: rgba(11, 15, 25, 0.58) !important;
+}
