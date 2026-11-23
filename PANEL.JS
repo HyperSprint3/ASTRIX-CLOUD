@@ -197,10 +197,8 @@ function getAllowedRoles(element) {
 function canAccessPage(pageName) {
     if (!currentUser) return false;
 
-    // Home is available to every authenticated account.
     if (pageName === "home") return true;
 
-    // Server Console and server management.
     const serverPages = [
         "overview",
         "files",
@@ -218,7 +216,6 @@ function canAccessPage(pageName) {
         return canUseConsole();
     }
 
-    // Owner-only pages.
     if (
         pageName === "admin" ||
         pageName === "team-management"
@@ -226,14 +223,12 @@ function canAccessPage(pageName) {
         return isOwner();
     }
 
-    // Administration pages.
     if (
         ["all-servers", "manage-users", "manage-tickets"].includes(pageName)
     ) {
         return isStaff();
     }
 
-    // Every authenticated role can access these.
     if (
         pageName === "tickets" ||
         pageName === "account"
@@ -255,7 +250,6 @@ function canAccessPage(pageName) {
 function updateRoleVisibility() {
     if (!currentUser) return;
 
-    // Hide navigation and buttons based on their allowed roles.
     $$("[data-allowed-roles]").forEach(element => {
         const allowedRoles = getAllowedRoles(element);
 
@@ -267,7 +261,6 @@ function updateRoleVisibility() {
         element.setAttribute("aria-hidden", String(!permitted));
     });
 
-    // Server pages are Owner/Admin only.
     const serverPages = [
         "overview",
         "files",
@@ -286,13 +279,11 @@ function updateRoleVisibility() {
         if (page) page.hidden = !canUseConsole();
     });
 
-    // Owner-only dashboard and team management.
     ["admin", "team-management"].forEach(pageName => {
         const page = $(`#page-${pageName}`);
         if (page) page.hidden = !isOwner();
     });
 
-    // Show the administration navigation only to staff.
     const adminNavigation = $("#adminNavigation");
 
     if (adminNavigation) {
@@ -336,7 +327,6 @@ function showDashboard() {
     updateUserInterface();
     updateRoleVisibility();
 
-    // Every account starts at Home.
     navigateTo("home");
 
     closeSidebar();
@@ -618,7 +608,6 @@ function updateUserInterface() {
     setText("#topbarAvatar", initials);
     setText("#accountAvatar", initials);
 
-    // Home page greeting.
     setText("#homeUserName", name);
     setText("#homeWelcomeName", name);
     setText("#homeUserRole", roleLabel);
@@ -760,6 +749,105 @@ function normalizeTeamAccounts(result) {
     return [];
 }
 
+/* RESET A TEAM ACCOUNT PASSWORD */
+
+async function resetTeamAccountPassword(account, button) {
+    if (!isOwner()) {
+        window.alert("Only the Owner can reset team passwords.");
+        return;
+    }
+
+    const accountId = Number(account.id);
+
+    if (!Number.isSafeInteger(accountId) || accountId < 1) {
+        window.alert("This account has an invalid ID.");
+        return;
+    }
+
+    if (accountId === Number(getUserId())) {
+        window.alert(
+            "You cannot reset your own password from Team Management."
+        );
+        return;
+    }
+
+    const username = account.username || "this account";
+
+    const newPassword = window.prompt(
+        `Enter a NEW password for ${username}.\n\nMinimum 12 characters.`
+    );
+
+    if (newPassword === null) return;
+
+    if (newPassword.length < 12 || newPassword.length > 128) {
+        window.alert(
+            "Password must be between 12 and 128 characters."
+        );
+        return;
+    }
+
+    const confirmPassword = window.prompt(
+        `Confirm the new password for ${username}.`
+    );
+
+    if (confirmPassword === null) return;
+
+    if (newPassword !== confirmPassword) {
+        window.alert("The passwords do not match. Nothing was changed.");
+        return;
+    }
+
+    const confirmed = window.confirm(
+        `Reset the password for ${username}?\n\nTheir existing sessions will be logged out.`
+    );
+
+    if (!confirmed) return;
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Resetting...";
+    }
+
+    try {
+        const result = await apiRequest(API.teamUsers, {
+            method: "POST",
+            body: {
+                action: "reset-password",
+                user_id: accountId,
+                password: newPassword
+            }
+        });
+
+        if (result.success !== true) {
+            throw new Error(
+                result.error ||
+                result.message ||
+                "Password reset failed."
+            );
+        }
+
+        window.alert(
+            result.message || "Password reset successfully."
+        );
+
+        await loadTeamAccounts();
+
+    } catch (error) {
+        window.alert(
+            error.message || "Unable to reset this account password."
+        );
+
+        if (button) {
+            button.disabled = false;
+            button.textContent = "Reset Password";
+        }
+
+        console.error("Team password reset error:", error);
+    }
+}
+
+/* RENDER TEAM ACCOUNT */
+
 function renderTeamAccount(account) {
     const item = document.createElement("article");
     item.className = "team-account-item";
@@ -778,10 +866,37 @@ function renderTeamAccount(account) {
     role.textContent = String(account.role || "staff").toUpperCase();
 
     details.append(username, email);
-    item.append(details, role);
+
+    const actions = document.createElement("div");
+    actions.className = "team-account-actions";
+
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "text-button team-reset-password";
+    resetButton.textContent = "Reset Password";
+
+    const isCurrentAccount =
+        Number(account.id) === Number(getUserId());
+
+    if (isCurrentAccount) {
+        resetButton.disabled = true;
+        resetButton.textContent = "Your Account";
+        resetButton.title =
+            "Change your own password through account settings.";
+    } else {
+        resetButton.addEventListener("click", () => {
+            resetTeamAccountPassword(account, resetButton);
+        });
+    }
+
+    actions.appendChild(resetButton);
+
+    item.append(details, role, actions);
 
     return item;
 }
+
+/* LOAD TEAM ACCOUNTS */
 
 async function loadTeamAccounts() {
     if (!isOwner()) return;
@@ -903,8 +1018,6 @@ $("#teamCreateForm")?.addEventListener("submit", async event => {
         return;
     }
 
-    // Owner creation is allowed in the interface.
-    // The backend must also be updated to accept this role.
     if (!["owner", "admin", "staff"].includes(role)) {
         setTeamStatus("Choose a valid account role.");
         return;
@@ -934,7 +1047,6 @@ $("#teamCreateForm")?.addEventListener("submit", async event => {
 
         form.reset();
 
-        // Reset password visibility after creation.
         const passwordInput = $("#teamPassword");
 
         if (passwordInput) {
@@ -1107,7 +1219,6 @@ function navigateTo(pageName) {
             `Access denied: ${pageName} for role ${getUserRole()}`
         );
 
-        // Restricted pages redirect to Home.
         if (pageName !== "home") {
             navigateTo("home");
         }
@@ -1115,15 +1226,12 @@ function navigateTo(pageName) {
         return false;
     }
 
-    // Remove active state from every page.
     $$(".page").forEach(section => {
         section.classList.remove("active");
     });
 
-    // Activate selected page.
     page.classList.add("active");
 
-    // Update navigation buttons.
     $$(".nav-link").forEach(link => {
         link.classList.toggle(
             "active",
@@ -1131,7 +1239,6 @@ function navigateTo(pageName) {
         );
     });
 
-    // Update page title.
     const pageTitle = $("#pageTitle");
 
     if (pageTitle) {
@@ -1142,7 +1249,6 @@ function navigateTo(pageName) {
     closeSidebar();
     showIcons();
 
-    // Load page data when needed.
     if (pageName === "tickets") {
         loadTickets();
     }
@@ -1235,11 +1341,6 @@ $("#logoutBtn")?.addEventListener("click", async () => {
 });
 
 /* ================= SERVER CONTROLS ================= */
-
-/*
-   These buttons do not send fake server commands.
-   A real Pterodactyl-compatible server API must be configured first.
-*/
 
 function showServerConnectionNotice(action) {
     if (!canUseConsole()) {
