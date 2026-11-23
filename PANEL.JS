@@ -4,7 +4,7 @@
 /* ==========================================================
    ASTRIX CLOUD — CONTROL PANEL
    Authentication • Navigation • Account • Support
-   Owner Dashboard • Live D1 Statistics
+   Owner Dashboard • Team Management
    ========================================================== */
 
 /* ================= API CONFIGURATION ================= */
@@ -18,7 +18,8 @@ const API = {
     tickets: "/api/tickets",
     ticketReplies: "/api/ticket-replies",
     ticketStatus: "/api/ticket-status",
-    ownerStats: "/api/owner-stats"
+    ownerStats: "/api/owner-stats",
+    teamUsers: "/api/team-users"
 };
 
 const SELECTORS = {
@@ -34,6 +35,7 @@ let pendingSignupEmail = "";
 let pendingSignupDetails = null;
 let isLoadingTickets = false;
 let isLoadingOwnerStats = false;
+let isLoadingTeamAccounts = false;
 
 /* ================= HELPERS ================= */
 
@@ -96,8 +98,8 @@ async function apiRequest(url, options = {}) {
     if (contentType.includes("application/json")) {
         data = await response.json();
     } else {
-        const text = await response.text();
-        data = text ? { message: text } : {};
+        const responseText = await response.text();
+        data = responseText ? { message: responseText } : {};
     }
 
     if (!response.ok) {
@@ -451,11 +453,18 @@ function updateUserInterface() {
         adminNavigation.hidden = !isStaff();
     }
 
-    // Only the Owner account can see the Owner Dashboard link.
+    // Owner Dashboard is Owner-only.
     const ownerNavigation = $('#adminNavigation [data-page="admin"]');
 
     if (ownerNavigation) {
         ownerNavigation.hidden = !isOwner();
+    }
+
+    // Team Management is Owner-only.
+    const teamNavigation = $('#adminNavigation [data-page="team-management"]');
+
+    if (teamNavigation) {
+        teamNavigation.hidden = !isOwner();
     }
 
     loadProfileLogo();
@@ -502,13 +511,7 @@ function formatOwnerStat(value) {
 }
 
 async function loadOwnerStats() {
-    if (!isOwner()) {
-        return;
-    }
-
-    if (isLoadingOwnerStats) {
-        return;
-    }
+    if (!isOwner() || isLoadingOwnerStats) return;
 
     const refreshButton = $("#refreshOwnerStats");
 
@@ -540,9 +543,7 @@ async function loadOwnerStats() {
         const stats = result.stats;
 
         OWNER_STAT_KEYS.forEach(key => {
-            const elements = $$(`[data-owner-stat="${key}"]`);
-
-            elements.forEach(element => {
+            $$(`[data-owner-stat="${key}"]`).forEach(element => {
                 element.textContent = formatOwnerStat(stats[key]);
             });
         });
@@ -564,25 +565,10 @@ async function loadOwnerStats() {
     } catch (error) {
         resetOwnerStats();
 
-        if (error.message.includes("403") || error.message.includes("Forbidden")) {
-            setOwnerStatus(
-                "Access denied. Only the Owner account can view these statistics.",
-                "error"
-            );
-        } else if (
-            error.message.includes("401") ||
-            error.message.includes("Unauthorized")
-        ) {
-            setOwnerStatus(
-                "Your session may have expired. Please sign in again.",
-                "error"
-            );
-        } else {
-            setOwnerStatus(
-                error.message || "Unable to load Owner statistics.",
-                "error"
-            );
-        }
+        setOwnerStatus(
+            error.message || "Unable to load Owner statistics.",
+            "error"
+        );
 
         console.error("Owner statistics error:", error);
 
@@ -598,6 +584,180 @@ async function loadOwnerStats() {
 
 $("#refreshOwnerStats")?.addEventListener("click", () => {
     loadOwnerStats();
+});
+
+/* ================= TEAM MANAGEMENT ================= */
+
+function setTeamStatus(message, type = "error") {
+    setMessage("#teamCreateMessage", message, type);
+}
+
+function normalizeTeamAccounts(result) {
+    if (Array.isArray(result.accounts)) return result.accounts;
+    if (Array.isArray(result.data?.accounts)) return result.data.accounts;
+    if (Array.isArray(result.users)) return result.users;
+
+    return [];
+}
+
+function renderTeamAccount(account) {
+    const item = document.createElement("article");
+    item.className = "team-account-item";
+
+    const details = document.createElement("div");
+    details.className = "team-account-details";
+
+    const username = document.createElement("h4");
+    username.textContent = account.username || "Unknown user";
+
+    const email = document.createElement("p");
+    email.textContent = account.email || "No email";
+
+    const role = document.createElement("span");
+    role.className = "team-account-role";
+    role.textContent =
+        String(account.role || "staff").toUpperCase();
+
+    details.append(username, email);
+    item.append(details, role);
+
+    return item;
+}
+
+async function loadTeamAccounts() {
+    if (!isOwner()) return;
+
+    const container = $("#teamAccountsList");
+
+    if (!container) return;
+
+    if (isLoadingTeamAccounts) return;
+
+    isLoadingTeamAccounts = true;
+    container.textContent = "Loading team accounts...";
+
+    try {
+        const result = await apiRequest(API.teamUsers);
+
+        if (result.success !== true) {
+            throw new Error(
+                result.error || "Unable to load team accounts."
+            );
+        }
+
+        const accounts = normalizeTeamAccounts(result);
+
+        container.replaceChildren();
+
+        if (!accounts.length) {
+            container.textContent =
+                "No Admin or Staff accounts have been created yet.";
+            return;
+        }
+
+        accounts.forEach(account => {
+            container.appendChild(renderTeamAccount(account));
+        });
+
+    } catch (error) {
+        container.textContent =
+            error.message || "Unable to load team accounts.";
+
+        console.error("Team account loading error:", error);
+
+    } finally {
+        isLoadingTeamAccounts = false;
+    }
+}
+
+/* CREATE TEAM ACCOUNT */
+
+$("#teamCreateForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!isOwner()) {
+        setTeamStatus("Only the Owner can create team accounts.");
+        return;
+    }
+
+    const form = event.currentTarget;
+    const button = $("#createTeamAccountBtn") ||
+        form.querySelector('button[type="submit"]');
+
+    const username = $("#teamUsername")?.value.trim();
+    const email = $("#teamEmail")?.value.trim().toLowerCase();
+    const password = $("#teamPassword")?.value;
+    const role = $("#teamRole")?.value;
+
+    if (!username || !email || !password || !role) {
+        setTeamStatus("Please complete all fields.");
+        return;
+    }
+
+    if (!/^[a-zA-Z0-9_-]{3,30}$/.test(username)) {
+        setTeamStatus(
+            "Username must be 3–30 characters using letters, numbers, _ or -."
+        );
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setTeamStatus("Please enter a valid email address.");
+        return;
+    }
+
+    if (password.length < 12 || password.length > 128) {
+        setTeamStatus("Password must be 12–128 characters.");
+        return;
+    }
+
+    if (!["admin", "staff"].includes(role)) {
+        setTeamStatus("Choose a valid team role.");
+        return;
+    }
+
+    setButtonLoading(button, true, "Creating account...");
+    setTeamStatus("");
+
+    try {
+        const result = await apiRequest(API.teamUsers, {
+            method: "POST",
+            body: {
+                username,
+                email,
+                password,
+                role
+            }
+        });
+
+        if (result.success !== true) {
+            throw new Error(
+                result.error || "Account creation failed."
+            );
+        }
+
+        form.reset();
+
+        setTeamStatus(
+            result.message || "Team account created successfully.",
+            "success"
+        );
+
+        await loadTeamAccounts();
+
+        // Refresh Owner statistics after account creation.
+        loadOwnerStats();
+
+    } catch (error) {
+        setTeamStatus(
+            error.message || "Unable to create team account."
+        );
+
+        console.error("Team account creation error:", error);
+
+    } finally {
+        setButtonLoading(button, false);
+    }
 });
 
 /* ================= PROFILE LOGO ================= */
@@ -696,6 +856,7 @@ const pageNames = {
     tickets: "Support Tickets",
     account: "My Account",
     admin: "Owner Dashboard",
+    "team-management": "Team Management",
     "all-servers": "All Servers",
     "manage-users": "Manage Users",
     "manage-tickets": "Manage Tickets"
@@ -706,12 +867,15 @@ function navigateTo(pageName) {
 
     if (!page) return;
 
-    // Owner Dashboard is restricted to the Owner role.
-    if (pageName === "admin" && !isOwner()) {
+    // Owner-only pages.
+    if (
+        ["admin", "team-management"].includes(pageName) &&
+        !isOwner()
+    ) {
         return;
     }
 
-    // Other administration pages are restricted to staff.
+    // Other administration pages require staff access.
     if (
         ["all-servers", "manage-users", "manage-tickets"].includes(pageName) &&
         !isStaff()
@@ -747,6 +911,10 @@ function navigateTo(pageName) {
 
     if (pageName === "admin") {
         loadOwnerStats();
+    }
+
+    if (pageName === "team-management") {
+        loadTeamAccounts();
     }
 }
 
@@ -796,6 +964,9 @@ $("#logoutBtn")?.addEventListener("click", async () => {
     pendingSignupDetails = null;
 
     resetOwnerStats();
+
+    const teamList = $("#teamAccountsList");
+    if (teamList) teamList.replaceChildren();
 
     showLogin();
     showAuthForm("login");
