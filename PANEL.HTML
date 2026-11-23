@@ -629,7 +629,170 @@
 
             <!-- ADMIN PAGES -->
 
-            <section id="page-admin" class="page">
+            <!-- ================= OWNER DASHBOARD ================= -->
+
+<section id="page-admin" class="page owner-dashboard">
+
+    <div class="page-heading owner-heading">
+        <div>
+            <span class="eyebrow">ASTRIX CLOUD / OWNER CONTROL</span>
+            <h1>Owner Dashboard</h1>
+            <p>Monitor and manage your ASTRIX CLOUD platform.</p>
+        </div>
+
+        <button type="button" id="refreshOwnerStats" class="primary-button">
+            <i data-lucide="refresh-cw"></i>
+            Refresh Statistics
+        </button>
+    </div>
+
+    <section class="content-card owner-welcome-card">
+        <div class="owner-welcome-icon">
+            <i data-lucide="shield-check"></i>
+        </div>
+
+        <div class="owner-welcome-info">
+            <span class="eyebrow">PLATFORM OWNER</span>
+            <h2>Welcome back, <span id="ownerName">Owner</span></h2>
+            <p id="ownerEmail">Loading owner account...</p>
+        </div>
+
+        <span class="role-badge">OWNER</span>
+    </section>
+
+    <div class="owner-section-heading">
+        <div>
+            <h2>Platform Overview</h2>
+            <p>Live statistics from your ASTRIX CLOUD database.</p>
+        </div>
+        <span id="ownerStatsStatus" class="owner-stats-status">
+            Waiting for data...
+        </span>
+    </div>
+
+    <div class="owner-stats-grid">
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Total Users</span>
+                <i data-lucide="users"></i>
+            </div>
+            <strong data-owner-stat="total_users">—</strong>
+            <small>Registered platform accounts</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Owners</span>
+                <i data-lucide="crown"></i>
+            </div>
+            <strong data-owner-stat="owners">—</strong>
+            <small>Owner accounts</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Administrators</span>
+                <i data-lucide="shield-check"></i>
+            </div>
+            <strong data-owner-stat="admins">—</strong>
+            <small>Admin accounts</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Staff Members</span>
+                <i data-lucide="user-check"></i>
+            </div>
+            <strong data-owner-stat="staff">—</strong>
+            <small>Staff accounts</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Members</span>
+                <i data-lucide="users-round"></i>
+            </div>
+            <strong data-owner-stat="members">—</strong>
+            <small>Regular user accounts</small>
+        </article>
+
+    </div>
+
+    <div class="owner-section-heading">
+        <div>
+            <h2>Support Overview</h2>
+            <p>Monitor customer support activity.</p>
+        </div>
+    </div>
+
+    <div class="owner-stats-grid">
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Total Tickets</span>
+                <i data-lucide="messages-square"></i>
+            </div>
+            <strong data-owner-stat="total_tickets">—</strong>
+            <small>All support tickets</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Open Tickets</span>
+                <i data-lucide="message-circle"></i>
+            </div>
+            <strong data-owner-stat="open_tickets">—</strong>
+            <small>Tickets awaiting resolution</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Closed Tickets</span>
+                <i data-lucide="check-circle"></i>
+            </div>
+            <strong data-owner-stat="closed_tickets">—</strong>
+            <small>Resolved tickets</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Total Replies</span>
+                <i data-lucide="reply"></i>
+            </div>
+            <strong data-owner-stat="total_replies">—</strong>
+            <small>Support conversation replies</small>
+        </article>
+
+        <article class="owner-stat-card">
+            <div class="owner-stat-top">
+                <span>Active Sessions</span>
+                <i data-lucide="activity"></i>
+            </div>
+            <strong data-owner-stat="active_sessions">—</strong>
+            <small>Currently valid sessions</small>
+        </article>
+
+    </div>
+
+    <section class="content-card owner-security-card">
+        <div class="owner-security-icon">
+            <i data-lucide="lock-keyhole"></i>
+        </div>
+        <div>
+            <h3>Owner Security</h3>
+            <p>
+                Owner statistics are protected by server-side role verification.
+                Only the platform owner can access this dashboard.
+            </p>
+        </div>
+        <span class="secure-indicator">
+            <span class="status-dot"></span>
+            Protected
+        </span>
+    </section>
+
+</section>
                 <div class="page-heading"><div>
                     <span class="eyebrow">ADMINISTRATION</span>
                     <h1>Admin</h1><p>Platform administration.</p>
