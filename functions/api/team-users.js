@@ -107,7 +107,7 @@ export async function onRequestGet({ request, env }) {
     const result = await env.DB.prepare(`
       SELECT id, username, email, role, created_at
       FROM users
-      WHERE role IN ('admin', 'staff')
+      WHERE role IN ('owner', 'admin', 'staff')
       ORDER BY id DESC
     `).all();
 
@@ -140,12 +140,77 @@ export async function onRequestPost({ request, env }) {
       return jsonError("Invalid request body.");
     }
 
+    // -----------------------------------------
+    // RESET TEAM ACCOUNT PASSWORD
+    // -----------------------------------------
+
+    if (body.action === "reset-password") {
+      const userId = Number(body.user_id);
+      const password = typeof body.password === "string"
+        ? body.password
+        : "";
+
+      if (!Number.isSafeInteger(userId) || userId < 1) {
+        return jsonError("Invalid account ID.");
+      }
+
+      if (userId === auth.user.id) {
+        return jsonError(
+          "Use your account settings to change your own password."
+        );
+      }
+
+      if (password.length < 12 || password.length > 128) {
+        return jsonError(
+          "Password must be between 12 and 128 characters."
+        );
+      }
+
+      const target = await env.DB.prepare(`
+        SELECT id, username, role
+        FROM users
+        WHERE id = ?
+          AND role IN ('owner', 'admin', 'staff')
+      `).bind(userId).first();
+
+      if (!target) {
+        return jsonError("Team account not found.", 404);
+      }
+
+      const passwordHash = await hashPassword(password);
+
+      await env.DB.prepare(`
+        UPDATE users
+        SET password_hash = ?
+        WHERE id = ?
+      `).bind(passwordHash, userId).run();
+
+      // Revoke existing sessions for the account.
+      await env.DB.prepare(`
+        DELETE FROM sessions
+        WHERE user_id = ?
+      `).bind(userId).run();
+
+      return Response.json({
+        success: true,
+        message: "Account password reset successfully. Existing sessions were logged out."
+      });
+    }
+
+    // -----------------------------------------
+    // CREATE TEAM ACCOUNT
+    // -----------------------------------------
+
     const username = String(body.username || "").trim();
     const email = String(body.email || "").trim().toLowerCase();
+
     const password = typeof body.password === "string"
       ? body.password
       : "";
-    const role = String(body.role || "").trim().toLowerCase();
+
+    const role = String(body.role || "")
+      .trim()
+      .toLowerCase();
 
     if (!validUsername(username)) {
       return jsonError(
@@ -163,9 +228,9 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-    if (!["admin", "staff"].includes(role)) {
+    if (!["owner", "admin", "staff"].includes(role)) {
       return jsonError(
-        "Role must be Admin or Staff."
+        "Role must be Owner, Admin or Staff."
       );
     }
 
@@ -203,10 +268,10 @@ export async function onRequestPost({ request, env }) {
       );
     }
 
-    console.error("Team account creation error:", error);
+    console.error("Team account operation error:", error);
 
     return jsonError(
-      "Could not create team account.",
+      "Could not complete the team account operation.",
       500
     );
   }
