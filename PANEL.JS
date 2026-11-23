@@ -3,8 +3,8 @@
 
 /* ==========================================================
    ASTRIX CLOUD — CONTROL PANEL
-   Pterodactyl-inspired interface
    Authentication • Navigation • Account • Support
+   Owner Dashboard • Live D1 Statistics
    ========================================================== */
 
 /* ================= API CONFIGURATION ================= */
@@ -17,7 +17,8 @@ const API = {
     verifySignup: "/api/verify-signup",
     tickets: "/api/tickets",
     ticketReplies: "/api/ticket-replies",
-    ticketStatus: "/api/ticket-status"
+    ticketStatus: "/api/ticket-status",
+    ownerStats: "/api/owner-stats"
 };
 
 const SELECTORS = {
@@ -32,6 +33,7 @@ let currentUser = null;
 let pendingSignupEmail = "";
 let pendingSignupDetails = null;
 let isLoadingTickets = false;
+let isLoadingOwnerStats = false;
 
 /* ================= HELPERS ================= */
 
@@ -48,7 +50,9 @@ function setMessage(selector, message, type = "error") {
     element.className = "form-message";
 
     if (message) {
-        element.classList.add(type === "success" ? "success-message" : "error-message");
+        element.classList.add(
+            type === "success" ? "success-message" : "error-message"
+        );
     }
 }
 
@@ -59,10 +63,12 @@ function setButtonLoading(button, loading, loadingText = "Please wait...") {
         if (!button.dataset.originalText) {
             button.dataset.originalText = button.innerHTML;
         }
+
         button.disabled = true;
         button.textContent = loadingText;
     } else {
         button.disabled = false;
+
         if (button.dataset.originalText) {
             button.innerHTML = button.dataset.originalText;
             delete button.dataset.originalText;
@@ -127,6 +133,10 @@ function getUserRole(user = currentUser) {
     return String(user?.role || "member").toLowerCase();
 }
 
+function isOwner(user = currentUser) {
+    return getUserRole(user) === "owner";
+}
+
 function isStaff(user = currentUser) {
     return ["owner", "admin", "staff"].includes(getUserRole(user));
 }
@@ -158,15 +168,23 @@ function showIcons() {
 }
 
 function showLogin() {
-    $(SELECTORS.loginPage).hidden = false;
-    $(SELECTORS.dashboard).hidden = true;
+    const loginPage = $(SELECTORS.loginPage);
+    const dashboard = $(SELECTORS.dashboard);
+
+    if (loginPage) loginPage.hidden = false;
+    if (dashboard) dashboard.hidden = true;
+
     closeSidebar();
     showIcons();
 }
 
 function showDashboard() {
-    $(SELECTORS.loginPage).hidden = true;
-    $(SELECTORS.dashboard).hidden = false;
+    const loginPage = $(SELECTORS.loginPage);
+    const dashboard = $(SELECTORS.dashboard);
+
+    if (loginPage) loginPage.hidden = true;
+    if (dashboard) dashboard.hidden = false;
+
     updateUserInterface();
     navigateTo("overview");
     closeSidebar();
@@ -238,10 +256,13 @@ $(SELECTORS.loginForm)?.addEventListener("submit", async event => {
         }
 
         if (!currentUser || !getUserEmail(currentUser)) {
-            throw new Error("Login succeeded but user details could not be loaded.");
+            throw new Error(
+                "Login succeeded but user details could not be loaded."
+            );
         }
 
         $("#loginPassword").value = "";
+
         showDashboard();
         await loadTickets();
 
@@ -297,6 +318,7 @@ $(SELECTORS.signupForm)?.addEventListener("submit", async event => {
         pendingSignupDetails = { username, email, password };
 
         showAuthForm("verify");
+
         setMessage(
             "#verifyMessage",
             "Verification code sent. Check your email.",
@@ -342,6 +364,7 @@ $(SELECTORS.verifyForm)?.addEventListener("submit", async event => {
 
         pendingSignupDetails = null;
         pendingSignupEmail = "";
+
         $("#verificationCode").value = "";
 
         const returnedUser = result.user || result.data?.user;
@@ -353,6 +376,7 @@ $(SELECTORS.verifyForm)?.addEventListener("submit", async event => {
         } else {
             showAuthForm("login");
             $("#loginEmail").value = email;
+
             setMessage(
                 "#loginMessage",
                 "Email verified! You can now sign in.",
@@ -400,29 +424,181 @@ function updateUserInterface() {
     const roleLabel = role.charAt(0).toUpperCase() + role.slice(1);
     const initials = getInitials(name);
 
-    $("#sidebarUserName").textContent = name;
-    $("#sidebarUserRole").textContent = roleLabel;
-    $("#topbarUserName").textContent = name;
+    const setText = (selector, value) => {
+        const element = $(selector);
+        if (element) element.textContent = value;
+    };
 
-    $("#accountName").textContent = name;
-    $("#accountEmail").textContent = email;
-    $("#accountRole").textContent = roleLabel;
+    setText("#sidebarUserName", name);
+    setText("#sidebarUserRole", roleLabel);
+    setText("#topbarUserName", name);
 
-    $("#accountNameDetail").textContent = name;
-    $("#accountEmailDetail").textContent = email;
-    $("#accountRoleDetail").textContent = roleLabel;
+    setText("#accountName", name);
+    setText("#accountEmail", email);
+    setText("#accountRole", roleLabel);
 
-    $("#userAvatar").textContent = initials;
-    $("#topbarAvatar").textContent = initials;
-    $("#accountAvatar").textContent = initials;
+    setText("#accountNameDetail", name);
+    setText("#accountEmailDetail", email);
+    setText("#accountRoleDetail", roleLabel);
+
+    setText("#userAvatar", initials);
+    setText("#topbarAvatar", initials);
+    setText("#accountAvatar", initials);
 
     const adminNavigation = $("#adminNavigation");
+
     if (adminNavigation) {
         adminNavigation.hidden = !isStaff();
     }
 
+    // Only the Owner account can see the Owner Dashboard link.
+    const ownerNavigation = $('#adminNavigation [data-page="admin"]');
+
+    if (ownerNavigation) {
+        ownerNavigation.hidden = !isOwner();
+    }
+
     loadProfileLogo();
 }
+
+/* ================= OWNER DASHBOARD ================= */
+
+const OWNER_STAT_KEYS = [
+    "total_users",
+    "owners",
+    "admins",
+    "staff",
+    "members",
+    "total_tickets",
+    "open_tickets",
+    "closed_tickets",
+    "total_replies",
+    "active_sessions"
+];
+
+function setOwnerStatus(message, type = "info") {
+    const status = $("#ownerStatsStatus");
+
+    if (!status) return;
+
+    status.textContent = message;
+    status.dataset.status = type;
+}
+
+function resetOwnerStats() {
+    $$("[data-owner-stat]").forEach(element => {
+        element.textContent = "—";
+    });
+}
+
+function formatOwnerStat(value) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number) || number < 0) {
+        return "—";
+    }
+
+    return Math.floor(number).toLocaleString();
+}
+
+async function loadOwnerStats() {
+    if (!isOwner()) {
+        return;
+    }
+
+    if (isLoadingOwnerStats) {
+        return;
+    }
+
+    const refreshButton = $("#refreshOwnerStats");
+
+    isLoadingOwnerStats = true;
+
+    if (refreshButton) {
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Refreshing...";
+    }
+
+    setOwnerStatus("Loading live statistics...", "loading");
+    resetOwnerStats();
+
+    const ownerName = $("#ownerName");
+    const ownerEmail = $("#ownerEmail");
+
+    if (ownerName) ownerName.textContent = getUserName();
+    if (ownerEmail) ownerEmail.textContent = getUserEmail();
+
+    try {
+        const result = await apiRequest(API.ownerStats);
+
+        if (result.success !== true || !result.stats) {
+            throw new Error(
+                result.message || "The statistics response was invalid."
+            );
+        }
+
+        const stats = result.stats;
+
+        OWNER_STAT_KEYS.forEach(key => {
+            const elements = $$(`[data-owner-stat="${key}"]`);
+
+            elements.forEach(element => {
+                element.textContent = formatOwnerStat(stats[key]);
+            });
+        });
+
+        if (result.owner) {
+            if (ownerName) {
+                ownerName.textContent =
+                    result.owner.username || getUserName();
+            }
+
+            if (ownerEmail) {
+                ownerEmail.textContent =
+                    result.owner.email || getUserEmail();
+            }
+        }
+
+        setOwnerStatus("Statistics updated successfully.", "success");
+
+    } catch (error) {
+        resetOwnerStats();
+
+        if (error.message.includes("403") || error.message.includes("Forbidden")) {
+            setOwnerStatus(
+                "Access denied. Only the Owner account can view these statistics.",
+                "error"
+            );
+        } else if (
+            error.message.includes("401") ||
+            error.message.includes("Unauthorized")
+        ) {
+            setOwnerStatus(
+                "Your session may have expired. Please sign in again.",
+                "error"
+            );
+        } else {
+            setOwnerStatus(
+                error.message || "Unable to load Owner statistics.",
+                "error"
+            );
+        }
+
+        console.error("Owner statistics error:", error);
+
+    } finally {
+        isLoadingOwnerStats = false;
+
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.textContent = "Refresh Statistics";
+        }
+    }
+}
+
+$("#refreshOwnerStats")?.addEventListener("click", () => {
+    loadOwnerStats();
+});
 
 /* ================= PROFILE LOGO ================= */
 
@@ -487,9 +663,13 @@ $("#accountLogoInput")?.addEventListener("change", event => {
         try {
             localStorage.setItem(getProfileLogoKey(), reader.result);
             loadProfileLogo();
+
             setMessage("#logoMessage", "Profile image updated.", "success");
         } catch {
-            setMessage("#logoMessage", "Unable to save this image in browser storage.");
+            setMessage(
+                "#logoMessage",
+                "Unable to save this image in browser storage."
+            );
         }
     };
 
@@ -515,7 +695,7 @@ const pageNames = {
     activity: "Activity",
     tickets: "Support Tickets",
     account: "My Account",
-    admin: "Admin",
+    admin: "Owner Dashboard",
     "all-servers": "All Servers",
     "manage-users": "Manage Users",
     "manage-tickets": "Manage Tickets"
@@ -526,27 +706,47 @@ function navigateTo(pageName) {
 
     if (!page) return;
 
+    // Owner Dashboard is restricted to the Owner role.
+    if (pageName === "admin" && !isOwner()) {
+        return;
+    }
+
+    // Other administration pages are restricted to staff.
     if (
-        ["admin", "all-servers", "manage-users", "manage-tickets"].includes(pageName) &&
+        ["all-servers", "manage-users", "manage-tickets"].includes(pageName) &&
         !isStaff()
     ) {
         return;
     }
 
-    $$(".page").forEach(section => section.classList.remove("active"));
+    $$(".page").forEach(section => {
+        section.classList.remove("active");
+    });
+
     page.classList.add("active");
 
     $$(".nav-link").forEach(link => {
-        link.classList.toggle("active", link.dataset.page === pageName);
+        link.classList.toggle(
+            "active",
+            link.dataset.page === pageName
+        );
     });
 
-    $("#pageTitle").textContent = pageNames[pageName] || "ASTRIX CLOUD";
+    const pageTitle = $("#pageTitle");
+
+    if (pageTitle) {
+        pageTitle.textContent = pageNames[pageName] || "ASTRIX CLOUD";
+    }
 
     closeSidebar();
     showIcons();
 
     if (pageName === "tickets") {
         loadTickets();
+    }
+
+    if (pageName === "admin") {
+        loadOwnerStats();
     }
 }
 
@@ -556,7 +756,10 @@ document.addEventListener("click", event => {
     if (!navigationButton) return;
 
     const pageName = navigationButton.dataset.page;
-    if (pageName) navigateTo(pageName);
+
+    if (pageName) {
+        navigateTo(pageName);
+    }
 });
 
 /* ================= MOBILE SIDEBAR ================= */
@@ -579,6 +782,7 @@ $("#sidebarOverlay")?.addEventListener("click", closeSidebar);
 
 $("#logoutBtn")?.addEventListener("click", async () => {
     const button = $("#logoutBtn");
+
     if (button) button.disabled = true;
 
     try {
@@ -590,6 +794,8 @@ $("#logoutBtn")?.addEventListener("click", async () => {
     currentUser = null;
     pendingSignupEmail = "";
     pendingSignupDetails = null;
+
+    resetOwnerStats();
 
     showLogin();
     showAuthForm("login");
@@ -606,10 +812,12 @@ $("#logoutBtn")?.addEventListener("click", async () => {
 
 function showServerConnectionNotice(action) {
     const output = $("#consoleOutput");
+
     if (!output) return;
 
     const line = document.createElement("div");
     line.className = "console-line warning-line";
+
     line.textContent =
         `[ASTRIX CLOUD] ${action}: server API connection is not configured.`;
 
@@ -652,6 +860,7 @@ function normalizeList(result) {
     if (Array.isArray(result.data)) return result.data;
     if (Array.isArray(result.data?.tickets)) return result.data.tickets;
     if (Array.isArray(result.users)) return result.users;
+
     return [];
 }
 
@@ -672,7 +881,9 @@ function renderTicket(ticket, adminMode = false) {
     const subject = escapeHTML(getTicketSubject(ticket));
     const status = escapeHTML(getTicketStatus(ticket));
     const category = escapeHTML(ticket.category || "General");
-    const description = escapeHTML(ticket.message || ticket.description || "");
+    const description = escapeHTML(
+        ticket.message || ticket.description || ""
+    );
 
     const item = document.createElement("article");
     item.className = "ticket-item";
@@ -703,6 +914,7 @@ function renderTicket(ticket, adminMode = false) {
         if (id == null) return;
 
         const message = window.prompt("Enter your ticket reply:");
+
         if (!message || !message.trim()) return;
 
         replyButton.disabled = true;
@@ -716,7 +928,11 @@ function renderTicket(ticket, adminMode = false) {
                 }
             });
 
-            await loadTicketReplies(id, $(".ticket-replies", item));
+            await loadTicketReplies(
+                id,
+                $(".ticket-replies", item)
+            );
+
         } catch (error) {
             window.alert(error.message || "Unable to send reply.");
         } finally {
@@ -730,6 +946,7 @@ function renderTicket(ticket, adminMode = false) {
         if (id == null) return;
 
         const nextStatus = status === "closed" ? "open" : "closed";
+
         statusButton.disabled = true;
 
         try {
@@ -742,6 +959,7 @@ function renderTicket(ticket, adminMode = false) {
             });
 
             await loadTickets();
+
         } catch (error) {
             window.alert(error.message || "Unable to update ticket.");
         } finally {
@@ -763,6 +981,7 @@ async function loadTicketReplies(ticketId, container) {
         );
 
         const replies = normalizeList(result);
+
         container.replaceChildren();
 
         if (!replies.length) {
@@ -798,7 +1017,10 @@ async function loadTickets() {
     const adminList = $("#adminTicketsList");
 
     if (myList) myList.textContent = "Loading tickets...";
-    if (adminList && isStaff()) adminList.textContent = "Loading tickets...";
+
+    if (adminList && isStaff()) {
+        adminList.textContent = "Loading tickets...";
+    }
 
     try {
         const result = await apiRequest(API.tickets);
@@ -831,8 +1053,9 @@ async function loadTickets() {
         showIcons();
 
     } catch (error) {
-        if (myList) myList.textContent =
-            error.message || "Unable to load tickets.";
+        if (myList) {
+            myList.textContent = error.message || "Unable to load tickets.";
+        }
 
         if (adminList && isStaff()) {
             adminList.textContent =
@@ -874,6 +1097,7 @@ $("#ticketForm")?.addEventListener("submit", async event => {
         });
 
         form.reset();
+
         setMessage(
             "#ticketFormMessage",
             "Support ticket submitted successfully.",
@@ -896,6 +1120,7 @@ $("#ticketForm")?.addEventListener("submit", async event => {
 
 async function loadAdminUsers() {
     const container = $("#usersList");
+
     if (!container || !isStaff()) return;
 
     container.textContent =
@@ -904,6 +1129,7 @@ async function loadAdminUsers() {
 
 async function loadAdminServers() {
     const container = $("#allServersList");
+
     if (!container || !isStaff()) return;
 
     container.textContent =
@@ -915,7 +1141,11 @@ async function loadAdminServers() {
 async function initializePanel() {
     showIcons();
 
-    $("#serverDisplayName").textContent = "My Minecraft Server";
+    const serverDisplayName = $("#serverDisplayName");
+
+    if (serverDisplayName) {
+        serverDisplayName.textContent = "My Minecraft Server";
+    }
 
     await restoreSession();
 
