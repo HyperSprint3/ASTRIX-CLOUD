@@ -137,25 +137,22 @@
 
     <aside id="sidebar" class="sidebar">
 
-        
-<div class="sidebar-brand">
-    <div class="astrix-logo">
-        <span>A</span>
-    </div>
+        <div class="sidebar-brand">
+            <div class="astrix-logo">
+                <span>A</span>
+            </div>
 
-    <div class="brand-name">
-        <strong>ASTRIX</strong>
-        <span class="brand-cloud">CLOUD</span>
-        <small>GAME SERVER PANEL</small>
-    </div>
+            <div class="brand-name">
+                <strong>ASTRIX</strong>
+                <span class="brand-cloud">CLOUD</span>
+                <small>GAME SERVER PANEL</small>
+            </div>
 
-    <button id="closeSidebar" class="icon-button mobile-only"
-        type="button" aria-label="Close menu">
-        <i data-lucide="x"></i>
-    </button>
-</div>
-
-            
+            <button id="closeSidebar" class="icon-button mobile-only"
+                type="button" aria-label="Close menu">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
 
         <div class="sidebar-section">
             <span class="sidebar-label">MANAGEMENT</span>
@@ -194,18 +191,30 @@
             </nav>
         </div>
 
+        <!-- ADMINISTRATION SIDEBAR -->
+
         <div class="sidebar-section admin-section" id="adminNavigation" hidden>
             <span class="sidebar-label">ADMINISTRATION</span>
+
             <nav class="navigation">
                 <button class="nav-link" data-page="admin">
                     <i data-lucide="shield-check"></i><span>Admin</span>
                 </button>
+
                 <button class="nav-link" data-page="all-servers">
                     <i data-lucide="server"></i><span>All Servers</span>
                 </button>
+
                 <button class="nav-link" data-page="manage-users">
                     <i data-lucide="users"></i><span>Manage Users</span>
                 </button>
+
+                <!-- NEW TEAM MANAGEMENT BUTTON -->
+
+                <button class="nav-link" data-page="team-management">
+                    <i data-lucide="user-cog"></i><span>Team Management</span>
+                </button>
+
                 <button class="nav-link" data-page="manage-tickets">
                     <i data-lucide="messages-square"></i><span>Manage Tickets</span>
                 </button>
@@ -296,7 +305,6 @@
                 </div>
 
                 <div class="console-layout">
-
                     <section class="console-card">
                         <div class="console-card-heading">
                             <div>
@@ -333,117 +341,81 @@
                     </section>
 
                     <aside class="resource-column">
-
                         <div class="resource-card">
                             <div class="resource-icon"><i data-lucide="wifi"></i></div>
-                            <div>
-                                <span>Address</span>
-                                <strong id="serverAddress">Not connected</strong>
-                            </div>
+                            <div><span>Address</span>
+                                <strong id="serverAddress">Not connected</strong></div>
                         </div>
-
                         <div class="resource-card">
                             <div class="resource-icon"><i data-lucide="clock"></i></div>
-                            <div>
-                                <span>Uptime</span>
-                                <strong id="serverUptime">—</strong>
-                            </div>
+                            <div><span>Uptime</span>
+                                <strong id="serverUptime">—</strong></div>
                         </div>
-
                         <div class="resource-card">
                             <div class="resource-icon"><i data-lucide="cpu"></i></div>
-                            <div>
-                                <span>CPU Load</span>
-                                <strong id="serverCpu">—</strong>
-                            </div>
+                            <div><span>CPU Load</span>
+                                <strong id="serverCpu">—</strong></div>
                         </div>
-
                         <div class="resource-card">
                             <div class="resource-icon"><i data-lucide="memory-stick"></i></div>
-                            <div>
-                                <span>Memory</span>
-                                <strong id="serverMemory">—</strong>
-                            </div>
+                            <div><span>Memory</span>
+                                <strong id="serverMemory">—</strong></div>
                         </div>
-
                         <div class="resource-card">
                             <div class="resource-icon"><i data-lucide="hard-drive"></i></div>
-                            <div>
-                                <span>Disk</span>
-                                <strong id="serverDisk">—</strong>
-                            </div>
+                            <div><span>Disk</span>
+                                <strong id="serverDisk">—</strong></div>
                         </div>
-
                         <div class="resource-card">
                             <div class="resource-icon"><i data-lucide="cloud-download"></i></div>
-                            <div>
-                                <span>Network (Inbound)</span>
-                                <strong id="serverInbound">—</strong>
-                            </div>
+                            <div><span>Network (Inbound)</span>
+                                <strong id="serverInbound">—</strong></div>
                         </div>
-
                         <div class="resource-card">
                             <div class="resource-icon"><i data-lucide="cloud-upload"></i></div>
-                            <div>
-                                <span>Network (Outbound)</span>
-                                <strong id="serverOutbound">—</strong>
-                            </div>
+                            <div><span>Network (Outbound)</span>
+                                <strong id="serverOutbound">—</strong></div>
                         </div>
-
                     </aside>
                 </div>
 
                 <div class="charts-grid">
                     <section class="chart-card">
-                        <div class="chart-heading">
-                            <h3>CPU Load</h3>
-                            <span>Usage</span>
-                        </div>
+                        <div class="chart-heading"><h3>CPU Load</h3><span>Usage</span></div>
                         <div class="chart-placeholder" id="cpuChart">
                             <i data-lucide="activity"></i>
                             <span>Waiting for server metrics</span>
                         </div>
                     </section>
-
                     <section class="chart-card">
-                        <div class="chart-heading">
-                            <h3>Memory</h3>
-                            <span>RAM usage</span>
-                        </div>
+                        <div class="chart-heading"><h3>Memory</h3><span>RAM usage</span></div>
                         <div class="chart-placeholder" id="memoryChart">
                             <i data-lucide="memory-stick"></i>
                             <span>Waiting for server metrics</span>
                         </div>
                     </section>
-
                     <section class="chart-card">
-                        <div class="chart-heading">
-                            <h3>Network</h3>
-                            <span>Traffic</span>
-                        </div>
+                        <div class="chart-heading"><h3>Network</h3><span>Traffic</span></div>
                         <div class="chart-placeholder" id="networkChart">
                             <i data-lucide="activity"></i>
                             <span>Waiting for server metrics</span>
                         </div>
                     </section>
                 </div>
-
             </section>
 
             <!-- PLACEHOLDER MANAGEMENT PAGES -->
 
             <section id="page-files" class="page">
-                <div class="page-heading">
-                    <div><span class="eyebrow">SERVER MANAGEMENT</span>
-                    <h1>Files</h1><p>Browse and manage server files.</p></div>
-                </div>
-                <section class="content-card">
-                    <div class="empty-state">
-                        <i data-lucide="folder"></i>
-                        <h3>File manager not connected</h3>
-                        <p>Connect the server API to browse and edit files.</p>
-                    </div>
-                </section>
+                <div class="page-heading"><div>
+                    <span class="eyebrow">SERVER MANAGEMENT</span>
+                    <h1>Files</h1><p>Browse and manage server files.</p>
+                </div></div>
+                <section class="content-card"><div class="empty-state">
+                    <i data-lucide="folder"></i>
+                    <h3>File manager not connected</h3>
+                    <p>Connect the server API to browse and edit files.</p>
+                </div></section>
             </section>
 
             <section id="page-databases" class="page">
@@ -627,176 +599,272 @@
                 </div>
             </section>
 
-            <!-- ADMIN PAGES -->
+            <!-- ================= ADMIN PAGES ================= -->
 
-            <!-- ================= OWNER DASHBOARD ================= -->
+            <!-- OWNER DASHBOARD -->
 
-<section id="page-admin" class="page owner-dashboard">
+            <section id="page-admin" class="page owner-dashboard">
 
-    <div class="page-heading owner-heading">
-        <div>
-            <span class="eyebrow">ASTRIX CLOUD / OWNER CONTROL</span>
-            <h1>Owner Dashboard</h1>
-            <p>Monitor and manage your ASTRIX CLOUD platform.</p>
-        </div>
+                <div class="page-heading owner-heading">
+                    <div>
+                        <span class="eyebrow">ASTRIX CLOUD / OWNER CONTROL</span>
+                        <h1>Owner Dashboard</h1>
+                        <p>Monitor and manage your ASTRIX CLOUD platform.</p>
+                    </div>
 
-        <button type="button" id="refreshOwnerStats" class="primary-button">
-            <i data-lucide="refresh-cw"></i>
-            Refresh Statistics
-        </button>
-    </div>
+                    <button type="button" id="refreshOwnerStats" class="primary-button">
+                        <i data-lucide="refresh-cw"></i>
+                        Refresh Statistics
+                    </button>
+                </div>
 
-    <section class="content-card owner-welcome-card">
-        <div class="owner-welcome-icon">
-            <i data-lucide="shield-check"></i>
-        </div>
+                <section class="content-card owner-welcome-card">
+                    <div class="owner-welcome-icon">
+                        <i data-lucide="shield-check"></i>
+                    </div>
+                    <div class="owner-welcome-info">
+                        <span class="eyebrow">PLATFORM OWNER</span>
+                        <h2>Welcome back, <span id="ownerName">Owner</span></h2>
+                        <p id="ownerEmail">Loading owner account...</p>
+                    </div>
+                    <span class="role-badge">OWNER</span>
+                </section>
 
-        <div class="owner-welcome-info">
-            <span class="eyebrow">PLATFORM OWNER</span>
-            <h2>Welcome back, <span id="ownerName">Owner</span></h2>
-            <p id="ownerEmail">Loading owner account...</p>
-        </div>
+                <div class="owner-section-heading">
+                    <div>
+                        <h2>Platform Overview</h2>
+                        <p>Live statistics from your ASTRIX CLOUD database.</p>
+                    </div>
+                    <span id="ownerStatsStatus" class="owner-stats-status">
+                        Waiting for data...
+                    </span>
+                </div>
 
-        <span class="role-badge">OWNER</span>
-    </section>
+                <div class="owner-stats-grid">
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Total Users</span><i data-lucide="users"></i>
+                        </div>
+                        <strong data-owner-stat="total_users">—</strong>
+                        <small>Registered platform accounts</small>
+                    </article>
 
-    <div class="owner-section-heading">
-        <div>
-            <h2>Platform Overview</h2>
-            <p>Live statistics from your ASTRIX CLOUD database.</p>
-        </div>
-        <span id="ownerStatsStatus" class="owner-stats-status">
-            Waiting for data...
-        </span>
-    </div>
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Owners</span><i data-lucide="crown"></i>
+                        </div>
+                        <strong data-owner-stat="owners">—</strong>
+                        <small>Owner accounts</small>
+                    </article>
 
-    <div class="owner-stats-grid">
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Administrators</span><i data-lucide="shield-check"></i>
+                        </div>
+                        <strong data-owner-stat="admins">—</strong>
+                        <small>Admin accounts</small>
+                    </article>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Total Users</span>
-                <i data-lucide="users"></i>
-            </div>
-            <strong data-owner-stat="total_users">—</strong>
-            <small>Registered platform accounts</small>
-        </article>
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Staff Members</span><i data-lucide="user-check"></i>
+                        </div>
+                        <strong data-owner-stat="staff">—</strong>
+                        <small>Staff accounts</small>
+                    </article>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Owners</span>
-                <i data-lucide="crown"></i>
-            </div>
-            <strong data-owner-stat="owners">—</strong>
-            <small>Owner accounts</small>
-        </article>
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Members</span><i data-lucide="users-round"></i>
+                        </div>
+                        <strong data-owner-stat="members">—</strong>
+                        <small>Regular user accounts</small>
+                    </article>
+                </div>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Administrators</span>
-                <i data-lucide="shield-check"></i>
-            </div>
-            <strong data-owner-stat="admins">—</strong>
-            <small>Admin accounts</small>
-        </article>
+                <div class="owner-section-heading">
+                    <div>
+                        <h2>Support Overview</h2>
+                        <p>Monitor customer support activity.</p>
+                    </div>
+                </div>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Staff Members</span>
-                <i data-lucide="user-check"></i>
-            </div>
-            <strong data-owner-stat="staff">—</strong>
-            <small>Staff accounts</small>
-        </article>
+                <div class="owner-stats-grid">
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Total Tickets</span><i data-lucide="messages-square"></i>
+                        </div>
+                        <strong data-owner-stat="total_tickets">—</strong>
+                        <small>All support tickets</small>
+                    </article>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Members</span>
-                <i data-lucide="users-round"></i>
-            </div>
-            <strong data-owner-stat="members">—</strong>
-            <small>Regular user accounts</small>
-        </article>
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Open Tickets</span><i data-lucide="message-circle"></i>
+                        </div>
+                        <strong data-owner-stat="open_tickets">—</strong>
+                        <small>Tickets awaiting resolution</small>
+                    </article>
 
-    </div>
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Closed Tickets</span><i data-lucide="check-circle"></i>
+                        </div>
+                        <strong data-owner-stat="closed_tickets">—</strong>
+                        <small>Resolved tickets</small>
+                    </article>
 
-    <div class="owner-section-heading">
-        <div>
-            <h2>Support Overview</h2>
-            <p>Monitor customer support activity.</p>
-        </div>
-    </div>
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Total Replies</span><i data-lucide="reply"></i>
+                        </div>
+                        <strong data-owner-stat="total_replies">—</strong>
+                        <small>Support conversation replies</small>
+                    </article>
 
-    <div class="owner-stats-grid">
+                    <article class="owner-stat-card">
+                        <div class="owner-stat-top">
+                            <span>Active Sessions</span><i data-lucide="activity"></i>
+                        </div>
+                        <strong data-owner-stat="active_sessions">—</strong>
+                        <small>Currently valid sessions</small>
+                    </article>
+                </div>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Total Tickets</span>
-                <i data-lucide="messages-square"></i>
-            </div>
-            <strong data-owner-stat="total_tickets">—</strong>
-            <small>All support tickets</small>
-        </article>
+                <section class="content-card owner-security-card">
+                    <div class="owner-security-icon">
+                        <i data-lucide="lock-keyhole"></i>
+                    </div>
+                    <div>
+                        <h3>Owner Security</h3>
+                        <p>
+                            Owner statistics are protected by server-side role verification.
+                            Only the platform owner can access this dashboard.
+                        </p>
+                    </div>
+                    <span class="secure-indicator">
+                        <span class="status-dot"></span> Protected
+                    </span>
+                </section>
+            </section>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Open Tickets</span>
-                <i data-lucide="message-circle"></i>
-            </div>
-            <strong data-owner-stat="open_tickets">—</strong>
-            <small>Tickets awaiting resolution</small>
-        </article>
+            <!-- TEAM MANAGEMENT -->
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Closed Tickets</span>
-                <i data-lucide="check-circle"></i>
-            </div>
-            <strong data-owner-stat="closed_tickets">—</strong>
-            <small>Resolved tickets</small>
-        </article>
+            <section id="page-team-management" class="page">
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Total Replies</span>
-                <i data-lucide="reply"></i>
-            </div>
-            <strong data-owner-stat="total_replies">—</strong>
-            <small>Support conversation replies</small>
-        </article>
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">ASTRIX CLOUD / TEAM CONTROL</span>
+                        <h1>Team Management</h1>
+                        <p>Create and manage your platform administrators and staff.</p>
+                    </div>
+                </div>
 
-        <article class="owner-stat-card">
-            <div class="owner-stat-top">
-                <span>Active Sessions</span>
-                <i data-lucide="activity"></i>
-            </div>
-            <strong data-owner-stat="active_sessions">—</strong>
-            <small>Currently valid sessions</small>
-        </article>
+                <section class="content-card">
+                    <div class="card-heading">
+                        <div>
+                            <h3>Create Team Account</h3>
+                            <p>Add a new Admin or Staff member to ASTRIX CLOUD.</p>
+                        </div>
+                        <i data-lucide="user-plus"></i>
+                    </div>
 
-    </div>
+                    <form id="teamCreateForm" class="standard-form">
 
-    <section class="content-card owner-security-card">
-        <div class="owner-security-icon">
-            <i data-lucide="lock-keyhole"></i>
-        </div>
-        <div>
-            <h3>Owner Security</h3>
-            <p>
-                Owner statistics are protected by server-side role verification.
-                Only the platform owner can access this dashboard.
-            </p>
-        </div>
-        <span class="secure-indicator">
-            <span class="status-dot"></span>
-            Protected
-        </span>
-    </section>
+                        <label for="teamUsername">Username</label>
+                        <input
+                            id="teamUsername"
+                            type="text"
+                            placeholder="Enter team member username"
+                            minlength="3"
+                            maxlength="30"
+                            required
+                        >
 
-</section>
-                <div class="page-heading"><div>
-                    <span class="eyebrow">ADMINISTRATION</span>
-                    <h1>Admin</h1><p>Platform administration.</p>
-                </div></div>
+                        <label for="teamEmail">Email address</label>
+                        <input
+                            id="teamEmail"
+                            type="email"
+                            placeholder="team@example.com"
+                            required
+                        >
+
+                        <label for="teamPassword">Temporary password</label>
+                        <input
+                            id="teamPassword"
+                            type="password"
+                            placeholder="At least 12 characters"
+                            minlength="12"
+                            maxlength="128"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                        <label for="teamRole">Account role</label>
+                        <select id="teamRole" required>
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
+                        </select>
+
+                        <div id="teamCreateMessage" class="form-message"></div>
+
+                        <button
+                            type="submit"
+                            id="createTeamAccountBtn"
+                            class="primary-button"
+                        >
+                            <i data-lucide="user-plus"></i>
+                            Create Team Account
+                        </button>
+                    </form>
+                </section>
+
+                <section class="content-card">
+                    <div class="card-heading">
+                        <div>
+                            <h3>Team Accounts</h3>
+                            <p>View your registered Admin and Staff accounts.</p>
+                        </div>
+                        <i data-lucide="users"></i>
+                    </div>
+
+                    <div id="teamAccountsList" class="team-accounts-list">
+                        <div class="empty-state">
+                            <i data-lucide="users"></i>
+                            <h3>Team accounts</h3>
+                            <p>Team account information will appear here after the backend is connected.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="content-card owner-security-card">
+                    <div class="owner-security-icon">
+                        <i data-lucide="shield-check"></i>
+                    </div>
+                    <div>
+                        <h3>Owner-only access</h3>
+                        <p>
+                            Only the platform owner should be able to create
+                            or manage Admin and Staff accounts.
+                        </p>
+                    </div>
+                    <span class="secure-indicator">
+                        <span class="status-dot"></span> Protected
+                    </span>
+                </section>
+
+            </section>
+
+            <!-- ADMIN PLACEHOLDER -->
+
+            <section id="page-admin-placeholder" class="page">
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>Administration</h1>
+                        <p>Platform administration.</p>
+                    </div>
+                </div>
                 <section class="content-card">
                     <div class="empty-state">
                         <i data-lucide="shield-check"></i>
@@ -806,29 +874,46 @@
                 </section>
             </section>
 
+            <!-- ALL SERVERS -->
+
             <section id="page-all-servers" class="page">
-                <div class="page-heading"><div>
-                    <span class="eyebrow">ADMINISTRATION</span>
-                    <h1>All Servers</h1><p>Platform server overview.</p>
-                </div></div>
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>All Servers</h1>
+                        <p>Platform server overview.</p>
+                    </div>
+                </div>
                 <section class="content-card">
                     <div id="allServersList" class="server-list"></div>
                 </section>
             </section>
 
+            <!-- MANAGE USERS -->
+
             <section id="page-manage-users" class="page">
-                <div class="page-heading"><div>
-                    <span class="eyebrow">ADMINISTRATION</span>
-                    <h1>Manage Users</h1><p>User management.</p>
-                </div></div>
-                <section class="content-card"><div id="usersList"></div></section>
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>Manage Users</h1>
+                        <p>User management.</p>
+                    </div>
+                </div>
+                <section class="content-card">
+                    <div id="usersList"></div>
+                </section>
             </section>
 
+            <!-- MANAGE TICKETS -->
+
             <section id="page-manage-tickets" class="page">
-                <div class="page-heading"><div>
-                    <span class="eyebrow">ADMINISTRATION</span>
-                    <h1>Manage Tickets</h1><p>Review customer support conversations.</p>
-                </div></div>
+                <div class="page-heading">
+                    <div>
+                        <span class="eyebrow">ADMINISTRATION</span>
+                        <h1>Manage Tickets</h1>
+                        <p>Review customer support conversations.</p>
+                    </div>
+                </div>
                 <section class="content-card">
                     <div id="adminTicketsList" class="ticket-list"></div>
                 </section>
