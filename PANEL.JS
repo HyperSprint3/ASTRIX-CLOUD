@@ -3,8 +3,8 @@
 
 /* ==========================================================
    ASTRIX CLOUD — CONTROL PANEL
-   Authentication • Navigation • Account • Support
-   Owner Dashboard • Team Management
+   Home • Authentication • Navigation • Account • Support
+   Owner Dashboard • Team Management • Role Protection
    ========================================================== */
 
 /* ================= API CONFIGURATION ================= */
@@ -33,6 +33,7 @@ const SELECTORS = {
 let currentUser = null;
 let pendingSignupEmail = "";
 let pendingSignupDetails = null;
+
 let isLoadingTickets = false;
 let isLoadingOwnerStats = false;
 let isLoadingTeamAccounts = false;
@@ -83,11 +84,15 @@ async function apiRequest(url, options = {}) {
         method: options.method || "GET",
         credentials: "same-origin",
         headers: {
-            "Accept": "application/json",
-            ...(options.body ? { "Content-Type": "application/json" } : {}),
+            Accept: "application/json",
+            ...(options.body ? {
+                "Content-Type": "application/json"
+            } : {}),
             ...(options.headers || {})
         },
-        ...(options.body ? { body: JSON.stringify(options.body) } : {})
+        ...(options.body ? {
+            body: JSON.stringify(options.body)
+        } : {})
     };
 
     const response = await fetch(url, config);
@@ -103,12 +108,11 @@ async function apiRequest(url, options = {}) {
     }
 
     if (!response.ok) {
-        const message =
+        throw new Error(
             data.message ||
             data.error ||
-            `Request failed (${response.status})`;
-
-        throw new Error(message);
+            `Request failed (${response.status})`
+        );
     }
 
     return data;
@@ -139,8 +143,16 @@ function isOwner(user = currentUser) {
     return getUserRole(user) === "owner";
 }
 
+function isAdmin(user = currentUser) {
+    return getUserRole(user) === "admin";
+}
+
 function isStaff(user = currentUser) {
     return ["owner", "admin", "staff"].includes(getUserRole(user));
+}
+
+function canUseConsole(user = currentUser) {
+    return ["owner", "admin"].includes(getUserRole(user));
 }
 
 function escapeHTML(value) {
@@ -169,6 +181,140 @@ function showIcons() {
     }
 }
 
+/* ================= ROLE ACCESS CONTROL ================= */
+
+function getAllowedRoles(element) {
+    const value = element?.dataset?.allowedRoles;
+
+    if (!value) return null;
+
+    return value
+        .split(",")
+        .map(role => role.trim().toLowerCase())
+        .filter(Boolean);
+}
+
+function canAccessPage(pageName) {
+    if (!currentUser) return false;
+
+    // Home is available to every authenticated account.
+    if (pageName === "home") return true;
+
+    // Server Console and server management.
+    const serverPages = [
+        "overview",
+        "files",
+        "databases",
+        "schedules",
+        "users",
+        "backups",
+        "network",
+        "startup",
+        "settings",
+        "activity"
+    ];
+
+    if (serverPages.includes(pageName)) {
+        return canUseConsole();
+    }
+
+    // Owner-only pages.
+    if (
+        pageName === "admin" ||
+        pageName === "team-management"
+    ) {
+        return isOwner();
+    }
+
+    // Administration pages.
+    if (
+        ["all-servers", "manage-users", "manage-tickets"].includes(pageName)
+    ) {
+        return isStaff();
+    }
+
+    // Every authenticated role can access these.
+    if (
+        pageName === "tickets" ||
+        pageName === "account"
+    ) {
+        return true;
+    }
+
+    const page = $(`#page-${CSS.escape(pageName)}`);
+
+    if (!page) return false;
+
+    const allowedRoles = getAllowedRoles(page);
+
+    if (!allowedRoles) return true;
+
+    return allowedRoles.includes(getUserRole());
+}
+
+function updateRoleVisibility() {
+    if (!currentUser) return;
+
+    // Hide navigation and buttons based on their allowed roles.
+    $$("[data-allowed-roles]").forEach(element => {
+        const allowedRoles = getAllowedRoles(element);
+
+        if (!allowedRoles) return;
+
+        const permitted = allowedRoles.includes(getUserRole());
+
+        element.hidden = !permitted;
+        element.setAttribute("aria-hidden", String(!permitted));
+    });
+
+    // Server pages are Owner/Admin only.
+    const serverPages = [
+        "overview",
+        "files",
+        "databases",
+        "schedules",
+        "users",
+        "backups",
+        "network",
+        "startup",
+        "settings",
+        "activity"
+    ];
+
+    serverPages.forEach(pageName => {
+        const page = $(`#page-${pageName}`);
+        if (page) page.hidden = !canUseConsole();
+    });
+
+    // Owner-only dashboard and team management.
+    ["admin", "team-management"].forEach(pageName => {
+        const page = $(`#page-${pageName}`);
+        if (page) page.hidden = !isOwner();
+    });
+
+    // Show the administration navigation only to staff.
+    const adminNavigation = $("#adminNavigation");
+
+    if (adminNavigation) {
+        adminNavigation.hidden = !isStaff();
+    }
+
+    const ownerNavigation = $('#adminNavigation [data-page="admin"]');
+
+    if (ownerNavigation) {
+        ownerNavigation.hidden = !isOwner();
+    }
+
+    const teamNavigation =
+        $('#adminNavigation [data-page="team-management"]');
+
+    if (teamNavigation) {
+        teamNavigation.hidden = !isOwner();
+    }
+}
+
+/* ================= LOGIN / DASHBOARD DISPLAY ================= */
+
 function showLogin() {
     const loginPage = $(SELECTORS.loginPage);
     const dashboard = $(SELECTORS.dashboard);
@@ -188,7 +334,11 @@ function showDashboard() {
     if (dashboard) dashboard.hidden = false;
 
     updateUserInterface();
-    navigateTo("overview");
+    updateRoleVisibility();
+
+    // Every account starts at Home.
+    navigateTo("home");
+
     closeSidebar();
     showIcons();
 }
@@ -269,7 +419,10 @@ $(SELECTORS.loginForm)?.addEventListener("submit", async event => {
         await loadTickets();
 
     } catch (error) {
-        setMessage("#loginMessage", error.message || "Unable to sign in.");
+        setMessage(
+            "#loginMessage",
+            error.message || "Unable to sign in."
+        );
     } finally {
         setButtonLoading(button, false);
     }
@@ -298,12 +451,18 @@ $(SELECTORS.signupForm)?.addEventListener("submit", async event => {
     }
 
     if (!/^[a-zA-Z0-9_.-]+$/.test(username)) {
-        setMessage("#signupMessage", "Username contains unsupported characters.");
+        setMessage(
+            "#signupMessage",
+            "Username contains unsupported characters."
+        );
         return;
     }
 
     if (password.length < 12 || password.length > 128) {
-        setMessage("#signupMessage", "Password must be 12–128 characters.");
+        setMessage(
+            "#signupMessage",
+            "Password must be 12–128 characters."
+        );
         return;
     }
 
@@ -328,7 +487,10 @@ $(SELECTORS.signupForm)?.addEventListener("submit", async event => {
         );
 
     } catch (error) {
-        setMessage("#signupMessage", error.message || "Unable to start signup.");
+        setMessage(
+            "#signupMessage",
+            error.message || "Unable to start signup."
+        );
     } finally {
         setButtonLoading(button, false);
     }
@@ -346,12 +508,18 @@ $(SELECTORS.verifyForm)?.addEventListener("submit", async event => {
     const email = pendingSignupEmail || pendingSignupDetails?.email;
 
     if (!email) {
-        setMessage("#verifyMessage", "Signup session not found. Start again.");
+        setMessage(
+            "#verifyMessage",
+            "Signup session not found. Start again."
+        );
         return;
     }
 
     if (!/^\d{6}$/.test(code || "")) {
-        setMessage("#verifyMessage", "Enter the six-digit verification code.");
+        setMessage(
+            "#verifyMessage",
+            "Enter the six-digit verification code."
+        );
         return;
     }
 
@@ -387,7 +555,10 @@ $(SELECTORS.verifyForm)?.addEventListener("submit", async event => {
         }
 
     } catch (error) {
-        setMessage("#verifyMessage", error.message || "Verification failed.");
+        setMessage(
+            "#verifyMessage",
+            error.message || "Verification failed."
+        );
     } finally {
         setButtonLoading(button, false);
     }
@@ -447,26 +618,12 @@ function updateUserInterface() {
     setText("#topbarAvatar", initials);
     setText("#accountAvatar", initials);
 
-    const adminNavigation = $("#adminNavigation");
+    // Home page greeting.
+    setText("#homeUserName", name);
+    setText("#homeWelcomeName", name);
+    setText("#homeUserRole", roleLabel);
 
-    if (adminNavigation) {
-        adminNavigation.hidden = !isStaff();
-    }
-
-    // Owner Dashboard is Owner-only.
-    const ownerNavigation = $('#adminNavigation [data-page="admin"]');
-
-    if (ownerNavigation) {
-        ownerNavigation.hidden = !isOwner();
-    }
-
-    // Team Management is Owner-only.
-    const teamNavigation = $('#adminNavigation [data-page="team-management"]');
-
-    if (teamNavigation) {
-        teamNavigation.hidden = !isOwner();
-    }
-
+    updateRoleVisibility();
     loadProfileLogo();
 }
 
@@ -560,7 +717,10 @@ async function loadOwnerStats() {
             }
         }
 
-        setOwnerStatus("Statistics updated successfully.", "success");
+        setOwnerStatus(
+            "Statistics updated successfully.",
+            "success"
+        );
 
     } catch (error) {
         resetOwnerStats();
@@ -583,7 +743,7 @@ async function loadOwnerStats() {
 }
 
 $("#refreshOwnerStats")?.addEventListener("click", () => {
-    loadOwnerStats();
+    if (isOwner()) loadOwnerStats();
 });
 
 /* ================= TEAM MANAGEMENT ================= */
@@ -615,8 +775,7 @@ function renderTeamAccount(account) {
 
     const role = document.createElement("span");
     role.className = "team-account-role";
-    role.textContent =
-        String(account.role || "staff").toUpperCase();
+    role.textContent = String(account.role || "staff").toUpperCase();
 
     details.append(username, email);
     item.append(details, role);
@@ -629,9 +788,7 @@ async function loadTeamAccounts() {
 
     const container = $("#teamAccountsList");
 
-    if (!container) return;
-
-    if (isLoadingTeamAccounts) return;
+    if (!container || isLoadingTeamAccounts) return;
 
     isLoadingTeamAccounts = true;
     container.textContent = "Loading team accounts...";
@@ -651,7 +808,7 @@ async function loadTeamAccounts() {
 
         if (!accounts.length) {
             container.textContent =
-                "No Admin or Staff accounts have been created yet.";
+                "No Owner, Admin or Staff accounts have been created yet.";
             return;
         }
 
@@ -670,6 +827,40 @@ async function loadTeamAccounts() {
     }
 }
 
+/* SHOW / HIDE TEAM PASSWORD */
+
+$("#toggleTeamPassword")?.addEventListener("click", () => {
+    const passwordInput = $("#teamPassword");
+    const toggleButton = $("#toggleTeamPassword");
+
+    if (!passwordInput || !toggleButton) return;
+
+    const isVisible = passwordInput.type === "text";
+
+    passwordInput.type = isVisible ? "password" : "text";
+
+    toggleButton.setAttribute(
+        "aria-label",
+        isVisible ? "Show password" : "Hide password"
+    );
+
+    toggleButton.setAttribute(
+        "title",
+        isVisible ? "Show password" : "Hide password"
+    );
+
+    const icon = $("i", toggleButton);
+
+    if (icon) {
+        icon.setAttribute(
+            "data-lucide",
+            isVisible ? "eye" : "eye-off"
+        );
+    }
+
+    showIcons();
+});
+
 /* CREATE TEAM ACCOUNT */
 
 $("#teamCreateForm")?.addEventListener("submit", async event => {
@@ -681,6 +872,7 @@ $("#teamCreateForm")?.addEventListener("submit", async event => {
     }
 
     const form = event.currentTarget;
+
     const button = $("#createTeamAccountBtn") ||
         form.querySelector('button[type="submit"]');
 
@@ -711,8 +903,10 @@ $("#teamCreateForm")?.addEventListener("submit", async event => {
         return;
     }
 
-    if (!["admin", "staff"].includes(role)) {
-        setTeamStatus("Choose a valid team role.");
+    // Owner creation is allowed in the interface.
+    // The backend must also be updated to accept this role.
+    if (!["owner", "admin", "staff"].includes(role)) {
+        setTeamStatus("Choose a valid account role.");
         return;
     }
 
@@ -732,21 +926,39 @@ $("#teamCreateForm")?.addEventListener("submit", async event => {
 
         if (result.success !== true) {
             throw new Error(
-                result.error || "Account creation failed."
+                result.error ||
+                result.message ||
+                "Account creation failed."
             );
         }
 
         form.reset();
 
+        // Reset password visibility after creation.
+        const passwordInput = $("#teamPassword");
+
+        if (passwordInput) {
+            passwordInput.type = "password";
+        }
+
+        const toggleIcon = $("#toggleTeamPassword i");
+
+        if (toggleIcon) {
+            toggleIcon.setAttribute("data-lucide", "eye");
+        }
+
+        showIcons();
+
         setTeamStatus(
-            result.message || "Team account created successfully.",
+            result.message || "Account created successfully.",
             "success"
         );
 
         await loadTeamAccounts();
 
-        // Refresh Owner statistics after account creation.
-        loadOwnerStats();
+        if (isOwner()) {
+            loadOwnerStats();
+        }
 
     } catch (error) {
         setTeamStatus(
@@ -787,7 +999,11 @@ function loadProfileLogo() {
         if (!avatar) return;
 
         if (logo) {
-            avatar.innerHTML = `<img src="${logo}" alt="Profile image">`;
+            const image = document.createElement("img");
+            image.src = logo;
+            image.alt = "Profile image";
+
+            avatar.replaceChildren(image);
         } else {
             avatar.textContent = getInitials(getUserName());
         }
@@ -806,13 +1022,21 @@ $("#accountLogoInput")?.addEventListener("change", event => {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-        setMessage("#logoMessage", "Choose a PNG, JPG or WEBP image.");
+        setMessage(
+            "#logoMessage",
+            "Choose a PNG, JPG or WEBP image."
+        );
+
         event.target.value = "";
         return;
     }
 
     if (file.size > 1024 * 1024) {
-        setMessage("#logoMessage", "Image must be smaller than 1 MB.");
+        setMessage(
+            "#logoMessage",
+            "Image must be smaller than 1 MB."
+        );
+
         event.target.value = "";
         return;
     }
@@ -821,10 +1045,18 @@ $("#accountLogoInput")?.addEventListener("change", event => {
 
     reader.onload = () => {
         try {
-            localStorage.setItem(getProfileLogoKey(), reader.result);
+            localStorage.setItem(
+                getProfileLogoKey(),
+                reader.result
+            );
+
             loadProfileLogo();
 
-            setMessage("#logoMessage", "Profile image updated.", "success");
+            setMessage(
+                "#logoMessage",
+                "Profile image updated.",
+                "success"
+            );
         } catch {
             setMessage(
                 "#logoMessage",
@@ -843,7 +1075,8 @@ $("#accountLogoInput")?.addEventListener("change", event => {
 /* ================= NAVIGATION ================= */
 
 const pageNames = {
-    overview: "Console",
+    home: "Home",
+    overview: "Server Console",
     files: "Files",
     databases: "Databases",
     schedules: "Schedules",
@@ -851,7 +1084,7 @@ const pageNames = {
     backups: "Backups",
     network: "Network",
     startup: "Startup",
-    settings: "Settings",
+    settings: "Server Settings",
     activity: "Activity",
     tickets: "Support Tickets",
     account: "My Account",
@@ -863,32 +1096,34 @@ const pageNames = {
 };
 
 function navigateTo(pageName) {
+    if (!currentUser) return false;
+
     const page = $(`#page-${CSS.escape(pageName)}`);
 
-    if (!page) return;
+    if (!page) return false;
 
-    // Owner-only pages.
-    if (
-        ["admin", "team-management"].includes(pageName) &&
-        !isOwner()
-    ) {
-        return;
+    if (!canAccessPage(pageName)) {
+        console.warn(
+            `Access denied: ${pageName} for role ${getUserRole()}`
+        );
+
+        // Restricted pages redirect to Home.
+        if (pageName !== "home") {
+            navigateTo("home");
+        }
+
+        return false;
     }
 
-    // Other administration pages require staff access.
-    if (
-        ["all-servers", "manage-users", "manage-tickets"].includes(pageName) &&
-        !isStaff()
-    ) {
-        return;
-    }
-
+    // Remove active state from every page.
     $$(".page").forEach(section => {
         section.classList.remove("active");
     });
 
+    // Activate selected page.
     page.classList.add("active");
 
+    // Update navigation buttons.
     $$(".nav-link").forEach(link => {
         link.classList.toggle(
             "active",
@@ -896,26 +1131,39 @@ function navigateTo(pageName) {
         );
     });
 
+    // Update page title.
     const pageTitle = $("#pageTitle");
 
     if (pageTitle) {
-        pageTitle.textContent = pageNames[pageName] || "ASTRIX CLOUD";
+        pageTitle.textContent =
+            pageNames[pageName] || "ASTRIX CLOUD";
     }
 
     closeSidebar();
     showIcons();
 
+    // Load page data when needed.
     if (pageName === "tickets") {
         loadTickets();
     }
 
-    if (pageName === "admin") {
+    if (pageName === "admin" && isOwner()) {
         loadOwnerStats();
     }
 
-    if (pageName === "team-management") {
+    if (pageName === "team-management" && isOwner()) {
         loadTeamAccounts();
     }
+
+    if (pageName === "manage-users" && isStaff()) {
+        loadAdminUsers();
+    }
+
+    if (pageName === "all-servers" && isStaff()) {
+        loadAdminServers();
+    }
+
+    return true;
 }
 
 document.addEventListener("click", event => {
@@ -925,9 +1173,10 @@ document.addEventListener("click", event => {
 
     const pageName = navigationButton.dataset.page;
 
-    if (pageName) {
-        navigateTo(pageName);
-    }
+    if (!pageName) return;
+
+    event.preventDefault();
+    navigateTo(pageName);
 });
 
 /* ================= MOBILE SIDEBAR ================= */
@@ -954,9 +1203,14 @@ $("#logoutBtn")?.addEventListener("click", async () => {
     if (button) button.disabled = true;
 
     try {
-        await apiRequest(API.logout, { method: "POST" });
+        await apiRequest(API.logout, {
+            method: "POST"
+        });
     } catch (error) {
-        console.warn("Logout endpoint returned an error:", error);
+        console.warn(
+            "Logout endpoint returned an error:",
+            error
+        );
     }
 
     currentUser = null;
@@ -968,6 +1222,12 @@ $("#logoutBtn")?.addEventListener("click", async () => {
     const teamList = $("#teamAccountsList");
     if (teamList) teamList.replaceChildren();
 
+    const ticketsList = $("#myTicketsList");
+    if (ticketsList) ticketsList.replaceChildren();
+
+    const adminTicketsList = $("#adminTicketsList");
+    if (adminTicketsList) adminTicketsList.replaceChildren();
+
     showLogin();
     showAuthForm("login");
 
@@ -977,11 +1237,16 @@ $("#logoutBtn")?.addEventListener("click", async () => {
 /* ================= SERVER CONTROLS ================= */
 
 /*
-   These buttons intentionally do not send fake server commands.
+   These buttons do not send fake server commands.
    A real Pterodactyl-compatible server API must be configured first.
 */
 
 function showServerConnectionNotice(action) {
+    if (!canUseConsole()) {
+        navigateTo("home");
+        return;
+    }
+
     const output = $("#consoleOutput");
 
     if (!output) return;
@@ -997,19 +1262,30 @@ function showServerConnectionNotice(action) {
 }
 
 $("#startServerBtn")?.addEventListener("click", () => {
+    if (!canUseConsole()) return;
+
     showServerConnectionNotice("Start requested");
 });
 
 $("#restartServerBtn")?.addEventListener("click", () => {
+    if (!canUseConsole()) return;
+
     showServerConnectionNotice("Restart requested");
 });
 
 $("#stopServerBtn")?.addEventListener("click", () => {
+    if (!canUseConsole()) return;
+
     showServerConnectionNotice("Stop requested");
 });
 
 $("#consoleCommandForm")?.addEventListener("submit", event => {
     event.preventDefault();
+
+    if (!canUseConsole()) {
+        navigateTo("home");
+        return;
+    }
 
     const input = $("#consoleCommand");
     const command = input?.value.trim();
@@ -1049,9 +1325,11 @@ function getTicketStatus(ticket) {
 
 function renderTicket(ticket, adminMode = false) {
     const id = getTicketId(ticket);
+
     const subject = escapeHTML(getTicketSubject(ticket));
     const status = escapeHTML(getTicketStatus(ticket));
     const category = escapeHTML(ticket.category || "General");
+
     const description = escapeHTML(
         ticket.message || ticket.description || ""
     );
@@ -1084,7 +1362,9 @@ function renderTicket(ticket, adminMode = false) {
     replyButton?.addEventListener("click", async () => {
         if (id == null) return;
 
-        const message = window.prompt("Enter your ticket reply:");
+        const message = window.prompt(
+            "Enter your ticket reply:"
+        );
 
         if (!message || !message.trim()) return;
 
@@ -1105,7 +1385,9 @@ function renderTicket(ticket, adminMode = false) {
             );
 
         } catch (error) {
-            window.alert(error.message || "Unable to send reply.");
+            window.alert(
+                error.message || "Unable to send reply."
+            );
         } finally {
             replyButton.disabled = false;
         }
@@ -1114,9 +1396,10 @@ function renderTicket(ticket, adminMode = false) {
     const statusButton = $(".ticket-status-button", item);
 
     statusButton?.addEventListener("click", async () => {
-        if (id == null) return;
+        if (id == null || !isStaff()) return;
 
-        const nextStatus = status === "closed" ? "open" : "closed";
+        const nextStatus =
+            status === "closed" ? "open" : "closed";
 
         statusButton.disabled = true;
 
@@ -1132,7 +1415,9 @@ function renderTicket(ticket, adminMode = false) {
             await loadTickets();
 
         } catch (error) {
-            window.alert(error.message || "Unable to update ticket.");
+            window.alert(
+                error.message || "Unable to update ticket."
+            );
         } finally {
             statusButton.disabled = false;
         }
@@ -1165,7 +1450,8 @@ async function loadTicketReplies(ticketId, container) {
             row.className = "ticket-reply";
 
             const author = document.createElement("strong");
-            author.textContent = reply.username || reply.author || "User";
+            author.textContent =
+                reply.username || reply.author || "User";
 
             const message = document.createElement("p");
             message.textContent = reply.message || "";
@@ -1175,7 +1461,8 @@ async function loadTicketReplies(ticketId, container) {
         });
 
     } catch (error) {
-        container.textContent = error.message || "Could not load replies.";
+        container.textContent =
+            error.message || "Could not load replies.";
     }
 }
 
@@ -1187,7 +1474,9 @@ async function loadTickets() {
     const myList = $("#myTicketsList");
     const adminList = $("#adminTicketsList");
 
-    if (myList) myList.textContent = "Loading tickets...";
+    if (myList) {
+        myList.textContent = "Loading tickets...";
+    }
 
     if (adminList && isStaff()) {
         adminList.textContent = "Loading tickets...";
@@ -1201,10 +1490,13 @@ async function loadTickets() {
             myList.replaceChildren();
 
             if (!tickets.length) {
-                myList.textContent = "You have no support tickets yet.";
+                myList.textContent =
+                    "You have no support tickets yet.";
             } else {
                 tickets.forEach(ticket => {
-                    myList.appendChild(renderTicket(ticket, false));
+                    myList.appendChild(
+                        renderTicket(ticket, false)
+                    );
                 });
             }
         }
@@ -1213,10 +1505,13 @@ async function loadTickets() {
             adminList.replaceChildren();
 
             if (!tickets.length) {
-                adminList.textContent = "No tickets available.";
+                adminList.textContent =
+                    "No tickets available.";
             } else {
                 tickets.forEach(ticket => {
-                    adminList.appendChild(renderTicket(ticket, true));
+                    adminList.appendChild(
+                        renderTicket(ticket, true)
+                    );
                 });
             }
         }
@@ -1225,7 +1520,8 @@ async function loadTickets() {
 
     } catch (error) {
         if (myList) {
-            myList.textContent = error.message || "Unable to load tickets.";
+            myList.textContent =
+                error.message || "Unable to load tickets.";
         }
 
         if (adminList && isStaff()) {
@@ -1242,6 +1538,8 @@ async function loadTickets() {
 $("#ticketForm")?.addEventListener("submit", async event => {
     event.preventDefault();
 
+    if (!currentUser) return;
+
     const form = event.currentTarget;
     const button = form.querySelector('button[type="submit"]');
 
@@ -1250,7 +1548,10 @@ $("#ticketForm")?.addEventListener("submit", async event => {
     const description = $("#ticketDescription")?.value.trim();
 
     if (!subject || !category || !description) {
-        setMessage("#ticketFormMessage", "Complete all ticket fields.");
+        setMessage(
+            "#ticketFormMessage",
+            "Complete all ticket fields."
+        );
         return;
     }
 
@@ -1326,4 +1627,7 @@ async function initializePanel() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", initializePanel);
+document.addEventListener(
+    "DOMContentLoaded",
+    initializePanel
+);
