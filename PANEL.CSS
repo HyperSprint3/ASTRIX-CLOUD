@@ -1664,3 +1664,273 @@ textarea:focus-visible {
     caret-color: #a78bfa;
     transition: background-color 99999s ease-out;
 }
+
+/* =========================================================
+   ASTRIX CLOUD — PREMIUM OWNER DASHBOARD
+   ========================================================= */
+
+.owner-dashboard {
+    animation: pageEnter .4s ease both;
+}
+
+.owner-heading {
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 25px;
+    border: 1px solid rgba(139, 92, 246, .25);
+    border-radius: 18px;
+    background:
+        radial-gradient(ellipse at 90% 20%, rgba(139, 92, 246, .2), transparent 45%),
+        linear-gradient(120deg, #111729, #171632);
+}
+
+.owner-heading .primary-button {
+    width: auto;
+    min-width: 185px;
+    margin: 0;
+}
+
+.owner-welcome-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    padding: 25px;
+    background:
+        radial-gradient(ellipse at 90% 50%, rgba(99, 102, 241, .2), transparent 45%),
+        linear-gradient(120deg, #151D32, #111729);
+}
+
+.owner-welcome-icon {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(167, 139, 250, .35);
+    border-radius: 17px;
+    color: #C4B5FD;
+    background: rgba(99, 102, 241, .18);
+    box-shadow: 0 0 25px rgba(99, 102, 241, .18);
+}
+
+.owner-welcome-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.owner-welcome-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.owner-welcome-info .eyebrow {
+    margin-bottom: 7px;
+}
+
+.owner-welcome-info h2 {
+    color: white;
+    font-size: 20px;
+    font-weight: 850;
+}
+
+.owner-welcome-info p {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.owner-welcome-card > .role-badge {
+    flex-shrink: 0;
+}
+
+.owner-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 28px 0 17px;
+}
+
+.owner-section-heading h2 {
+    color: white;
+    font-size: 17px;
+    font-weight: 850;
+}
+
+.owner-section-heading p {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.owner-stats-status {
+    padding: 7px 11px;
+    border: 1px solid rgba(139, 92, 246, .22);
+    border-radius: 30px;
+    color: var(--purple-light);
+    background: rgba(99, 102, 241, .08);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.owner-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.owner-stat-card {
+    min-width: 0;
+    min-height: 145px;
+    position: relative;
+    overflow: hidden;
+    padding: 17px;
+    border: 1px solid rgba(139, 92, 246, .2);
+    border-radius: 16px;
+    background:
+        radial-gradient(ellipse at 100% 0%, rgba(99, 102, 241, .13), transparent 55%),
+        linear-gradient(145deg, #151D32, #101626);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .16);
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+.owner-stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(167, 139, 250, .6);
+    box-shadow: 0 12px 32px rgba(99, 102, 241, .15);
+}
+
+.owner-stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    color: #AAB0C8;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.owner-stat-top svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+    color: var(--purple-light);
+}
+
+.owner-stat-card > strong {
+    display: block;
+    margin-top: 19px;
+    color: white;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    overflow-wrap: anywhere;
+}
+
+.owner-stat-card > small {
+    display: block;
+    margin-top: 7px;
+    color: #858DAA;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.owner-security-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 28px;
+    background:
+        linear-gradient(110deg, rgba(16, 185, 129, .06), transparent 70%),
+        linear-gradient(145deg, #151D32, #101626);
+}
+
+.owner-security-icon {
+    width: 45px;
+    height: 45px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(16, 185, 129, .22);
+    border-radius: 13px;
+    color: #6EE7B7;
+    background: rgba(16, 185, 129, .09);
+}
+
+.owner-security-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.owner-security-card > div:nth-child(2) {
+    min-width: 0;
+    flex: 1;
+}
+
+.owner-security-card h3 {
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.owner-security-card p {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.7;
+}
+
+.owner-security-card .secure-indicator {
+    flex-shrink: 0;
+}
+
+@media (max-width: 1250px) {
+    .owner-stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .owner-heading {
+        align-items: stretch;
+    }
+
+    .owner-heading .primary-button {
+        width: 100%;
+    }
+
+    .owner-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .owner-welcome-card {
+        flex-wrap: wrap;
+    }
+
+    .owner-security-card {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 430px) {
+    .owner-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .owner-stat-card {
+        min-height: 125px;
+    }
+
+    .owner-welcome-info h2 {
+        font-size: 17px;
+    }
+
+    .owner-security-card .secure-indicator {
+        margin-left: 60px;
+    }
+}
