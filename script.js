@@ -1,20 +1,34 @@
 
+"use strict";
+
 document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
 
-  // Mobile navigation - supports both Home and inner pages
+  /* MOBILE NAVIGATION */
   const menuToggle =
+    document.querySelector("#menu") ||
     document.querySelector(".menu-toggle") ||
     document.querySelector(".menu");
 
   const navLinks =
+    document.querySelector("#nav") ||
     document.querySelector(".nav-links") ||
     document.querySelector(".topbar nav");
+
+  function closeMenu() {
+    if (!menuToggle || !navLinks) return;
+
+    navLinks.classList.remove("open");
+    menuToggle.textContent = "☰";
+    menuToggle.setAttribute("aria-expanded", "false");
+  }
 
   if (menuToggle && navLinks) {
     menuToggle.setAttribute("aria-expanded", "false");
 
-    menuToggle.addEventListener("click", () => {
+    menuToggle.addEventListener("click", event => {
+      event.stopPropagation();
+
       const isOpen = navLinks.classList.toggle("open");
 
       menuToggle.textContent = isOpen ? "✕" : "☰";
@@ -22,11 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     navLinks.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", () => {
-        navLinks.classList.remove("open");
-        menuToggle.textContent = "☰";
-        menuToggle.setAttribute("aria-expanded", "false");
-      });
+      link.addEventListener("click", closeMenu);
     });
 
     document.addEventListener("click", event => {
@@ -34,30 +44,58 @@ document.addEventListener("DOMContentLoaded", () => {
         !navLinks.contains(event.target) &&
         !menuToggle.contains(event.target)
       ) {
-        navLinks.classList.remove("open");
-        menuToggle.textContent = "☰";
-        menuToggle.setAttribute("aria-expanded", "false");
+        closeMenu();
       }
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 760) closeMenu();
     });
   }
 
-  // Scroll reveal animations
-  const revealElements = document.querySelectorAll(".reveal");
+  /* SMOOTH SECTION NAVIGATION */
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener("click", event => {
+      const selector = link.getAttribute("href");
+
+      if (!selector || selector === "#") return;
+
+      const target = document.querySelector(selector);
+
+      if (target) {
+        event.preventDefault();
+
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    });
+  });
+
+  /* SCROLL REVEAL */
+  const revealElements = document.querySelectorAll(
+    ".reveal, .service-card, .feature-item, .section-heading"
+  );
 
   if ("IntersectionObserver" in window) {
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.12,
-      rootMargin: "0px 0px -35px 0px"
-    });
+    const revealObserver = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.12,
+        rootMargin: "0px 0px -35px 0px"
+      }
+    );
 
     revealElements.forEach(element => {
+      element.classList.add("reveal-ready");
       revealObserver.observe(element);
     });
   } else {
@@ -66,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Scroll progress - supports both class names
+  /* SCROLL PROGRESS */
   const progressBar =
     document.querySelector(".scroll-progress") ||
     document.querySelector(".page-progress");
@@ -97,10 +135,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateProgress();
 
-  // Cursor glow
+  /* CURSOR GLOW */
   const cursorGlow = document.querySelector(".cursor-glow");
 
-  if (cursorGlow && window.matchMedia("(pointer: fine)").matches) {
+  if (
+    cursorGlow &&
+    window.matchMedia("(pointer: fine)").matches
+  ) {
     let cursorFrame = null;
 
     window.addEventListener("mousemove", event => {
@@ -116,39 +157,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }, { passive: true });
   }
 
-  // Dynamic footer year - supports both page layouts
+  /* DYNAMIC FOOTER YEAR */
   const currentYear = new Date().getFullYear();
 
   document.querySelectorAll(".year, #year").forEach(element => {
     element.textContent = currentYear;
   });
 
-  // Smooth section navigation
-  document.querySelectorAll('a[href^="#"]').forEach(link => {
-    link.addEventListener("click", event => {
-      const selector = link.getAttribute("href");
-
-      if (!selector || selector === "#") return;
-
-      const target = document.querySelector(selector);
-
-      if (target) {
-        event.preventDefault();
-
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-      }
-    });
-  });
-
-  // Subtle 3D card tilt on desktop
-  const cards = document.querySelectorAll(
-    ".service-card, .feature-card"
-  );
-
+  /* 3D CARD TILT */
   if (window.matchMedia("(pointer: fine)").matches) {
+    const cards = document.querySelectorAll(
+      ".service-card, .feature-card, .feature-item"
+    );
+
     cards.forEach(card => {
       card.addEventListener("mousemove", event => {
         const rect = card.getBoundingClientRect();
@@ -156,11 +177,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const x = (event.clientX - rect.left) / rect.width;
         const y = (event.clientY - rect.top) / rect.height;
 
-        const rotateY = (x - 0.5) * 5;
-        const rotateX = (0.5 - y) * 5;
+        const rotateY = (x - 0.5) * 4;
+        const rotateX = (0.5 - y) * 4;
 
         card.style.transform =
-          `perspective(900px) translateY(-6px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+          `perspective(900px) translateY(-5px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
       });
 
       card.addEventListener("mouseleave", () => {
@@ -169,9 +190,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Button click feedback
+  /* BUTTON PRESS FEEDBACK */
   document.querySelectorAll(
-    ".button, .btn-primary, .nav-cta"
+    ".button, .btn, .nav-cta"
   ).forEach(button => {
     button.addEventListener("pointerdown", () => {
       button.classList.add("button-pressed");
@@ -184,8 +205,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Animate elements when the page loads
+  /* PAGE READY */
   body.classList.add("website-ready");
 
-  console.log("ASTRIX CLOUD upgraded successfully 🚀");
+  console.log("ASTRIX CLOUD website initialized.");
 });
