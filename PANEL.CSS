@@ -1,2259 +1,1343 @@
 
-/* =========================================================
-   ASTRIX CLOUD — PREMIUM CONTROL PANEL
-   Complete stylesheet for the original PANEL.HTML
-   Theme: Midnight Navy / Electric Purple
-   ========================================================= */
+"use strict";
 
-/* ================= ROOT ================= */
+/* ==========================================================
+   ASTRIX CLOUD — CONTROL PANEL
+   Authentication • Navigation • Tickets • Account
+   Owner Dashboard • Team Management
+   ========================================================== */
 
-:root {
-    color-scheme: dark;
+/* ================= API CONFIGURATION ================= */
 
-    --bg: #080914;
-    --bg-soft: #0c0e1c;
-    --surface: #101324;
-    --surface-2: #15192d;
-    --surface-3: #1b2038;
+const API = {
+    login: "/api/login",
+    logout: "/api/logout",
+    me: "/api/me",
+    sendVerification: "/api/send-verification",
+    verifySignup: "/api/verify-signup",
+    tickets: "/api/tickets",
+    ticketReplies: "/api/ticket-replies",
+    ticketStatus: "/api/ticket-status",
+    ownerStats: "/api/owner-stats",
+    teamUsers: "/api/team-users"
+};
 
-    --border: rgba(164, 151, 255, 0.13);
-    --border-hover: rgba(164, 151, 255, 0.32);
+/* ================= APPLICATION STATE ================= */
 
-    --primary: #895cff;
-    --primary-light: #aa8aff;
-    --primary-dark: #6038d9;
-    --primary-glow: rgba(137, 92, 255, 0.23);
+const App = {
+    user: null,
+    tickets: [],
+    teamAccounts: [],
+    currentPage: "home",
+    pendingSignupEmail: "",
+    loading: false
+};
 
-    --text: #f4f2ff;
-    --text-soft: #c0bfd3;
-    --muted: #85869f;
+const STAFF_ROLES = ["owner", "admin", "staff"];
 
-    --green: #39d99a;
-    --red: #ff627c;
-    --orange: #ffb454;
-    --blue: #54a8ff;
+const PAGE_TITLES = {
+    home: "Home",
+    overview: "Server Console",
+    files: "Files",
+    databases: "Databases",
+    schedules: "Schedules",
+    users: "Users",
+    backups: "Backups",
+    network: "Network",
+    startup: "Startup",
+    settings: "Server Settings",
+    activity: "Activity",
+    tickets: "Support Tickets",
+    account: "My Account",
+    admin: "Administration",
+    "all-servers": "All Servers",
+    "manage-users": "Manage Users",
+    "team-management": "Team Management",
+    "manage-tickets": "Manage Tickets"
+};
 
-    --radius-sm: 10px;
-    --radius: 16px;
-    --radius-lg: 22px;
-    --radius-xl: 28px;
+/* ================= DOM HELPERS ================= */
 
-    --sidebar-width: 270px;
+const $ = (selector, root = document) =>
+    root.querySelector(selector);
 
-    --shadow:
-        0 20px 70px rgba(0, 0, 0, 0.28);
+const $$ = (selector, root = document) =>
+    [...root.querySelectorAll(selector)];
 
-    --transition: 220ms ease;
+function byId(id) {
+    return document.getElementById(id);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+function setText(id, value) {
+    const element = byId(id);
+    if (element) element.textContent = value ?? "";
 }
 
-html {
-    scroll-behavior: smooth;
-    scrollbar-color: #39305e #090a15;
+function showMessage(id, message, type = "info") {
+    const element = byId(id);
+    if (!element) return;
+
+    element.textContent = message || "";
+    element.dataset.type = type;
+
+    element.style.color =
+        type === "error" ? "#ff7188" :
+        type === "success" ? "#39d99a" :
+        "#aaa9c0";
 }
 
-body {
-    min-height: 100vh;
-    background:
-        radial-gradient(
-            ellipse at 15% 0%,
-            rgba(105, 67, 206, 0.10),
-            transparent 38%
-        ),
-        radial-gradient(
-            ellipse at 90% 90%,
-            rgba(68, 83, 190, 0.07),
-            transparent 35%
-        ),
-        var(--bg);
+function setButtonLoading(button, loading, label) {
+    if (!button) return;
 
-    color: var(--text);
-    font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    if (loading) {
+        button.dataset.originalText = button.textContent.trim();
+        button.disabled = true;
+        button.textContent = label || "Please wait...";
+    } else {
+        button.disabled = false;
 
-    font-size: 14px;
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-
-button,
-input,
-textarea,
-select {
-    font: inherit;
-}
-
-button {
-    color: inherit;
-}
-
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-    outline: 2px solid var(--primary-light);
-    outline-offset: 3px;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-a {
-    color: var(--primary-light);
-    text-decoration: none;
-}
-
-[hidden] {
-    display: none !important;
-}
-
-::selection {
-    background: var(--primary);
-    color: white;
-}
-
-/* ================= SCROLLBAR ================= */
-
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #090a15;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #39305e;
-    border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
-}
-
-/* ================= AUTH BACKGROUND ================= */
-
-.auth-page {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 35px 18px;
-    overflow: hidden;
-}
-
-.auth-background {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-
-    background:
-        radial-gradient(
-            circle at 50% 40%,
-            rgba(137, 92, 255, 0.17),
-            transparent 35%
-        ),
-        radial-gradient(
-            circle at 15% 85%,
-            rgba(71, 95, 220, 0.11),
-            transparent 30%
-        );
-}
-
-.auth-background::before,
-.auth-background::after {
-    content: "";
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    border: 1px solid rgba(155, 124, 255, 0.09);
-    border-radius: 50%;
-    animation: authOrbit 18s linear infinite;
-}
-
-.auth-background::before {
-    top: -170px;
-    left: -150px;
-}
-
-.auth-background::after {
-    right: -180px;
-    bottom: -180px;
-    width: 500px;
-    height: 500px;
-    animation-direction: reverse;
-}
-
-@keyframes authOrbit {
-    to {
-        transform: rotate(360deg);
+        if (button.dataset.originalText) {
+            button.textContent = button.dataset.originalText;
+            delete button.dataset.originalText;
+        }
     }
 }
 
-/* ================= AUTH CARD ================= */
-
-.auth-card {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 460px;
-    padding: 38px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(24, 27, 49, 0.97),
-            rgba(12, 14, 27, 0.98)
-        );
-
-    box-shadow:
-        0 35px 100px rgba(0, 0, 0, 0.48),
-        0 0 60px rgba(137, 92, 255, 0.08);
-
-    backdrop-filter: blur(22px);
-    animation: cardAppear 650ms cubic-bezier(.2,.8,.2,1);
+function initials(name) {
+    return String(name || "AC")
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(part => part.charAt(0).toUpperCase())
+        .join("") || "AC";
 }
 
-@keyframes cardAppear {
-    from {
-        opacity: 0;
-        transform: translateY(24px) scale(.98);
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[char]);
+}
+
+function formatDate(value) {
+    if (!value) return "Unknown date";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    return date.toLocaleString();
 }
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 34px;
-}
-
-.brand-icon {
-    display: grid;
-    place-items: center;
-    width: 53px;
-    height: 53px;
-    border-radius: 16px;
-    color: white;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--primary),
-            #5632c9
-        );
-
-    box-shadow:
-        0 8px 30px rgba(137, 92, 255, 0.35);
-}
-
-.brand-icon svg {
-    width: 27px;
-    height: 27px;
-}
-
-.brand h1 {
-    font-size: 20px;
-    font-weight: 850;
-    letter-spacing: 1.4px;
-}
-
-.brand h1 span {
-    color: var(--primary-light);
-}
-
-.brand p {
-    margin-top: 2px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.auth-heading {
-    margin-bottom: 27px;
-}
-
-.eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    color: var(--primary-light);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.7px;
-    text-transform: uppercase;
-}
-
-.auth-heading h2,
-.auth-form h2 {
-    margin-top: 9px;
-    font-size: 25px;
-    font-weight: 750;
-    letter-spacing: -0.7px;
-}
-
-.auth-heading p,
-.auth-form > p {
-    margin-top: 7px;
-    color: var(--muted);
-    font-size: 13px;
-}
-
-/* ================= FORMS ================= */
-
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-}
-
-.auth-form label,
-.standard-form label,
-.content-card label {
-    margin-top: 7px;
-    color: var(--text-soft);
-    font-size: 12px;
-    font-weight: 650;
-}
-
-.input-wrap {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    min-height: 49px;
-    padding: 0 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: rgba(7, 9, 20, 0.65);
-    transition: var(--transition);
-}
-
-.input-wrap:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(137, 92, 255, 0.10);
-}
-
-.input-wrap > svg {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    color: var(--muted);
-}
-
-.input-wrap input {
-    width: 100%;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: white;
-    font-size: 13px;
-}
-
-.input-wrap input::placeholder,
-input::placeholder,
-textarea::placeholder {
-    color: #64657e;
-}
-
-.auth-form input:focus {
-    outline: 0;
-}
-
-.auth-form[hidden] {
-    display: none !important;
-}
-
-input,
-textarea,
-select {
-    width: 100%;
-    min-height: 45px;
-    padding: 11px 13px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: #0b0d1b;
-    color: var(--text);
-    transition: var(--transition);
-}
-
-input:hover,
-textarea:hover,
-select:hover {
-    border-color: var(--border-hover);
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(137, 92, 255, 0.09);
-    outline: 0;
-}
-
-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-select {
-    cursor: pointer;
-}
-
-option {
-    background: var(--surface);
-    color: white;
-}
-
-/* ================= BUTTONS ================= */
-
-.primary-button,
-.secondary-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    min-height: 46px;
-    padding: 0 19px;
-    border: 1px solid transparent;
-    border-radius: 11px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 750;
-    transition:
-        transform var(--transition),
-        box-shadow var(--transition),
-        background var(--transition);
-}
-
-.primary-button {
-    color: white;
-    background:
-        linear-gradient(
-            115deg,
-            #9668ff,
-            #7044e8
-        );
-
-    box-shadow:
-        0 7px 22px rgba(112, 68, 232, 0.23);
-}
-
-.primary-button:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        0 12px 30px rgba(112, 68, 232, 0.38);
-}
-
-.primary-button:active,
-.secondary-button:active {
-    transform: scale(.98);
-}
-
-.primary-button svg,
-.secondary-button svg {
-    width: 17px;
-    height: 17px;
-}
-
-.auth-form > .primary-button {
-    width: 100%;
-    margin-top: 9px;
-    min-height: 50px;
-}
-
-.secondary-button {
-    color: var(--text);
-    border-color: var(--border);
-    background: rgba(255, 255, 255, 0.035);
-}
-
-.secondary-button:hover {
-    border-color: var(--primary);
-    background: rgba(137, 92, 255, 0.10);
-}
-
-.compact-button {
-    min-height: 41px;
-    padding: 0 15px;
-}
-
-.text-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 0;
-    border: 0;
-    background: transparent;
-    color: var(--primary-light);
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.text-button:hover {
-    color: white;
-    gap: 11px;
-}
-
-.text-button svg {
-    width: 15px;
-    height: 15px;
-}
-
-.auth-switch {
-    margin-top: 12px;
-    color: var(--muted);
-    text-align: center;
-    font-size: 12px;
-}
-
-.auth-switch button {
-    border: 0;
-    background: none;
-    color: var(--primary-light);
-    font-weight: 750;
-    cursor: pointer;
-}
-
-.auth-switch button:hover {
-    color: white;
-    text-decoration: underline;
-}
-
-.auth-footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 32px;
-    padding-top: 19px;
-    border-top: 1px solid var(--border);
-    color: #656780;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: .7px;
-}
-
-/* ================= FORM MESSAGES ================= */
-
-.form-message {
-    min-height: 0;
-    color: var(--muted);
-    font-size: 12px;
-    overflow-wrap: anywhere;
-}
-
-.form-message:empty {
-    display: none;
-}
-
-/* ================= DASHBOARD LAYOUT ================= */
-
-.dashboard {
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    position: fixed;
-    z-index: 30;
-    top: 0;
-    bottom: 0;
-    left: 0;
-
-    display: flex;
-    flex-direction: column;
-
-    width: var(--sidebar-width);
-    padding: 23px 17px 16px;
-
-    border-right: 1px solid var(--border);
-
-    background:
-        linear-gradient(
-            180deg,
-            #111327 0%,
-            #0c0e1b 100%
-        );
-
-    overflow-y: auto;
-    transition: transform 280ms ease;
-}
-
-.sidebar-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 64px;
-    padding: 0 5px 20px;
-    border-bottom: 1px solid var(--border);
-}
-
-.astrix-logo {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 43px;
-    height: 43px;
-    flex-shrink: 0;
-    border: 1px solid rgba(190, 167, 255, .45);
-    border-radius: 13px;
-    background:
-        linear-gradient(
-            145deg,
-            #9b70ff,
-            #4925bd
-        );
-    box-shadow: 0 0 24px rgba(137, 92, 255, .30);
-}
-
-.astrix-logo span {
-    color: white;
-    font-size: 27px;
-    font-weight: 900;
-    font-style: italic;
-}
-
-.brand-name {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.2;
-}
-
-.brand-name strong {
-    font-size: 17px;
-    font-weight: 900;
-    letter-spacing: 1.6px;
-}
-
-.brand-cloud {
-    color: var(--primary-light);
-    font-size: 13px;
-    font-weight: 850;
-    letter-spacing: 3px;
-}
-
-.brand-name small {
-    margin-top: 5px;
-    color: var(--muted);
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: 1.1px;
-}
-
-.sidebar-section {
-    margin-top: 26px;
-}
-
-.sidebar-label {
-    display: block;
-    margin: 0 0 11px 11px;
-    color: #777891;
-    font-size: 9px;
-    font-weight: 850;
-    letter-spacing: 1.5px;
-}
-
-.navigation {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.nav-link {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    min-height: 43px;
-    padding: 0 12px;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    background: transparent;
-    color: #a6a6bd;
-    text-align: left;
-    font-size: 12px;
-    font-weight: 650;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.nav-link svg {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-}
-
-.nav-link:hover {
-    color: white;
-    background: rgba(137, 92, 255, 0.09);
-}
-
-.nav-link.active {
-    border-color: rgba(153, 120, 255, .19);
-    color: white;
-    background:
-        linear-gradient(
-            100deg,
-            rgba(137, 92, 255, .23),
-            rgba(137, 92, 255, .07)
-        );
-}
-
-.nav-link.active::before {
-    content: "";
-    position: absolute;
-    left: -1px;
-    top: 9px;
-    bottom: 9px;
-    width: 3px;
-    border-radius: 5px;
-    background: var(--primary-light);
-    box-shadow: 0 0 12px var(--primary);
-}
-
-.nav-link.active svg {
-    color: var(--primary-light);
-}
-
-.sidebar-bottom {
-    margin-top: auto;
-    padding-top: 24px;
-}
-
-.sidebar-profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 15px;
-    padding: 13px 9px;
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    background: rgba(255, 255, 255, .025);
-}
-
-.avatar {
-    display: grid;
-    place-items: center;
-    width: 39px;
-    height: 39px;
-    flex-shrink: 0;
-    border: 1px solid rgba(190, 167, 255, .25);
-    border-radius: 12px;
-    background:
-        linear-gradient(
-            140deg,
-            #8055ed,
-            #4024a1
-        );
-    color: white;
-    font-size: 13px;
-    font-weight: 850;
-    overflow: hidden;
-}
-
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.profile-info {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.profile-info strong {
-    overflow: hidden;
-    color: white;
-    font-size: 11px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.profile-info small {
-    color: var(--muted);
-    font-size: 10px;
-    text-transform: capitalize;
-}
-
-.icon-button {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    flex-shrink: 0;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    background: transparent;
-    color: #a4a4bd;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.icon-button:hover {
-    border-color: var(--border);
-    background: rgba(137, 92, 255, .12);
-    color: white;
-}
-
-.icon-button svg {
-    width: 18px;
-    height: 18px;
-}
-
-.mobile-only {
-    display: none;
-}
-
-/* ================= MAIN AREA ================= */
-
-.main-area {
-    display: flex;
-    flex-direction: column;
-    width: calc(100% - var(--sidebar-width));
-    min-height: 100vh;
-    margin-left: var(--sidebar-width);
-}
-
-.topbar {
-    position: sticky;
-    z-index: 20;
-    top: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 82px;
-    padding: 13px 34px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(9, 11, 23, .86);
-    backdrop-filter: blur(20px);
-}
-
-.topbar-left,
-.topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-}
-
-.topbar-caption {
-    color: var(--muted);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1.3px;
-}
-
-.topbar h2 {
-    margin-top: 2px;
-    font-size: 19px;
-    font-weight: 800;
-}
-
-.topbar-right > strong {
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
-.small-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    font-size: 11px;
-}
+function normalizeArray(result, key) {
+    if (Array.isArray(result)) return result;
+    if (Array.isArray(result?.[key])) return result[key];
+    if (Array.isArray(result?.data)) return result.data;
+    if (Array.isArray(result?.data?.[key])) return result.data[key];
 
-.secure-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 10px;
-    border: 1px solid rgba(57, 217, 154, .14);
-    border-radius: 30px;
-    background: rgba(57, 217, 154, .055);
-    color: #8ce5be;
-    font-size: 10px;
-    font-weight: 750;
+    return [];
 }
 
-.status-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 10px rgba(57, 217, 154, .65);
-}
-
-.content-area {
-    flex: 1;
-    width: 100%;
-    max-width: 1700px;
-    margin: 0 auto;
-    padding: 31px 34px;
-}
+/* ================= API REQUESTS ================= */
 
-.page {
-    display: none;
-    animation: pageEnter 350ms ease both;
-}
-
-.page.active {
-    display: block;
-}
+async function apiRequest(url, options = {}) {
+    const config = {
+        method: options.method || "GET",
+        credentials: "same-origin",
+        headers: {
+            Accept: "application/json",
+            ...(options.headers || {})
+        }
+    };
 
-@keyframes pageEnter {
-    from {
-        opacity: 0;
-        transform: translateY(9px);
+    if (options.body !== undefined) {
+        config.headers["Content-Type"] = "application/json";
+        config.body = JSON.stringify(options.body);
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    const response = await fetch(url, config);
+
+    let result = {};
+
+    try {
+        result = await response.json();
+    } catch {
+        result = {};
+    }
+
+    if (!response.ok) {
+        const error = new Error(
+            result.error ||
+            result.message ||
+            `Request failed (${response.status})`
+        );
+
+        error.status = response.status;
+        throw error;
+    }
+
+    return result;
+}
+
+function extractUser(result) {
+    return result?.user ||
+        result?.data?.user ||
+        result?.data ||
+        result;
+}
+
+function requireUser() {
+    if (!App.user) {
+        throw new Error("Please sign in first.");
+    }
+
+    return App.user;
+}
+
+function isStaff() {
+    return STAFF_ROLES.includes(
+        String(App.user?.role || "").toLowerCase()
+    );
+}
+
+function isOwner() {
+    return String(App.user?.role || "").toLowerCase() === "owner";
+}
+
+/* ================= AUTHENTICATION ================= */
+
+function showAuthForm(formId) {
+    ["loginForm", "signupForm", "verifyForm"].forEach(id => {
+        const form = byId(id);
+        if (form) form.hidden = id !== formId;
+    });
+
+    $$(".form-message").forEach(element => {
+        element.textContent = "";
+    });
+}
+
+async function login(email, password) {
+    const result = await apiRequest(API.login, {
+        method: "POST",
+        body: { email, password }
+    });
+
+    let user = extractUser(result);
+
+    if (!user?.id) {
+        const me = await apiRequest(API.me);
+        user = extractUser(me);
+    }
+
+    if (!user?.id) {
+        throw new Error("Login succeeded but account details could not be loaded.");
+    }
+
+    await startSession(user);
+}
+
+async function startSession(user) {
+    App.user = user;
+
+    const loginPage = byId("loginPage");
+    const dashboard = byId("dashboard");
+
+    if (loginPage) loginPage.hidden = true;
+    if (dashboard) dashboard.hidden = false;
+
+    updateUserInterface();
+    applyRolePermissions();
+    navigate("home");
+
+    loadMyTickets();
+
+    if (isOwner()) {
+        loadOwnerStats();
+        loadTeamAccounts();
+    }
+
+    refreshIcons();
+}
+
+async function checkSession() {
+    try {
+        const result = await apiRequest(API.me);
+        const user = extractUser(result);
+
+        if (user?.id) {
+            await startSession(user);
+            return true;
+        }
+    } catch (error) {
+        if (error.status !== 401) {
+            console.warn("Session check:", error.message);
+        }
+    }
+
+    App.user = null;
+
+    if (byId("loginPage")) byId("loginPage").hidden = false;
+    if (byId("dashboard")) byId("dashboard").hidden = true;
+
+    return false;
+}
+
+async function logout() {
+    const button = byId("logoutBtn");
+
+    if (button) button.disabled = true;
+
+    try {
+        await apiRequest(API.logout, {
+            method: "POST"
+        });
+    } catch (error) {
+        console.warn("Logout request:", error.message);
+    }
+
+    App.user = null;
+    App.tickets = [];
+    App.teamAccounts = [];
+
+    if (byId("dashboard")) byId("dashboard").hidden = true;
+    if (byId("loginPage")) byId("loginPage").hidden = false;
+
+    showAuthForm("loginForm");
+
+    if (byId("loginPassword")) {
+        byId("loginPassword").value = "";
+    }
+
+    if (button) button.disabled = false;
+
+    navigate("home");
+}
+
+/* ================= LOGIN FORM ================= */
+
+async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = byId("loginEmail").value.trim();
+    const password = byId("loginPassword").value;
+    const button = $("#loginForm button[type='submit']");
+
+    showMessage("loginMessage", "Signing in...", "info");
+    setButtonLoading(button, true, "Signing in...");
+
+    try {
+        await login(email, password);
+        showMessage("loginMessage", "", "info");
+    } catch (error) {
+        showMessage("loginMessage", error.message, "error");
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
-/* ================= HEADINGS ================= */
+/* ================= SIGNUP FORM ================= */
 
-.page-heading,
-.server-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 25px;
-}
+async function handleSignup(event) {
+    event.preventDefault();
 
-.page-heading h1,
-.server-heading h1 {
-    margin-top: 5px;
-    font-size: clamp(23px, 3vw, 31px);
-    font-weight: 850;
-    letter-spacing: -1px;
-}
+    const username = byId("signupUsername").value.trim();
+    const email = byId("signupEmail").value.trim();
+    const password = byId("signupPassword").value;
+    const button = $("#signupForm button[type='submit']");
 
-.page-heading p,
-.server-heading p {
-    margin-top: 5px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-/* ================= HOME HERO ================= */
-
-.home-hero {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 295px;
-    padding: 38px 43px;
-    border: 1px solid rgba(168, 140, 255, .21);
-    border-radius: var(--radius-xl);
-    background:
-        radial-gradient(
-            circle at 75% 50%,
-            rgba(137, 92, 255, .22),
-            transparent 32%
-        ),
-        linear-gradient(
-            115deg,
-            #19172e,
-            #121426 55%,
-            #101326
+    if (password.length < 12) {
+        showMessage(
+            "signupMessage",
+            "Password must contain at least 12 characters.",
+            "error"
         );
-    overflow: hidden;
-    box-shadow: var(--shadow);
-}
+        return;
+    }
 
-.home-hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: .24;
-    pointer-events: none;
-    background-image:
-        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-    background-size: 34px 34px;
-    mask-image: linear-gradient(90deg, black, transparent);
-}
+    showMessage("signupMessage", "Sending verification email...", "info");
+    setButtonLoading(button, true, "Sending...");
 
-.home-hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 580px;
-}
+    try {
+        const result = await apiRequest(API.sendVerification, {
+            method: "POST",
+            body: { username, email, password }
+        });
 
-.home-hero-content .eyebrow svg {
-    width: 14px;
-    height: 14px;
-}
+        App.pendingSignupEmail = email;
 
-.home-hero h1 {
-    margin-top: 15px;
-    font-size: clamp(28px, 4vw, 40px);
-    font-weight: 900;
-    letter-spacing: -1.7px;
-    line-height: 1.2;
-}
+        showMessage(
+            "verifyMessage",
+            result.message || `Verification code sent to ${email}.`,
+            "success"
+        );
 
-.home-hero h1 span {
-    color: var(--primary-light);
-}
-
-.home-hero-content > p {
-    max-width: 470px;
-    margin-top: 13px;
-    color: #aaa9c0;
-    font-size: 13px;
-}
-
-.home-hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 11px;
-    margin-top: 25px;
-}
-
-/* ================= HERO ART ================= */
-
-.home-hero-art {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 260px;
-    height: 230px;
-    flex-shrink: 0;
-}
-
-.home-orbit {
-    position: absolute;
-    width: 190px;
-    height: 190px;
-    border: 1px solid rgba(182, 154, 255, .23);
-    border-radius: 50%;
-}
-
-.orbit-one {
-    transform: rotateX(65deg) rotate(-25deg);
-    animation: orbitSpin 15s linear infinite;
-}
-
-.orbit-two {
-    width: 230px;
-    height: 230px;
-    border-style: dashed;
-    transform: rotateX(65deg) rotate(30deg);
-    animation: orbitSpin 24s linear infinite reverse;
-}
-
-@keyframes orbitSpin {
-    to {
-        transform: rotateX(65deg) rotate(335deg);
+        showAuthForm("verifyForm");
+    } catch (error) {
+        showMessage("signupMessage", error.message, "error");
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
-.home-cloud-icon {
-    display: grid;
-    place-items: center;
-    width: 105px;
-    height: 105px;
-    border: 1px solid rgba(194, 171, 255, .4);
-    border-radius: 30px;
-    background:
-        linear-gradient(
-            145deg,
-            rgba(157, 112, 255, .9),
-            rgba(79, 47, 181, .9)
+/* ================= EMAIL VERIFICATION ================= */
+
+async function handleVerification(event) {
+    event.preventDefault();
+
+    const code = byId("verificationCode").value.trim();
+    const email = App.pendingSignupEmail;
+    const button = $("#verifyForm button[type='submit']");
+
+    if (!email) {
+        showMessage(
+            "verifyMessage",
+            "Signup session missing. Please create your account again.",
+            "error"
         );
-    box-shadow:
-        0 0 55px rgba(137, 92, 255, .4),
-        inset 0 1px 0 rgba(255,255,255,.3);
-    animation: cloudFloat 4s ease-in-out infinite;
-}
+        return;
+    }
 
-.home-cloud-icon svg {
-    width: 55px;
-    height: 55px;
-    color: white;
-    stroke-width: 1.5;
-}
+    if (!/^\d{6}$/.test(code)) {
+        showMessage(
+            "verifyMessage",
+            "Enter the six-digit verification code.",
+            "error"
+        );
+        return;
+    }
 
-@keyframes cloudFloat {
-    50% {
-        transform: translateY(-11px);
+    showMessage("verifyMessage", "Verifying email...", "info");
+    setButtonLoading(button, true, "Verifying...");
+
+    try {
+        await apiRequest(API.verifySignup, {
+            method: "POST",
+            body: { email, code }
+        });
+
+        App.pendingSignupEmail = "";
+
+        showAuthForm("loginForm");
+
+        setText("loginEmail", email);
+
+        showMessage(
+            "loginMessage",
+            "Email verified! You can now sign in.",
+            "success"
+        );
+    } catch (error) {
+        showMessage("verifyMessage", error.message, "error");
+    } finally {
+        setButtonLoading(button, false);
     }
 }
 
-.home-floating-icon {
-    position: absolute;
-    display: grid;
-    place-items: center;
-    width: 43px;
-    height: 43px;
-    border: 1px solid rgba(182, 154, 255, .32);
-    border-radius: 13px;
-    background: #1c1a36;
-    color: var(--primary-light);
-    box-shadow: 0 8px 25px rgba(0,0,0,.25);
-}
+/* ================= NAVIGATION ================= */
 
-.home-floating-icon svg {
-    width: 21px;
-    height: 21px;
-}
+function navigate(page) {
+    const target = byId(`page-${page}`);
 
-.floating-one {
-    top: 25px;
-    right: 25px;
-    animation: cloudFloat 4s ease-in-out infinite;
-}
+    if (!target) {
+        console.warn("Page not found:", page);
+        return;
+    }
 
-.floating-two {
-    bottom: 25px;
-    left: 24px;
-    animation: cloudFloat 4s ease-in-out infinite 1s;
-}
-
-/* ================= HOME QUICK ACCESS ================= */
-
-.home-section-heading {
-    margin: 34px 0 17px;
-}
-
-.home-section-heading h2 {
-    margin-top: 5px;
-    font-size: 21px;
-    font-weight: 800;
-}
-
-.home-section-heading p {
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.home-quick-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 15px;
-}
-
-.home-quick-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    min-height: 170px;
-    padding: 20px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background:
-        linear-gradient(
-            145deg,
-            rgba(24, 27, 48, .92),
-            rgba(15, 17, 32, .92)
+    if (!canAccessPage(target)) {
+        showMessage(
+            "loginMessage",
+            "You do not have permission to access that page.",
+            "error"
         );
-    text-align: left;
-    cursor: pointer;
-    transition: var(--transition);
-}
+        return;
+    }
 
-.home-quick-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--border-hover);
-    background: #191b33;
-    box-shadow: 0 14px 35px rgba(0,0,0,.22);
-}
+    App.currentPage = page;
 
-.home-quick-icon {
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    margin-bottom: 16px;
-    border: 1px solid rgba(137,92,255,.22);
-    border-radius: 13px;
-    background: rgba(137,92,255,.13);
-    color: var(--primary-light);
-}
-
-.home-quick-icon svg {
-    width: 21px;
-    height: 21px;
-}
-
-.home-quick-card strong {
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.home-quick-card > span:not(.home-quick-icon) {
-    margin-top: 4px;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.quick-arrow {
-    position: absolute;
-    top: 19px;
-    right: 18px;
-    width: 16px;
-    height: 16px;
-    color: #74748f;
-    transition: var(--transition);
-}
-
-.home-quick-card:hover .quick-arrow {
-    color: var(--primary-light);
-    transform: translate(3px, -3px);
-}
-
-/* ================= HOME BOTTOM ================= */
-
-.home-bottom-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 15px;
-    margin-top: 18px;
-}
-
-.home-info-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 17px;
-}
-
-.home-info-icon {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    border: 1px solid rgba(137,92,255,.2);
-    border-radius: 13px;
-    background: rgba(137,92,255,.12);
-    color: var(--primary-light);
-}
-
-.home-info-icon svg {
-    width: 22px;
-    height: 22px;
-}
-
-.home-info-card h3 {
-    margin-top: 5px;
-    font-size: 14px;
-}
-
-.home-info-card p {
-    margin-top: 5px;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-/* ================= CONTENT CARDS ================= */
-
-.content-card,
-.chart-card {
-    min-width: 0;
-    padding: 23px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background:
-        linear-gradient(
-            145deg,
-            rgba(20, 23, 42, .94),
-            rgba(14, 16, 31, .96)
+    $$(".page").forEach(section => {
+        section.classList.toggle(
+            "active",
+            section.id === `page-${page}`
         );
-    box-shadow: 0 10px 35px rgba(0,0,0,.12);
-    transition: border-color var(--transition);
-}
+    });
 
-.content-card:hover,
-.chart-card:hover {
-    border-color: rgba(164,151,255,.23);
-}
-
-.card-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.card-heading h3 {
-    font-size: 15px;
-    font-weight: 800;
-}
-
-.card-heading p {
-    margin-top: 4px;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.card-heading > svg {
-    width: 21px;
-    height: 21px;
-    color: var(--primary-light);
-}
-
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 17px;
-    margin-top: 19px;
-}
-
-.ticket-layout {
-    align-items: start;
-}
-
-.ticket-layout > .content-card {
-    min-width: 0;
-}
-
-/* ================= OWNER DASHBOARD ================= */
-
-.owner-heading {
-    align-items: center;
-}
-
-.owner-welcome-card {
-    display: flex;
-    align-items: center;
-    gap: 19px;
-    margin-bottom: 29px;
-    padding: 25px;
-    background:
-        radial-gradient(
-            circle at 10% 50%,
-            rgba(137,92,255,.15),
-            transparent 45%
-        ),
-        var(--surface);
-}
-
-.owner-welcome-icon {
-    display: grid;
-    place-items: center;
-    width: 62px;
-    height: 62px;
-    flex-shrink: 0;
-    border: 1px solid rgba(180,154,255,.28);
-    border-radius: 18px;
-    background: rgba(137,92,255,.15);
-    color: var(--primary-light);
-}
-
-.owner-welcome-icon svg {
-    width: 31px;
-    height: 31px;
-}
-
-.owner-welcome-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.owner-welcome-info h2 {
-    margin-top: 5px;
-    font-size: 20px;
-    font-weight: 850;
-}
-
-.owner-welcome-info h2 span {
-    color: var(--primary-light);
-}
-
-.owner-welcome-info p {
-    margin-top: 3px;
-    color: var(--muted);
-    font-size: 11px;
-    overflow-wrap: anywhere;
-}
-
-.role-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px 11px;
-    border: 1px solid rgba(137,92,255,.25);
-    border-radius: 30px;
-    background: rgba(137,92,255,.11);
-    color: var(--primary-light);
-    font-size: 9px;
-    font-weight: 850;
-    letter-spacing: .8px;
-}
-
-.owner-section-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    margin: 27px 0 15px;
-}
-
-.owner-section-heading h2 {
-    font-size: 18px;
-    font-weight: 850;
-}
-
-.owner-section-heading p {
-    margin-top: 3px;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.owner-stats-status {
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    border-radius: 30px;
-    color: var(--muted);
-    font-size: 10px;
-}
-
-.owner-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 13px;
-}
-
-.owner-stat-card {
-    min-width: 0;
-    padding: 17px;
-    border: 1px solid var(--border);
-    border-radius: 15px;
-    background:
-        linear-gradient(
-            145deg,
-            #171a30,
-            #101222
+    $$(".nav-link[data-page]").forEach(link => {
+        link.classList.toggle(
+            "active",
+            link.dataset.page === page
         );
-    transition: var(--transition);
+    });
+
+    setText("pageTitle", PAGE_TITLES[page] || "ASTRIX CLOUD");
+
+    closeSidebar();
+
+    if (page === "tickets") loadMyTickets();
+    if (page === "admin" && isOwner()) loadOwnerStats();
+    if (page === "team-management" && isOwner()) loadTeamAccounts();
+    if (page === "manage-tickets" && isStaff()) loadAdminTickets();
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    refreshIcons();
 }
 
-.owner-stat-card:hover {
-    transform: translateY(-3px);
-    border-color: var(--border-hover);
+function canAccessPage(element) {
+    const allowed = element.dataset.allowedRoles;
+
+    if (!allowed) return true;
+
+    const roles = allowed.split(",").map(role => role.trim());
+    const userRole = String(App.user?.role || "").toLowerCase();
+
+    return roles.includes(userRole);
 }
 
-.owner-stat-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: 700;
+function applyRolePermissions() {
+    $$("[data-allowed-roles]").forEach(element => {
+        const allowed = element.dataset.allowedRoles
+            .split(",")
+            .map(role => role.trim());
+
+        const role = String(App.user?.role || "").toLowerCase();
+
+        element.hidden = !allowed.includes(role);
+    });
+
+    const adminNavigation = byId("adminNavigation");
+
+    if (adminNavigation) {
+        adminNavigation.hidden = !isStaff();
+    }
+
+    const teamLink = $('[data-page="team-management"]');
+
+    if (teamLink) {
+        teamLink.hidden = !isOwner();
+    }
 }
 
-.owner-stat-top svg {
-    width: 18px;
-    height: 18px;
-    color: var(--primary-light);
+/* ================= SIDEBAR ================= */
+
+function openSidebar() {
+    byId("sidebar")?.classList.add("open");
+    byId("sidebarOverlay")?.classList.add("active");
 }
 
-.owner-stat-card > strong {
-    display: block;
-    margin-top: 15px;
-    color: white;
-    font-size: 29px;
-    font-weight: 900;
-    line-height: 1.1;
-    overflow-wrap: anywhere;
+function closeSidebar() {
+    byId("sidebar")?.classList.remove("open");
+    byId("sidebarOverlay")?.classList.remove("active");
 }
 
-.owner-stat-card > small {
-    display: block;
-    margin-top: 8px;
-    color: var(--muted);
-    font-size: 9px;
+/* ================= USER INTERFACE ================= */
+
+function updateUserInterface() {
+    const user = requireUser();
+
+    const name = user.username || user.name || "Cloud User";
+    const email = user.email || "";
+    const role = String(user.role || "member").toUpperCase();
+
+    setText("sidebarUserName", name);
+    setText("sidebarUserRole", role);
+    setText("topbarUserName", name);
+    setText("homeUserName", name);
+
+    setText("accountName", name);
+    setText("accountEmail", email);
+    setText("accountRole", role);
+
+    setText("accountNameDetail", name);
+    setText("accountEmailDetail", email);
+    setText("accountRoleDetail", role);
+
+    setText("ownerName", name);
+    setText("ownerEmail", email);
+
+    ["userAvatar", "topbarAvatar", "accountAvatar"].forEach(id => {
+        const avatar = byId(id);
+
+        if (!avatar) return;
+
+        avatar.textContent = initials(name);
+        avatar.removeAttribute("data-image");
+    });
+
+    const savedImage = localStorage.getItem(
+        `astrix_avatar_${user.id}`
+    );
+
+    if (savedImage) {
+        setAvatarImage(savedImage);
+    }
 }
 
-.owner-security-card {
-    display: flex;
-    align-items: center;
-    gap: 17px;
-    margin-top: 25px;
+function setAvatarImage(dataUrl) {
+    ["userAvatar", "topbarAvatar", "accountAvatar"].forEach(id => {
+        const avatar = byId(id);
+        if (!avatar) return;
+
+        avatar.innerHTML = "";
+
+        const image = document.createElement("img");
+        image.src = dataUrl;
+        image.alt = "Profile image";
+
+        avatar.appendChild(image);
+    });
 }
 
-.owner-security-icon {
-    display: grid;
-    place-items: center;
-    width: 46px;
-    height: 46px;
-    flex-shrink: 0;
-    border-radius: 14px;
-    background: rgba(57,217,154,.10);
-    color: var(--green);
+/* ================= PROFILE IMAGE ================= */
+
+function handleProfileImage(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+        showMessage(
+            "logoMessage",
+            "Choose a PNG, JPG or WEBP image.",
+            "error"
+        );
+        event.target.value = "";
+        return;
+    }
+
+    if (file.size > 1024 * 1024) {
+        showMessage(
+            "logoMessage",
+            "Image must be smaller than 1 MB.",
+            "error"
+        );
+        event.target.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        try {
+            const dataUrl = reader.result;
+
+            localStorage.setItem(
+                `astrix_avatar_${App.user.id}`,
+                dataUrl
+            );
+
+            setAvatarImage(dataUrl);
+
+            showMessage(
+                "logoMessage",
+                "Profile image updated on this device.",
+                "success"
+            );
+        } catch {
+            showMessage(
+                "logoMessage",
+                "Could not save image. Browser storage may be full.",
+                "error"
+            );
+        }
+    };
+
+    reader.onerror = () => {
+        showMessage("logoMessage", "Could not read image.", "error");
+    };
+
+    reader.readAsDataURL(file);
 }
 
-.owner-security-icon svg {
-    width: 23px;
-    height: 23px;
+/* ================= MY TICKETS ================= */
+
+async function loadMyTickets() {
+    if (!App.user) return;
+
+    const container = byId("myTicketsList");
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <h3>Loading tickets...</h3>
+        </div>
+    `;
+
+    try {
+        const result = await apiRequest(API.tickets);
+
+        App.tickets = normalizeArray(result, "tickets");
+
+        renderTicketList(container, App.tickets, false);
+    } catch (error) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>Could not load tickets</h3>
+                <p>${escapeHTML(error.message)}</p>
+            </div>
+        `;
+    }
 }
 
-.owner-security-card > div:nth-child(2) {
-    flex: 1;
+function renderTicketList(container, tickets, adminMode) {
+    container.replaceChildren();
+
+    if (!tickets.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+
+        const heading = document.createElement("h3");
+        heading.textContent = "No tickets found";
+
+        const description = document.createElement("p");
+        description.textContent = adminMode
+            ? "There are currently no support tickets."
+            : "Your support tickets will appear here.";
+
+        empty.append(heading, description);
+        container.appendChild(empty);
+        return;
+    }
+
+    tickets.forEach(ticket => {
+        const item = document.createElement("article");
+        item.className = "ticket-item content-card";
+
+        const title = document.createElement("h3");
+        title.textContent = ticket.subject || `Ticket #${ticket.id}`;
+
+        const category = document.createElement("p");
+        category.textContent = ticket.category || "General support";
+
+        const status = document.createElement("span");
+        status.className = "role-badge";
+        status.textContent = String(ticket.status || "open").toUpperCase();
+
+        const date = document.createElement("small");
+        date.textContent = formatDate(ticket.created_at);
+
+        const description = document.createElement("p");
+        description.textContent =
+            ticket.description || ticket.message || "";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "secondary-button compact-button";
+        button.textContent = "View Conversation";
+
+        button.addEventListener("click", () => {
+            openTicketConversation(ticket, adminMode);
+        });
+
+        item.append(title, category, status, date, description, button);
+
+        if (adminMode && isStaff()) {
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "text-button";
+            toggle.textContent =
+                String(ticket.status).toLowerCase() === "closed"
+                    ? "Reopen ticket"
+                    : "Close ticket";
+
+            toggle.addEventListener("click", () => {
+                changeTicketStatus(ticket);
+            });
+
+            item.appendChild(toggle);
+        }
+
+        container.appendChild(item);
+    });
 }
 
-.owner-security-card h3 {
-    font-size: 13px;
+/* ================= CREATE TICKET ================= */
+
+async function handleTicketSubmit(event) {
+    event.preventDefault();
+
+    const subject = byId("ticketSubject").value.trim();
+    const category = byId("ticketCategory").value;
+    const message = byId("ticketDescription").value.trim();
+
+    const button = $("#ticketForm button[type='submit']");
+
+    if (!subject || !category || !message) {
+        showMessage(
+            "ticketFormMessage",
+            "Complete all ticket fields.",
+            "error"
+        );
+        return;
+    }
+
+    setButtonLoading(button, true, "Submitting...");
+    showMessage("ticketFormMessage", "Creating your ticket...", "info");
+
+    try {
+        const result = await apiRequest(API.tickets, {
+            method: "POST",
+            body: { subject, category, message }
+        });
+
+        byId("ticketForm").reset();
+
+        showMessage(
+            "ticketFormMessage",
+            result.message || "Ticket submitted successfully.",
+            "success"
+        );
+
+        await loadMyTickets();
+    } catch (error) {
+        showMessage("ticketFormMessage", error.message, "error");
+    } finally {
+        setButtonLoading(button, false);
+    }
 }
 
-.owner-security-card p {
-    margin-top: 3px;
-    color: var(--muted);
-    font-size: 11px;
+/* ================= TICKET CONVERSATION ================= */
+
+async function openTicketConversation(ticket, adminMode) {
+    const ticketId = ticket.id;
+
+    if (!ticketId) return;
+
+    let replies = [];
+
+    try {
+        const result = await apiRequest(
+            `${API.ticketReplies}?ticket_id=${encodeURIComponent(ticketId)}`
+        );
+
+        replies = normalizeArray(result, "replies");
+    } catch (error) {
+        alert(`Could not load conversation: ${error.message}`);
+        return;
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "content-card ticket-conversation";
+
+    const heading = document.createElement("h2");
+    heading.textContent = ticket.subject || `Ticket #${ticketId}`;
+
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "secondary-button compact-button";
+    close.textContent = "Close";
+
+    close.addEventListener("click", () => wrapper.remove());
+
+    const messages = document.createElement("div");
+    messages.className = "ticket-messages";
+
+    replies.forEach(reply => {
+        const article = document.createElement("article");
+        article.className = "ticket-message";
+
+        const author = document.createElement("strong");
+        author.textContent =
+            `${reply.username || "User"} · ${reply.role || "Member"}`;
+
+        const body = document.createElement("p");
+        body.textContent = reply.message || "";
+
+        const time = document.createElement("small");
+        time.textContent = formatDate(reply.created_at);
+
+        article.append(author, body, time);
+        messages.appendChild(article);
+    });
+
+    const form = document.createElement("form");
+    form.className = "standard-form";
+
+    const label = document.createElement("label");
+    label.textContent = "Write a reply";
+
+    const textarea = document.createElement("textarea");
+    textarea.required = true;
+    textarea.maxLength = 10000;
+    textarea.placeholder = "Type your message...";
+
+    const submit = document.createElement("button");
+    submit.type = "submit";
+    submit.className = "primary-button";
+    submit.textContent = "Send Reply";
+
+    form.append(label, textarea, submit);
+
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const message = textarea.value.trim();
+        if (!message) return;
+
+        submit.disabled = true;
+
+        try {
+            await apiRequest(API.ticketReplies, {
+                method: "POST",
+                body: {
+                    ticket_id: ticketId,
+                    message
+                }
+            });
+
+            wrapper.remove();
+            await openTicketConversation(ticket, adminMode);
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            submit.disabled = false;
+        }
+    });
+
+    wrapper.append(heading, close, messages, form);
+
+    const page = byId(
+        adminMode ? "page-manage-tickets" : "page-tickets"
+    );
+
+    page?.appendChild(wrapper);
+    wrapper.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ================= TICKET STATUS ================= */
+
+async function changeTicketStatus(ticket) {
+    const current = String(ticket.status || "open").toLowerCase();
+    const next = current === "closed" ? "open" : "closed";
+
+    if (!confirm(`Are you sure you want to ${next} this ticket?`)) {
+        return;
+    }
+
+    try {
+        await apiRequest(API.ticketStatus, {
+            method: "PATCH",
+            body: {
+                ticket_id: ticket.id,
+                status: next
+            }
+        });
+
+        await loadAdminTickets();
+        alert(`Ticket ${next} successfully.`);
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+/* ================= ADMIN TICKETS ================= */
+
+async function loadAdminTickets() {
+    if (!isStaff()) return;
+
+    const container = byId("adminTicketsList");
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <h3>Loading support tickets...</h3>
+        </div>
+    `;
+
+    try {
+        const result = await apiRequest(API.tickets);
+        const tickets = normalizeArray(result, "tickets");
+
+        renderTicketList(container, tickets, true);
+    } catch (error) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>Could not load tickets</h3>
+                <p>${escapeHTML(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+/* ================= OWNER STATISTICS ================= */
+
+async function loadOwnerStats() {
+    if (!isOwner()) return;
+
+    setText("ownerStatsStatus", "Loading statistics...");
+
+    try {
+        const result = await apiRequest(API.ownerStats);
+
+        const stats = result.stats || result.data?.stats || {};
+
+        $$("[data-owner-stat]").forEach(element => {
+            const key = element.dataset.ownerStat;
+            const value = stats[key];
+
+            element.textContent =
+                value === undefined || value === null
+                    ? "—"
+                    : Number(value).toLocaleString();
+        });
+
+        if (result.owner) {
+            setText("ownerName", result.owner.username || "Owner");
+            setText("ownerEmail", result.owner.email || "");
+        }
+
+        setText("ownerStatsStatus", "Statistics updated");
+    } catch (error) {
+        setText("ownerStatsStatus", error.message);
+    }
 }
 
 /* ================= TEAM MANAGEMENT ================= */
 
-.standard-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+async function loadTeamAccounts() {
+    if (!isOwner()) return;
+
+    const container = byId("teamAccountsList");
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <h3>Loading team accounts...</h3>
+        </div>
+    `;
+
+    try {
+        const result = await apiRequest(API.teamUsers);
+
+        App.teamAccounts = normalizeArray(result, "accounts");
+
+        renderTeamAccounts();
+    } catch (error) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>Could not load team accounts</h3>
+                <p>${escapeHTML(error.message)}</p>
+            </div>
+        `;
+    }
 }
 
-.standard-form .primary-button {
-    align-self: flex-start;
-    margin-top: 9px;
+function renderTeamAccounts() {
+    const container = byId("teamAccountsList");
+    if (!container) return;
+
+    container.replaceChildren();
+
+    if (!App.teamAccounts.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+
+        const title = document.createElement("h3");
+        title.textContent = "No team accounts found";
+
+        const description = document.createElement("p");
+        description.textContent =
+            "Create your first team account using the form above.";
+
+        empty.append(title, description);
+        container.appendChild(empty);
+        return;
+    }
+
+    App.teamAccounts.forEach(account => {
+        const item = document.createElement("article");
+        item.className = "team-account-item";
+
+        const info = document.createElement("div");
+
+        const name = document.createElement("strong");
+        name.textContent = account.username || "Team Member";
+
+        const email = document.createElement("p");
+        email.textContent = account.email || "";
+
+        const role = document.createElement("span");
+        role.className = "role-badge";
+        role.textContent = String(account.role || "staff").toUpperCase();
+
+        const date = document.createElement("small");
+        date.textContent = formatDate(account.created_at);
+
+        info.append(name, email, role, date);
+        item.appendChild(info);
+
+        container.appendChild(item);
+    });
 }
 
-.password-toggle-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
+/* ================= CREATE TEAM ACCOUNT ================= */
+
+async function handleTeamCreate(event) {
+    event.preventDefault();
+
+    if (!isOwner()) {
+        showMessage(
+            "teamCreateMessage",
+            "Only the Owner can create team accounts.",
+            "error"
+        );
+        return;
+    }
+
+    const username = byId("teamUsername").value.trim();
+    const email = byId("teamEmail").value.trim();
+    const password = byId("teamPassword").value;
+    const role = byId("teamRole").value;
+
+    const button = byId("createTeamAccountBtn");
+
+    if (username.length < 3 || username.length > 30) {
+        showMessage(
+            "teamCreateMessage",
+            "Username must be between 3 and 30 characters.",
+            "error"
+        );
+        return;
+    }
+
+    if (password.length < 12 || password.length > 128) {
+        showMessage(
+            "teamCreateMessage",
+            "Password must be between 12 and 128 characters.",
+            "error"
+        );
+        return;
+    }
+
+    if (!["admin", "staff", "owner"].includes(role)) {
+        showMessage(
+            "teamCreateMessage",
+            "Invalid team role.",
+            "error"
+        );
+        return;
+    }
+
+    setButtonLoading(button, true, "Creating account...");
+    showMessage("teamCreateMessage", "Creating team account...", "info");
+
+    try {
+        const result = await apiRequest(API.teamUsers, {
+            method: "POST",
+            body: {
+                username,
+                email,
+                password,
+                role
+            }
+        });
+
+        byId("teamCreateForm").reset();
+
+        showMessage(
+            "teamCreateMessage",
+            result.message || "Team account created successfully.",
+            "success"
+        );
+
+        await loadTeamAccounts();
+        await loadOwnerStats();
+    } catch (error) {
+        showMessage("teamCreateMessage", error.message, "error");
+    } finally {
+        setButtonLoading(button, false);
+    }
 }
 
-.password-toggle-wrap input {
-    padding-right: 54px;
-}
+/* ================= PASSWORD VISIBILITY ================= */
 
-.password-toggle-button {
-    position: absolute;
-    right: 7px;
-    display: grid;
-    place-items: center;
-    width: 37px;
-    height: 37px;
-    border: 0;
-    border-radius: 9px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-}
+function toggleTeamPassword() {
+    const input = byId("teamPassword");
+    const button = byId("toggleTeamPassword");
 
-.password-toggle-button:hover {
-    background: rgba(137,92,255,.12);
-    color: white;
-}
+    if (!input) return;
 
-.password-toggle-button svg {
-    width: 18px;
-    height: 18px;
-}
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
 
-.helper-text {
-    color: var(--muted);
-    font-size: 10px;
-}
+    if (button) {
+        button.setAttribute(
+            "aria-label",
+            visible ? "Hide password" : "Show password"
+        );
 
-.team-accounts-list {
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-}
+        button.title = visible ? "Hide password" : "Show password";
 
-.team-account-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    background: rgba(255,255,255,.02);
+        button.innerHTML = visible
+            ? '<i data-lucide="eye-off"></i>'
+            : '<i data-lucide="eye"></i>';
+
+        refreshIcons();
+    }
 }
 
 /* ================= SERVER CONSOLE ================= */
 
-.server-heading {
-    align-items: flex-start;
-}
-
-.server-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 9px;
-}
-
-.server-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 39px;
-    padding: 0 13px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    color: var(--text-soft);
-    font-size: 11px;
-    font-weight: 750;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.server-action svg {
-    width: 15px;
-    height: 15px;
-}
-
-.start-action {
-    border-color: rgba(57,217,154,.2);
-    background: rgba(57,217,154,.08);
-    color: var(--green);
-}
-
-.start-action:hover {
-    background: rgba(57,217,154,.17);
-}
-
-.restart-action:hover {
-    border-color: rgba(255,180,84,.4);
-    color: var(--orange);
-}
-
-.stop-action {
-    border-color: rgba(255,98,124,.2);
-    background: rgba(255,98,124,.07);
-    color: var(--red);
-}
-
-.stop-action:hover {
-    background: rgba(255,98,124,.16);
-}
-
-.console-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 250px;
-    gap: 16px;
-}
-
-.console-card {
-    min-width: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: #090b16;
-    overflow: hidden;
-}
-
-.console-card-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 54px;
-    padding: 0 17px;
-    border-bottom: 1px solid var(--border);
-    background: #111426;
-}
-
-.console-card-heading > div {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.console-card-heading strong {
-    font-size: 12px;
-}
-
-.console-live-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 11px var(--green);
-}
-
-.console-label {
-    color: var(--muted);
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-.console-output {
-    min-height: 330px;
-    max-height: 480px;
-    padding: 19px;
-    overflow: auto;
-    color: #c9c5dc;
-    font-family: "Cascadia Code", "Consolas", monospace;
-    font-size: 11px;
-    line-height: 1.9;
-    overflow-wrap: anywhere;
-}
-
-.console-line {
-    white-space: pre-wrap;
-}
-
-.muted-line {
-    color: #77758f;
-}
-
-.warning-line {
-    color: var(--orange);
-}
-
-.console-input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 53px;
-    padding: 7px 12px;
-    border-top: 1px solid var(--border);
-    background: #101324;
-}
-
-.console-input-row > span {
-    color: var(--primary-light);
-    font-weight: 900;
-}
-
-.console-input-row input {
-    min-width: 0;
-    min-height: 35px;
-    padding: 5px;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-    font-family: monospace;
-    font-size: 11px;
-}
-
-.console-input-row button {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    border: 0;
-    border-radius: 9px;
-    background: var(--primary);
-    color: white;
-    cursor: pointer;
-}
-
-.console-input-row button svg {
-    width: 16px;
-    height: 16px;
-}
-
-.resource-column {
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-}
-
-.resource-card {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    min-height: 61px;
-    padding: 11px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--surface);
-}
-
-.resource-icon {
-    display: grid;
-    place-items: center;
-    width: 35px;
-    height: 35px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    background: rgba(137,92,255,.12);
-    color: var(--primary-light);
-}
-
-.resource-icon svg {
-    width: 18px;
-    height: 18px;
-}
-
-.resource-card > div:last-child {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.resource-card span {
-    color: var(--muted);
-    font-size: 9px;
-}
-
-.resource-card strong {
-    margin-top: 2px;
-    color: var(--text-soft);
-    font-size: 11px;
-    overflow-wrap: anywhere;
-}
-
-/* ================= CHARTS ================= */
-
-.charts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    margin-top: 17px;
-}
-
-.chart-card {
-    min-height: 170px;
-}
-
-.chart-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.chart-heading h3 {
-    font-size: 13px;
-}
-
-.chart-heading span {
-    color: var(--muted);
-    font-size: 10px;
-}
-
-.chart-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 105px;
-    color: var(--muted);
-    font-size: 10px;
-}
-
-.chart-placeholder svg {
-    width: 27px;
-    height: 27px;
-    color: #7860c5;
-}
-
-/* ================= EMPTY STATES ================= */
-
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 210px;
-    padding: 28px;
-    text-align: center;
-}
-
-.empty-state > svg {
-    width: 38px;
-    height: 38px;
-    margin-bottom: 15px;
-    color: var(--primary-light);
-    opacity: .8;
-}
-
-.empty-state h3 {
-    font-size: 14px;
-}
-
-.empty-state p {
-    max-width: 360px;
-    margin-top: 7px;
-    color: var(--muted);
-    font-size: 11px;
-}
-
-/* ================= ACCOUNT ================= */
-
-.account-grid {
-    align-items: start;
-}
-
-.account-profile-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.account-avatar-wrap {
-    margin-bottom: 14px;
-}
-
-.account-avatar {
-    width: 88px;
-    height: 88px;
-    border-radius: 25px;
-    font-size: 25px;
-}
-
-.account-profile-card h2 {
-    font-size: 19px;
-    font-weight: 850;
-}
-
-.account-profile-card > p {
-    margin-top: 3px;
-    color: var(--muted);
-    font-size: 11px;
-    overflow-wrap: anywhere;
-}
-
-.account-profile-card > .role-badge {
-    margin-top: 11px;
-}
-
-.account-profile-card .divider {
-    width: 100%;
-    height: 1px;
-    margin: 21px 0;
-    background: var(--border);
-}
-
-.account-profile-card label,
-.account-profile-card input,
-.account-profile-card .helper-text,
-.account-profile-card .form-message {
-    width: 100%;
-    text-align: left;
-}
-
-.detail-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.detail-row:last-child {
-    border-bottom: 0;
-}
-
-.detail-row span {
-    color: var(--muted);
-    font-size: 11px;
-}
-
-.detail-row strong {
-    color: var(--text-soft);
-    font-size: 11px;
-    text-align: right;
-    overflow-wrap: anywhere;
-}
-
-/* ================= FOOTER ================= */
-
-.main-footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 35px;
-    padding: 19px 0 5px;
-    border-top: 1px solid var(--border);
-    color: #696b84;
-    font-size: 10px;
-}
-
-/* ================= OVERLAY ================= */
-
-.sidebar-overlay {
-    display: none;
-}
-
-/* ================= ANIMATIONS ================= */
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+/*
+ * Server controls intentionally do not send requests.
+ * A Pterodactyl application API connection must be configured
+ * securely on the server before these actions can work.
+ */
+
+function showServerNotice(action) {
+    const output = byId("consoleOutput");
+
+    if (!output) {
+        alert(
+            `${action}: Server API connection is not configured.`
+        );
+        return;
     }
 
-    to {
-        opacity: 1;
+    const line = document.createElement("div");
+    line.className = "console-line warning-line";
+    line.textContent =
+        `[ASTRIX CLOUD] ${action}: Server API connection is not configured.`;
+
+    output.appendChild(line);
+    output.scrollTop = output.scrollHeight;
+}
+
+function handleServerAction(action) {
+    const labels = {
+        start: "Start server",
+        restart: "Restart server",
+        stop: "Stop server"
+    };
+
+    showServerNotice(labels[action] || "Server action");
+}
+
+function handleConsoleCommand(event) {
+    event.preventDefault();
+
+    const input = byId("consoleCommand");
+    if (!input || !input.value.trim()) return;
+
+    showServerNotice(
+        `Console command not sent: ${input.value.trim()}`
+    );
+
+    input.value = "";
+}
+
+/* ================= ICONS ================= */
+
+function refreshIcons() {
+    if (window.lucide?.createIcons) {
+        window.lucide.createIcons();
     }
 }
 
-/* ================= RESPONSIVE: TABLET ================= */
+/* ================= EVENT LISTENERS ================= */
 
-@media (max-width: 1250px) {
-    .owner-stats-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+function bindEvents() {
+    byId("loginForm")?.addEventListener("submit", handleLogin);
+    byId("signupForm")?.addEventListener("submit", handleSignup);
+    byId("verifyForm")?.addEventListener("submit", handleVerification);
 
-    .home-quick-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    byId("showSignupBtn")?.addEventListener("click", () => {
+        showAuthForm("signupForm");
+    });
 
-    .console-layout {
-        grid-template-columns: minmax(0, 1fr) 220px;
-    }
+    byId("showLoginBtn")?.addEventListener("click", () => {
+        showAuthForm("loginForm");
+    });
 
-    .content-area {
-        padding: 26px 24px;
-    }
+    byId("backToLoginBtn")?.addEventListener("click", () => {
+        App.pendingSignupEmail = "";
+        showAuthForm("loginForm");
+    });
 
-    .topbar {
-        padding-right: 24px;
-        padding-left: 24px;
-    }
+    byId("logoutBtn")?.addEventListener("click", logout);
+
+    byId("menuToggle")?.addEventListener("click", openSidebar);
+    byId("closeSidebar")?.addEventListener("click", closeSidebar);
+    byId("sidebarOverlay")?.addEventListener("click", closeSidebar);
+
+    document.addEventListener("click", event => {
+        const target = event.target.closest("[data-page]");
+        if (!target) return;
+
+        const page = target.dataset.page;
+        if (!page) return;
+
+        event.preventDefault();
+        navigate(page);
+    });
+
+    byId("ticketForm")?.addEventListener(
+        "submit",
+        handleTicketSubmit
+    );
+
+    byId("teamCreateForm")?.addEventListener(
+        "submit",
+        handleTeamCreate
+    );
+
+    byId("toggleTeamPassword")?.addEventListener(
+        "click",
+        toggleTeamPassword
+    );
+
+    byId("accountLogoInput")?.addEventListener(
+        "change",
+        handleProfileImage
+    );
+
+    byId("refreshOwnerStats")?.addEventListener(
+        "click",
+        loadOwnerStats
+    );
+
+    byId("startServerBtn")?.addEventListener(
+        "click",
+        () => handleServerAction("start")
+    );
+
+    byId("restartServerBtn")?.addEventListener(
+        "click",
+        () => handleServerAction("restart")
+    );
+
+    byId("stopServerBtn")?.addEventListener(
+        "click",
+        () => handleServerAction("stop")
+    );
+
+    byId("consoleCommandForm")?.addEventListener(
+        "submit",
+        handleConsoleCommand
+    );
+
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeSidebar();
+    });
 }
 
-@media (max-width: 950px) {
-    :root {
-        --sidebar-width: 255px;
+/* ================= INITIALIZATION ================= */
+
+async function initializePanel() {
+    bindEvents();
+    refreshIcons();
+
+    const authenticated = await checkSession();
+
+    if (!authenticated) {
+        showAuthForm("loginForm");
     }
 
-    .sidebar {
-        transform: translateX(-100%);
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
-    }
-
-    .sidebar-overlay.active {
-        position: fixed;
-        z-index: 25;
-        inset: 0;
-        display: block;
-        background: rgba(0, 0, 0, .62);
-        backdrop-filter: blur(3px);
-    }
-
-    .mobile-only {
-        display: grid;
-    }
-
-    .main-area {
-        width: 100%;
-        margin-left: 0;
-    }
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .console-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .resource-column {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    refreshIcons();
 }
 
-/* ================= RESPONSIVE: MOBILE ================= */
-
-@media (max-width: 650px) {
-    .auth-card {
-        padding: 26px 21px;
-        border-radius: 21px;
-    }
-
-    .auth-heading h2 {
-        font-size: 22px;
-    }
-
-    .auth-footer {
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .topbar {
-        min-height: 70px;
-        padding: 10px 14px;
-    }
-
-    .topbar-right {
-        gap: 7px;
-    }
-
-    .topbar-right > strong,
-    .topbar-right .secure-indicator,
-    .topbar-right > .icon-button {
-        display: none;
-    }
-
-    .topbar h2 {
-        font-size: 16px;
-    }
-
-    .content-area {
-        padding: 20px 14px;
-    }
-
-    .home-hero {
-        min-height: auto;
-        padding: 27px 22px;
-    }
-
-    .home-hero h1 {
-        font-size: 29px;
-    }
-
-    .home-hero-art {
-        display: none;
-    }
-
-    .home-quick-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-
-    .home-quick-card {
-        min-height: 150px;
-        padding: 15px;
-    }
-
-    .home-bottom-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .home-info-card {
-        padding: 17px;
-    }
-
-    .owner-stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 9px;
-    }
-
-    .owner-stat-card {
-        padding: 13px;
-    }
-
-    .owner-stat-card > strong {
-        font-size: 24px;
-    }
-
-    .owner-welcome-card {
-        flex-wrap: wrap;
-        padding: 18px;
-    }
-
-    .owner-welcome-card > .role-badge {
-        margin-left: 78px;
-    }
-
-    .owner-security-card {
-        flex-wrap: wrap;
-        padding: 17px;
-    }
-
-    .owner-security-card .secure-indicator {
-        margin-left: 63px;
-    }
-
-    .page-heading,
-    .server-heading {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .server-actions {
-        width: 100%;
-    }
-
-    .server-action {
-        flex: 1;
-    }
-
-    .charts-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .resource-column {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .content-card,
-    .chart-card {
-        padding: 17px;
-    }
-
-    .main-footer {
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .detail-row {
-        gap: 9px;
-    }
-}
-
-@media (max-width: 380px) {
-    .home-quick-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .resource-column {
-        grid-template-columns: 1fr;
-    }
-
-    .owner-stats-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .auth-card {
-        padding: 22px 17px;
-    }
-}
-
-/* ================= REDUCED MOTION ================= */
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        scroll-behavior: auto !important;
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
-    }
-}
+document.addEventListener("DOMContentLoaded", initializePanel);
