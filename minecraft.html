@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080612">
+  <title>Minecraft Hosting — ASTRIX CLOUD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .mc-hero { min-height:65vh; display:grid; place-items:center; text-align:center; padding:110px 20px 60px; background:radial-gradient(ellipse at 50% 40%,#8237ff28,transparent 65%); }
+    .mc-hero h1 { font-family:Orbitron,sans-serif; font-size:clamp(36px,7vw,72px); margin:20px 0; }
+    .mc-hero p { max-width:650px; color:#b9b5ce; font-size:19px; line-height:1.7; }
+    .unavailable { display:inline-block; padding:12px 25px; border:1px solid #ff548b; color:#ff83ad; background:#ff367b18; border-radius:30px; font-weight:900; letter-spacing:2px; box-shadow:0 0 25px #ff367b30; animation:pulse 2s infinite; }
+    .mc-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; margin:35px 0; }
+    .mc-card { padding:27px; background:linear-gradient(145deg,#191933,#0c1022); border:1px solid #a855ff45; border-radius:17px; transition:.35s; }
+    .mc-card:hover { transform:translateY(-8px); border-color:#ff4ad8; box-shadow:0 10px 40px #a855ff30; }
+    .mc-card h3 { font-family:Orbitron,sans-serif; }
+    .mc-card p { color:#aaa; line-height:1.7; }
+    .mc-card .emoji { font-size:35px; }
+    .mc-notice { max-width:750px; margin:0 auto 70px; text-align:center; padding:30px; border:1px solid #ff548b65; background:#ff367b0c; border-radius:18px; }
+    .mc-notice h2 { color:#ff83ad; font-family:Orbitron,sans-serif; }
+    .mc-notice p { color:#c2b9cc; line-height:1.8; }
+    .mc-discord { display:inline-block; margin-top:15px; padding:13px 24px; background:linear-gradient(100deg,#8b35ff,#ff36c7); color:white; font-weight:900; border-radius:10px; }
+    .page-shell { width:min(1100px,92%); margin-inline:auto; }
+    @keyframes pulse { 0%,100% { box-shadow:0 0 12px #ff367b20; } 50% { box-shadow:0 0 30px #ff367b65; } }
+    @media(max-width:750px) { .mc-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <a class="logo" href="index.html">ASTRIX <span>CLOUD</span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="vps.html">VPS Plans</a>
+      <a href="custom.html">Custom VPS</a>
+      <a href="minecraft.html" class="active">Minecraft</a>
+      <a href="about.html">About</a>
+      <a href="https://discord.gg/SZn3gCpNH" target="_blank" rel="noopener noreferrer">Discord</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="mc-hero">
+      <div>
+        <div class="eyebrow">ASTRIX CLOUD • GAME SERVER HOSTING</div>
+        <div style="margin:28px 0"><span class="unavailable">● CURRENTLY UNAVAILABLE</span></div>
+        <h1>MINECRAFT <span class="gradient-text">HOSTING.</span></h1>
+        <p>Your future Minecraft world deserves powerful performance, smooth gameplay and reliable hosting. We're preparing this service for launch.</p>
+      </div>
+    </section>
+
+    <section class="page-shell">
+      <div class="section-heading">
+        <div class="eyebrow">COMING SOON</div>
+        <h2>What we're <span class="gradient-text">planning.</span></h2>
+        <p>These are planned features, not currently available services.</p>
+      </div>
+
+      <div class="mc-grid">
+        <article class="mc-card">
+          <div class="emoji">⚡</div>
+          <h3>High Performance</h3>
+          <p>Planned optimized server resources for smoother Minecraft gameplay.</p>
+        </article>
+        <article class="mc-card">
+          <div class="emoji">🧩</div>
+          <h3>Mod & Plugin Support</h3>
+          <p>Planned support for popular Minecraft server software and plugins.</p>
+        </article>
+        <article class="mc-card">
+          <div class="emoji">🛡️</div>
+          <h3>Server Protection</h3>
+          <p>Planned security and backup options to help protect your world.</p>
+        </article>
+      </div>
+
+      <div class="mc-notice">
+        <h2>🚧 Service Not Live Yet</h2>
+        <p>Minecraft hosting is currently unavailable. Orders, server creation and payments are not enabled. Join our Discord to follow updates and ask about the launch.</p>
+        <a class="mc-discord" href="https://discord.gg/SZn3gCpNH" target="_blank" rel="noopener noreferrer">JOIN ASTRIX DISCORD ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-main page-shell">
+      <a class="logo" href="index.html">ASTRIX <span>CLOUD</span></a>
+      <p>Founder: <a href="https://discord.com/channels/@me/1573220129108664345" target="_blank" rel="noopener noreferrer">『☠』・VOIDX | PT</a></p>
+      <a href="https://discord.gg/SZn3gCpNH" target="_blank" rel="noopener noreferrer">Join Discord ↗</a>
+    </div>
+    <div class="copyright page-shell">© 2026 ASTRIX CLOUD. All rights reserved.</div>
+  </footer>
+</body>
+</html>
