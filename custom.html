@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080612">
+  <title>Custom VPS Builder — ASTRIX CLOUD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .builder { max-width:900px; margin:40px auto 80px; padding:35px; border:1px solid #a855ff55; border-radius:22px; background:linear-gradient(145deg,#191933,#0c1022); box-shadow:0 0 45px #a855ff18; }
+    .builder h2 { font-family:Orbitron,sans-serif; }
+    .control { margin:35px 0; }
+    .control-top { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .control-top label { font-size:20px; font-weight:800; }
+    .value { color:#e2aaff; font-size:23px; font-weight:900; }
+    input[type=range] { width:100%; accent-color:#c34dff; margin-top:20px; cursor:pointer; }
+    .range-labels { display:flex; justify-content:space-between; color:#999; font-size:13px; }
+    .summary { padding:25px; border:1px solid #bd5cff55; border-radius:16px; background:#100d27; margin-top:35px; }
+    .summary-row { display:flex; justify-content:space-between; margin:13px 0; color:#ccc; }
+    .total { font-size:30px; font-weight:900; color:#e2aaff; }
+    .currency-options { display:flex; gap:10px; margin:20px 0; }
+    .currency-options button { border:1px solid #a855ff; padding:10px 20px; color:white; background:#171735; border-radius:8px; cursor:pointer; }
+    .currency-options button.active { background:linear-gradient(100deg,#8b35ff,#ff36c7); }
+    .builder-note { color:#ffcf78; font-size:13px; line-height:1.7; margin-top:20px; }
+    .build-button { display:block; width:100%; border:0; color:white; padding:16px; border-radius:10px; font-weight:900; font-size:16px; background:linear-gradient(100deg,#8b35ff,#256cff,#ff36c7); cursor:pointer; margin-top:25px; }
+    .page-intro { text-align:center; padding:100px 8% 20px; }
+    .page-intro h1 { font-family:Orbitron,sans-serif; font-size:clamp(32px,6vw,58px); }
+    @media(max-width:600px) { .builder { padding:20px; margin:25px 12px 60px; } }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <a class="logo" href="index.html">ASTRIX <span>CLOUD</span></a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="vps.html">VPS Plans</a>
+      <a href="custom.html" class="active">Custom VPS</a>
+      <a href="about.html">About</a>
+      <a href="https://discord.gg/SZn3gCpNH" target="_blank" rel="noopener noreferrer">Discord</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-intro">
+      <div class="eyebrow">YOUR SERVER • YOUR RULES</div>
+      <h1>BUILD YOUR <span class="gradient-text">OWN VPS.</span></h1>
+      <p>Adjust the resources and see an estimated sample price instantly.</p>
+    </section>
+
+    <section class="builder">
+      <h2>⚙️ Custom Configuration</h2>
+      <p>Choose the resources you want for your virtual server.</p>
+
+      <div class="control">
+        <div class="control-top"><label for="ram">🧠 RAM</label><span class="value" id="ramValue">8 GB</span></div>
+        <input id="ram" type="range" min="1" max="128" value="8" step="1">
+        <div class="range-labels"><span>1 GB</span><span>128 GB</span></div>
+      </div>
+
+      <div class="control">
+        <div class="control-top"><label for="cpu">⚡ CPU Cores</label><span class="value" id="cpuValue">4 Cores</span></div>
+        <input id="cpu" type="range" min="1" max="32" value="4" step="1">
+        <div class="range-labels"><span>1 Core</span><span>32 Cores</span></div>
+      </div>
+
+      <div class="control">
+        <div class="control-top"><label for="storage">💾 NVMe Storage</label><span class="value" id="storageValue">100 GB</span></div>
+        <input id="storage" type="range" min="20" max="1000" value="100" step="10">
+        <div class="range-labels"><span>20 GB</span><span>1000 GB</span></div>
+      </div>
+
+      <div class="summary">
+        <div class="eyebrow">YOUR CONFIGURATION</div>
+        <div class="summary-row"><span>RAM</span><strong id="summaryRam">8 GB</strong></div>
+        <div class="summary-row"><span>CPU</span><strong id="summaryCpu">4 Cores</strong></div>
+        <div class="summary-row"><span>Storage</span><strong id="summaryStorage">100 GB NVMe</strong></div>
+        <hr style="border-color:#ffffff20;margin:20px 0">
+        <div class="summary-row"><span>Estimated monthly price</span></div>
+        <div class="total" id="price">₹1,699</div>
+        <div class="currency-options">
+          <button class="active" id="inrButton" type="button">₹ INR</button>
+          <button id="usdButton" type="button">$ USD</button>
+        </div>
+        <p class="builder-note">⚠ SAMPLE ESTIMATE ONLY. This calculator does not check available server capacity or create a real VPS. Final pricing and availability must be confirmed by ASTRIX CLOUD.</p>
+      </div>
+
+      <button class="build-button" id="orderButton" type="button">ENQUIRE ABOUT MY VPS ↗</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-main page-shell">
+      <a class="logo" href="index.html">ASTRIX <span>CLOUD</span></a>
+      <p>Founder: <a class="founder-link" href="https://discord.com/channels/@me/1573220129108664345" target="_blank" rel="noopener noreferrer">『☠』・VOIDX | PT</a></p>
+      <a href="https://discord.gg/SZn3gCpNH" target="_blank" rel="noopener noreferrer">Join our Discord ↗</a>
+    </div>
+    <div class="copyright page-shell">© 2026 ASTRIX CLOUD</div>
+  </footer>
+
+  <script>
+    const ram = document.getElementById("ram");
+    const cpu = document.getElementById("cpu");
+    const storage = document.getElementById("storage");
+    const price = document.getElementById("price");
+    const inrButton = document.getElementById("inrButton");
+    const usdButton = document.getElementById("usdButton");
+    let currency = "inr";
+
+    function updateBuilder() {
+      const r = Number(ram.value);
+      const c = Number(cpu.value);
+      const s = Number(storage.value);
+
+      document.getElementById("ramValue").textContent = r + " GB";
+      document.getElementById("cpuValue").textContent = c + " Cores";
+      document.getElementById("storageValue").textContent = s + " GB";
+
+      document.getElementById("summaryRam").textContent = r + " GB";
+      document.getElementById("summaryCpu").textContent = c + " Cores";
+      document.getElementById("summaryStorage").textContent = s + " GB NVMe";
+
+      const estimate = Math.round(99 + r * 115 + c * 160 + s * 2.5);
+      price.textContent = currency === "inr"
+        ? "₹" + estimate.toLocaleString("en-IN")
+        : "$" + (estimate / 83).toFixed(2);
+    }
+
+    [ram, cpu, storage].forEach(input => input.addEventListener("input", updateBuilder));
+
+    inrButton.addEventListener("click", () => {
+      currency = "inr";
+      inrButton.classList.add("active");
+      usdButton.classList.remove("active");
+      updateBuilder();
+    });
+
+    usdButton.addEventListener("click", () => {
+      currency = "usd";
+      usdButton.classList.add("active");
+      inrButton.classList.remove("active");
+      updateBuilder();
+    });
+
+    document.getElementById("orderButton").addEventListener("click", () => {
+      const message = [
+        "Hello ASTRIX CLOUD! I want to enquire about a custom VPS.",
+        "RAM: " + ram.value + " GB",
+        "CPU: " + cpu.value + " Cores",
+        "Storage: " + storage.value + " GB NVMe",
+        "Estimated price: " + price.textContent + " / month",
+        "Please confirm actual availability and pricing."
+      ].join("\n");
+
+      window.open("https://discord.com/channels/@me", "_blank");
+      alert("Please send your configuration to our team in the ASTRIX CLOUD Discord server: https://discord.gg/SZn3gCpNH\n\n" + message);
+    });
+
+    updateBuilder();
+  </script>
+</body>
+</html>
