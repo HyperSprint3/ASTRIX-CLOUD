@@ -891,6 +891,238 @@ footer > a:last-child:hover {
 }
 
 ::selection {
+   
+/* =========================================
+   ASTRIX CLOUD — PURPLE GALAXY THEME
+   Added overrides: blue removal + card fixes
+========================================= */
+
+:root {
+  --bg: #070511;
+  --panel: #151025;
+  --panel2: #1c1433;
+  --purple: #a855ff;
+  --blue: #c084fc;
+  --pink: #ff36c7;
+  --white: #ffffff;
+  --muted: #b8adc9;
+  --border: rgba(174, 119, 255, .24);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 15% 15%, #812cff25, transparent 35%),
+    radial-gradient(ellipse at 85% 45%, #a855ff12, transparent 35%),
+    radial-gradient(ellipse at 50% 100%, #ff36c714, transparent 40%),
+    var(--bg);
+  color: var(--white);
+}
+
+.logo span {
+  color: #d9a2ff;
+  text-shadow: 0 0 20px #a855ff80;
+}
+
+nav a:hover {
+  color: #e3baff;
+  text-shadow: 0 0 15px #a855ff;
+}
+
+nav a::after {
+  background: linear-gradient(90deg, #8b35ff, #ff36c7);
+}
+
+.nav-btn,
+.primary-btn,
+.plan-btn,
+.vps-order {
+  color: white;
+  background: linear-gradient(110deg, #8b35ff, #c026d3, #ec4899);
+  background-size: 200% auto;
+  box-shadow: 0 0 25px #a855ff35;
+}
+
+.nav-btn:hover,
+.primary-btn:hover,
+.plan-btn:hover,
+.vps-order:hover {
+  box-shadow: 0 0 35px #c026d370;
+}
+
+.hero h1 span,
+.section-heading h2 span,
+.custom-content h2 span,
+.contact h2 span {
+  background: linear-gradient(90deg, #c084fc, #e879f9, #ff36c7, #c084fc);
+  background-size: 300% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.secondary-btn {
+  border-color: #a855ff75;
+}
+
+.secondary-btn:hover {
+  background: #a855ff20;
+  border-color: #d946ef;
+  box-shadow: 0 0 25px #a855ff30;
+}
+
+.stats strong {
+  text-shadow: 0 0 20px #a855ff80;
+}
+
+.custom-section {
+  background:
+    radial-gradient(ellipse at 80% 50%, #a855ff13, transparent 50%),
+    linear-gradient(120deg, #151025, #100c20);
+}
+
+.custom-box {
+  border-color: #a855ff70;
+  box-shadow: 0 0 35px #a855ff18;
+}
+
+.custom-title span,
+.plan-type {
+  color: #d69aff;
+}
+
+.plan:hover {
+  border-color: #c084fc;
+}
+
+.plan.featured {
+  border-color: #b05cff;
+}
+
+.feature:hover {
+  border-color: #ff36c7;
+}
+
+.contact {
+  background:
+    radial-gradient(ellipse at center, #a855ff25, transparent 65%),
+    radial-gradient(ellipse at 80% 80%, #ff36c710, transparent 45%);
+}
+
+footer > a:last-child:hover {
+  color: #d69aff;
+}
+
+::selection {
+  background: #a855ff;
+  color: white;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#a855ff, #ff36c7);
+}
+
+/* Consistent card sizing and overflow protection */
+.plans,
+.features,
+.vps-grid,
+.services-grid,
+.service-grid {
+  align-items: stretch;
+}
+
+.plans > *,
+.features > *,
+.vps-grid > *,
+.services-grid > *,
+.service-grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.plan,
+.feature,
+.vps-card,
+.service-card,
+.mc-card,
+.contact-card {
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: linear-gradient(145deg, #19142c, #0d0a1b);
+  border: 1px solid rgba(174, 119, 255, .24);
+  border-radius: 20px;
+}
+
+.plan > *,
+.feature > *,
+.vps-card > *,
+.service-card > *,
+.mc-card > *,
+.contact-card > * {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.plan-btn,
+.vps-order {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+/* Prevent a grid link from stretching into a giant blue block */
+.plans > a,
+.services-grid > a,
+.service-grid > a {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 250px;
+  padding: 30px;
+  color: white;
+  background: linear-gradient(145deg, #19142c, #0d0a1b);
+  border: 1px solid rgba(174, 119, 255, .24);
+  border-radius: 20px;
+  text-decoration: none;
+  white-space: normal;
+}
+
+.plans > a:hover,
+.services-grid > a:hover,
+.service-grid > a:hover {
+  transform: translateY(-8px);
+  border-color: #c084fc;
+  box-shadow: 0 15px 40px #a855ff25;
+}
+
+/* Responsive protection */
+img,
+video,
+iframe {
+  max-width: 100%;
+}
+
+@media (max-width: 650px) {
+  .plans,
+  .features,
+  .vps-grid,
+  .services-grid,
+  .service-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan,
+  .feature,
+  .vps-card,
+  .service-card,
+  .mc-card,
+  .contact-card {
+    width: 100%;
+  }
+}
+
   background: var(--purple);
   color: white;
 }
